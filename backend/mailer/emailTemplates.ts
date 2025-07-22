@@ -14,5 +14,5 @@ export const FORGOT_PASSWORD_TEMPLATE = loadTemplate(
   'passwordResetRequestTemplate.html'
 );
 export const PASSWORD_RESET_SUCCESS_TEMPLATE = loadTemplate(
-  'passwordResetRequestTemplate.html'
+  'passwordResetSuccessTemplate.html'
 );

@@ -6,7 +6,7 @@ Let's work on the auth stuff first (frontend and backend)
 
 ### Mailer
 
-- [] FUCKING MAILTRAP. Make email client environment agnostic
+- [] FUCKING MAILTRAP. Make email client environment agnostic -- aka non nerd-speak: use mailtrap for prod and nodemailer for dev
 
 ### Auth
 
