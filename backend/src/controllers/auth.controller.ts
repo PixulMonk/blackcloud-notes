@@ -151,7 +151,7 @@ export const forgotPassword = asyncHandler(
     }
 
     const resetToken = crypto.randomBytes(20).toString('hex');
-    const resetTokenExpiresAt = new Date(Date.now() + 5 * 60 * 1000); // expires in 5 minutes
+    const resetTokenExpiresAt = new Date(Date.now() + 60 * 60 * 1000); // expires in 1 hour
 
     user!.resetPasswordToken = resetToken;
     user!.resetPasswordExpiresAt = resetTokenExpiresAt;
@@ -197,5 +197,10 @@ export const resetPassword = asyncHandler(
     await user!.save();
 
     await sendPasswordResetSuccessEmail(user.name, user.email);
+
+    res.status(200).json({
+      sucess: true,
+      message: 'Your password has been reset successfully',
+    });
   }
 );

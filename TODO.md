@@ -6,7 +6,7 @@ Let's work on the auth stuff first (frontend and backend)
 
 ### Mailer
 
-- [] FUCKING MAILTRAP. Make email client environment agnostic
+- [] Make emails.ts look cleaner; Apply DRY princple
 
 ### Auth
 
