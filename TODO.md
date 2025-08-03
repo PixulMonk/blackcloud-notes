@@ -4,9 +4,9 @@ Let's work on the auth stuff first (frontend and backend)
 
 ## BACKEND
 
-### Mailer
+### Database
 
-- [] Make emails.ts look cleaner; Apply DRY princple
+- [ ] Change database dynamically depending on whether in prod or dev
 
 ### Auth
 
