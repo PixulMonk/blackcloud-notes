@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import bcrypt from 'bcrypt';
 import crypto from 'crypto';
-import mongoose from 'mongoose';
+import mongoose, { sanitizeFilter } from 'mongoose';
 import dotenv from 'dotenv';
 
 import asyncHandler from '../utils/asyncHandler';
@@ -17,6 +17,17 @@ import {
 } from '../../mailer/emails';
 
 dotenv.config();
+
+export const checkAuth = asyncHandler(
+  async (req: Request, res: Response): Promise<void> => {
+    const user = await User.findById(req.user).select('-password -kdfSalt');
+
+    if (!user) {
+      throw new Error('User not found');
+    }
+    res.status(200).json({ success: true, user: user });
+  }
+);
 
 export const signup = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {

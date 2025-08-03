@@ -10,7 +10,7 @@ import authRoutes from './routes/auth.route';
 import notesRoutes from './routes/notes.route';
 
 const app: Express = express();
-const PORT = parseInt(process.env.PORT || '3000', 10);
+const PORT: number = parseInt(process.env.PORT || '3000', 10);
 
 app.use(express.json());
 app.use(cookieParser());
