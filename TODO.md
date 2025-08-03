@@ -4,10 +4,6 @@ Let's work on the auth stuff first (frontend and backend)
 
 ## BACKEND
 
-### Mailer
-
-- [] Make emails.ts look cleaner; Apply DRY princple
-
 ### Auth
 
 - [ ] Sign in with Google
@@ -19,4 +15,5 @@ Let's work on the auth stuff first (frontend and backend)
 - [ ] Reset password UI
 - [ ] Auth store
 - [ ] Sign up page functionality
+- [ ] Sign up page password strength indicator
 - [ ] Login page functionality

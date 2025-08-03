@@ -8,11 +8,14 @@ import SettingsPage from './pages/SettingsPage';
 import { useState, useEffect } from 'react';
 import { useThemeStore } from './store/useThemeStore';
 import { updateFavicon } from './lib/utils';
+import VerifyEmailPage from './pages/VerifyEmailPage';
 
 function App() {
   const isDark = useThemeStore((state) => state.isDark);
   const location = useLocation();
-  const hideSidebar = ['/login', '/signup'].includes(location.pathname);
+  const hideSidebar = ['/login', '/signup', '/verify-email'].includes(
+    location.pathname
+  );
 
   useEffect(() => {
     document.documentElement.classList.toggle('dark', isDark);
@@ -34,6 +37,7 @@ function App() {
           <Route path="/signup" element={<SignupPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/settings" element={<SettingsPage />} />
+          <Route path="/verify-email" element={<VerifyEmailPage />} />
         </Routes>
       </main>
     </SidebarProvider>
