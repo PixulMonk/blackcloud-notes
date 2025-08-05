@@ -10,6 +10,7 @@ import {
   CardFooter,
 } from '@/components/ui/card';
 
+import { cn } from '@/lib/utils';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
@@ -20,7 +21,30 @@ import { Eye, EyeOff, AlertCircleIcon } from 'lucide-react';
 import { useState, useEffect } from 'react';
 
 export default function SignupCard() {
+  const [password, setPassword] = useState('');
+  const [passIndicatorMessage, setPassIndicatorMessage] = useState('');
+  const [passProgress, setPassProgress] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+
+  const getStrength = (pwd: string): number => {
+    if (!pwd) return 0;
+    let score = 0;
+    if (pwd.length >= 8) score++;
+    if (/[A-Z]/.test(pwd)) score++;
+    if (/[0-9]/.test(pwd)) score++;
+    if (/[^A-Za-z0-9]/.test(pwd)) score++;
+    return score; // 0 to 4
+  };
+
+  const strength: number = getStrength(password);
+  const colors = [
+    'bg-red-500', // Too Weak
+    'bg-yellow-500', // Weak
+    'bg-green-400', // Strong
+    'bg-green-600', // Very Strong
+  ];
+  const labels = ['Too Weak', 'Weak', 'Strong', 'Very Strong'];
+
   const [errorMessage, setErrorMessage] = useState({
     title: '',
     message: '',
@@ -74,25 +98,60 @@ export default function SignupCard() {
                   <Label htmlFor="password">Password</Label>
                 </div>
                 <div className="relative">
-                  <Input
-                    type={showPassword ? 'text' : 'password'}
-                    id="password"
-                    placeholder="Password"
-                    required
-                  />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    className="absolute right-2 top-1/2 -translate-y-1/2"
-                    onClick={() => setShowPassword((prev) => !prev)}
-                  >
-                    {showPassword ? (
-                      <EyeOff className="h-4 w-4" />
-                    ) : (
-                      <Eye className="h-4 w-4" />
-                    )}
-                  </Button>
+                  <div className="flex items-center">
+                    <Input
+                      type={showPassword ? 'text' : 'password'}
+                      id="password"
+                      value={password}
+                      placeholder="Password"
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                      className="pr-10" // space for the button
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="absolute right-2"
+                      onClick={() => setShowPassword((prev) => !prev)}
+                    >
+                      {showPassword ? (
+                        <EyeOff className="h-4 w-4" />
+                      ) : (
+                        <Eye className="h-4 w-4" />
+                      )}
+                    </Button>
+                  </div>
+                  {/* Strength bar */}
+                  {password && (
+                    <div className="flex gap-1 mt-2">
+                      {Array.from({ length: 4 }).map((_, i) => (
+                        <div
+                          key={i}
+                          className={cn(
+                            'h-1 flex-1 rounded transition-colors',
+                            i < strength
+                              ? colors[Math.max(strength - 1, 0)]
+                              : 'bg-gray-200'
+                          )}
+                        />
+                      ))}
+                    </div>
+                  )}
+
+                  {password && strength > 0 && (
+                    <p
+                      className={cn(
+                        'text-sm mt-1',
+                        colors[Math.max(strength - 1, 0)].replace(
+                          'bg-',
+                          'text-'
+                        )
+                      )}
+                    >
+                      {labels[Math.max(strength - 1, 0)]}
+                    </p>
+                  )}
                 </div>
                 <div className="flex items-center gap-3 mt-3">
                   <Checkbox id="terms" />
