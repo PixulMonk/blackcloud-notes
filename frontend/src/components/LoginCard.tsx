@@ -13,13 +13,27 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
-import { Eye, EyeOff } from 'lucide-react';
-import { useState } from 'react';
+import { Eye, EyeOff, AlertCircleIcon } from 'lucide-react';
+import { useState, useEffect } from 'react';
 
 export default function LoginCard() {
   const [showPassword, setShowPassword] = useState(false);
+  const [errorMessage, setErrorMessage] = useState({
+    title: '',
+    message: '',
+  });
 
+  useEffect(() => {
+    if (errorMessage.message) {
+      const timer = setTimeout(
+        () => setErrorMessage({ title: '', message: '' }),
+        5000
+      );
+      return () => clearTimeout(timer);
+    }
+  }, [errorMessage]);
   // TODO: login functionality = API call to backend
 
   return (
@@ -84,11 +98,28 @@ export default function LoginCard() {
           </form>
           <Button className="w-full">Sign in</Button>
         </CardContent>
-        <CardFooter>
-          <CardDescription>Don't have an account?</CardDescription>
-          <Button variant="link" asChild>
-            <Link to="/signup">Sign up</Link>
-          </Button>
+        <CardFooter className="flex flex-col gap-4">
+          <div className="flex flex-row items-center">
+            <CardDescription>Don't have an account?</CardDescription>
+            <Button variant="link" asChild>
+              <Link to="/signup">Sign up</Link>
+            </Button>
+          </div>
+          <div>
+            {(errorMessage.title || errorMessage.message) && (
+              <Alert variant="destructive">
+                <AlertCircleIcon />
+                {errorMessage.title && (
+                  <AlertTitle>{errorMessage.title}</AlertTitle>
+                )}
+                {errorMessage.message && (
+                  <AlertDescription>
+                    <p>{errorMessage.message}</p>
+                  </AlertDescription>
+                )}
+              </Alert>
+            )}
+          </div>
         </CardFooter>
       </Card>
     </div>
