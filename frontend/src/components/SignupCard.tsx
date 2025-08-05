@@ -24,6 +24,19 @@ export default function SignupCard() {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
+  const passwordRequirements = [
+    { label: 'At least 8 characters', test: (pwd: string) => pwd.length >= 8 },
+    {
+      label: 'At least 1 uppercase letter',
+      test: (pwd: string) => /[A-Z]/.test(pwd),
+    },
+    { label: 'At least 1 number', test: (pwd: string) => /\d/.test(pwd) },
+    {
+      label: 'At least 1 special character',
+      test: (pwd: string) => /[^A-Za-z0-9]/.test(pwd),
+    },
+  ];
+
   const getStrength = (pwd: string): number => {
     if (!pwd) return 0;
     let score = 0;
@@ -38,7 +51,7 @@ export default function SignupCard() {
   const colors = [
     'bg-red-500', // Too Weak
     'bg-yellow-500', // Weak
-    'bg-green-400', // Strong
+    'bg-lime-400', // Strong
     'bg-green-600', // Very Strong
   ];
   const labels = ['Too Weak', 'Weak', 'Strong', 'Very Strong'];
@@ -48,6 +61,7 @@ export default function SignupCard() {
     message: '',
   });
 
+  // Maybe it is not good UX to have the error message on a timer? Or maybe extend? Have to think about it
   useEffect(() => {
     if (errorMessage.message) {
       const timer = setTimeout(
@@ -83,7 +97,7 @@ export default function SignupCard() {
           <form>
             <div className="flex flex-col gap-6 max-w">
               <div className="grid gap-y-2">
-                <Label htmlFor="name">Email</Label>
+                <Label htmlFor="name">Name</Label>
                 <Input type="text" id="name" placeholder="Name" required />
               </div>
               <div className="grid gap-y-2">
@@ -135,7 +149,6 @@ export default function SignupCard() {
                       ))}
                     </div>
                   )}
-
                   {password && strength > 0 && (
                     <p
                       className={cn(
@@ -148,6 +161,46 @@ export default function SignupCard() {
                     >
                       {labels[Math.max(strength - 1, 0)]}
                     </p>
+                  )}
+                  {/* Password Requirements */}
+                  <div className="mt-2 space-y-1 text-xs">
+                    {passwordRequirements.map((req, idx) => {
+                      const valid = req.test(password);
+                      return (
+                        <div key={idx} className="flex items-center gap-2">
+                          <div
+                            className={cn(
+                              'w-2 h-2 rounded-full transition-colors',
+                              valid ? 'bg-green-500' : 'bg-gray-300'
+                            )}
+                          />
+                          <span
+                            className={cn(
+                              'transition-colors',
+                              valid ? 'text-green-600' : 'text-gray-500'
+                            )}
+                          >
+                            {req.label}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+                {/* Alerts */}
+                <div>
+                  {(errorMessage.title || errorMessage.message) && (
+                    <Alert variant="destructive">
+                      <AlertCircleIcon />
+                      {errorMessage.title && (
+                        <AlertTitle>{errorMessage.title}</AlertTitle>
+                      )}
+                      {errorMessage.message && (
+                        <AlertDescription>
+                          <p>{errorMessage.message}</p>
+                        </AlertDescription>
+                      )}
+                    </Alert>
                   )}
                 </div>
                 <div className="flex items-center gap-3 mt-3">
@@ -180,21 +233,6 @@ export default function SignupCard() {
             <Button variant="link" asChild>
               <Link to="/login">Sign in</Link>
             </Button>
-          </div>
-          <div>
-            {(errorMessage.title || errorMessage.message) && (
-              <Alert variant="destructive">
-                <AlertCircleIcon />
-                {errorMessage.title && (
-                  <AlertTitle>{errorMessage.title}</AlertTitle>
-                )}
-                {errorMessage.message && (
-                  <AlertDescription>
-                    <p>{errorMessage.message}</p>
-                  </AlertDescription>
-                )}
-              </Alert>
-            )}
           </div>
         </CardFooter>
       </Card>

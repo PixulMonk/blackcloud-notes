@@ -93,6 +93,22 @@ export default function LoginCard() {
                     )}
                   </Button>
                 </div>
+                {/* Alerts */}
+                <div>
+                  {(errorMessage.title || errorMessage.message) && (
+                    <Alert variant="destructive">
+                      <AlertCircleIcon />
+                      {errorMessage.title && (
+                        <AlertTitle>{errorMessage.title}</AlertTitle>
+                      )}
+                      {errorMessage.message && (
+                        <AlertDescription>
+                          <p>{errorMessage.message}</p>
+                        </AlertDescription>
+                      )}
+                    </Alert>
+                  )}
+                </div>
               </div>
             </div>
           </form>
@@ -104,21 +120,6 @@ export default function LoginCard() {
             <Button variant="link" asChild>
               <Link to="/signup">Sign up</Link>
             </Button>
-          </div>
-          <div>
-            {(errorMessage.title || errorMessage.message) && (
-              <Alert variant="destructive">
-                <AlertCircleIcon />
-                {errorMessage.title && (
-                  <AlertTitle>{errorMessage.title}</AlertTitle>
-                )}
-                {errorMessage.message && (
-                  <AlertDescription>
-                    <p>{errorMessage.message}</p>
-                  </AlertDescription>
-                )}
-              </Alert>
-            )}
           </div>
         </CardFooter>
       </Card>
