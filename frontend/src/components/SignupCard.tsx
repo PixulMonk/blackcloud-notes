@@ -61,17 +61,6 @@ export default function SignupCard() {
     message: '',
   });
 
-  // Maybe it is not good UX to have the error message on a timer? Or maybe extend? Have to think about it
-  useEffect(() => {
-    if (errorMessage.message) {
-      const timer = setTimeout(
-        () => setErrorMessage({ title: '', message: '' }),
-        5000
-      );
-      return () => clearTimeout(timer);
-    }
-  }, [errorMessage]);
-
   // TODO: login functionality = API call to backend
 
   return (
@@ -115,7 +104,14 @@ export default function SignupCard() {
                       id="password"
                       value={password}
                       placeholder="Password"
-                      onChange={(e) => setPassword(e.target.value)}
+                      onChange={(e) => {
+                        setPassword(e.target.value);
+
+                        // Clear error if user is typing again
+                        if (errorMessage.title || errorMessage.message) {
+                          setErrorMessage({ title: '', message: '' });
+                        }
+                      }}
                       required
                       className="pr-10" // space for the button
                     />

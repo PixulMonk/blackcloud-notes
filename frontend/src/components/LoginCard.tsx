@@ -25,15 +25,6 @@ export default function LoginCard() {
     message: '',
   });
 
-  useEffect(() => {
-    if (errorMessage.message) {
-      const timer = setTimeout(
-        () => setErrorMessage({ title: '', message: '' }),
-        5000
-      );
-      return () => clearTimeout(timer);
-    }
-  }, [errorMessage]);
   // TODO: login functionality = API call to backend
 
   return (
