@@ -22,8 +22,6 @@ import { useState, useEffect } from 'react';
 
 export default function SignupCard() {
   const [password, setPassword] = useState('');
-  const [passIndicatorMessage, setPassIndicatorMessage] = useState('');
-  const [passProgress, setPassProgress] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
   const getStrength = (pwd: string): number => {
@@ -61,7 +59,6 @@ export default function SignupCard() {
   }, [errorMessage]);
 
   // TODO: login functionality = API call to backend
-  // TODO: password strength indicator
 
   return (
     <div className="flex flex-col w-full items-center justify-center">
