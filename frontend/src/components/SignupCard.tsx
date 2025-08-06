@@ -104,7 +104,6 @@ export default function SignupCard() {
             <div className="flex flex-col gap-6 max-w">
               <div className="grid gap-y-2">
                 <Label htmlFor="name">Name</Label>
-<<<<<<< HEAD
                 <Input
                   type="text"
                   id="name"
@@ -115,9 +114,6 @@ export default function SignupCard() {
                   }}
                   required
                 />
-=======
-                <Input type="text" id="name" placeholder="Name" required />
->>>>>>> c5a264ddff093cd2fa3a7710aa00929ea33231a0
               </div>
               <div className="grid gap-y-2">
                 <Label htmlFor="email">Email</Label>
