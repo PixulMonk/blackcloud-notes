@@ -5,11 +5,12 @@ import HomePage from './pages/HomePage';
 import SignupPage from './pages/SignupPage';
 import LoginPage from './pages/LoginPage';
 import SettingsPage from './pages/SettingsPage';
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { useThemeStore } from './store/useThemeStore';
 import { updateFavicon } from './lib/utils';
 import VerifyEmailPage from './pages/VerifyEmailPage';
 import { useAuthStore } from './store/useAuthStore';
+import { Loader } from 'lucide-react';
 
 function App() {
   const { isCheckingAuth, checkAuth, isAuthenticated, user } = useAuthStore();
@@ -26,13 +27,21 @@ function App() {
 
   useEffect(() => {
     checkAuth();
-  }, [checkAuth]);
+  }, []);
   console.log('isAuthenticated', isAuthenticated);
   console.log('user', user);
 
   useEffect(() => {
     updateFavicon(isDark);
   }, [isDark]);
+
+  if (isCheckingAuth) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <Loader className="h-10 w-10 animate-spin text-gray-500" />
+      </div>
+    );
+  }
 
   return (
     <SidebarProvider>
@@ -46,6 +55,8 @@ function App() {
             element={
               user && isAuthenticated && user.isVerified ? (
                 <HomePage />
+              ) : user && isAuthenticated && !user.isVerified ? (
+                <Navigate to="/verify-email" />
               ) : (
                 <Navigate to="/login" />
               )

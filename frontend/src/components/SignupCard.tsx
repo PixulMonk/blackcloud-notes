@@ -18,7 +18,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 import { Eye, EyeOff, AlertCircleIcon, Loader } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useAuthStore } from '@/store/useAuthStore';
 
 export default function SignupCard() {

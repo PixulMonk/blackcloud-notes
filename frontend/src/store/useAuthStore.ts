@@ -18,7 +18,9 @@ interface AuthState {
   isLoading: boolean;
   isCheckingAuth: boolean;
   signup: (name: string, email: string, password: string) => Promise<boolean>;
+  login: (email: string, password: string) => Promise<boolean>;
   verifyEmail: (verificationCode: string) => Promise<boolean>;
+  checkAuth: () => Promise<void>;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
@@ -56,6 +58,32 @@ export const useAuthStore = create<AuthState>((set) => ({
       }
     }
   },
+  login: async (email, password) => {
+    set({ isLoading: true, error: null });
+    try {
+      const response = await axios.post(`${API_URL}/login`, {
+        email,
+        password,
+      });
+      set({
+        user: response.data.user,
+        isAuthenticated: true,
+        isLoading: false,
+      });
+      return true;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        set({
+          error: error.response?.data?.message || 'Error signing in',
+          isLoading: false,
+        });
+        return false;
+      } else {
+        set({ error: 'An unexpected error occurred', isLoading: false });
+        return false;
+      }
+    }
+  },
   verifyEmail: async (verificationCode) => {
     set({ isLoading: true, error: null });
     try {
@@ -82,6 +110,8 @@ export const useAuthStore = create<AuthState>((set) => ({
     }
   },
   checkAuth: async () => {
+    const state = useAuthStore.getState();
+    if (state.isAuthenticated) return;
     set({ isCheckingAuth: true, error: null });
     try {
       const response = await axios.get(`${API_URL}/check-auth`);
