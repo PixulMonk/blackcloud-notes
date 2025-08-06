@@ -14,5 +14,4 @@ Let's work on the auth stuff first (frontend and backend)
 
 - [ ] Reset password UI
 - [ ] Auth store
-- [ ] Sign up page functionality
 - [ ] Login page functionality

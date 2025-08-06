@@ -10,13 +10,17 @@ import {
 
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { AlertCircleIcon } from 'lucide-react';
+
+import { useAuthStore } from '@/store/useAuthStore';
 
 function VerifyEmailCard() {
   const [code, setCode] = useState(['', '', '', '', '', '']);
   const [isButtonDisabled, setIsButtonDisabled] = useState(true);
   const inputRefs = useRef<HTMLInputElement[]>([]);
   const navigate = useNavigate();
-  const isLoading = false;
+  const { verifyEmail, error, isLoading } = useAuthStore();
 
   const handleChange = (value: string, index: number) => {
     const newCode = [...code];
@@ -58,11 +62,24 @@ function VerifyEmailCard() {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const verificationCode = code.join('');
     console.log('Submitted code:', verificationCode);
-    // Navigate or call API here
+
+    try {
+      const success = await verifyEmail(verificationCode);
+      if (success) {
+        navigate('/');
+        console.log('Email verified successfully');
+      }
+    } catch (error) {
+      if (error instanceof Error) {
+        console.error('Error:', error.message);
+      } else {
+        console.error('Unknown error:', error);
+      }
+    }
   };
 
   // Auto submit when all fields are filled
@@ -106,7 +123,21 @@ function VerifyEmailCard() {
                 />
               ))}
             </div>
-            <Button disabled={isButtonDisabled} className="w-full">
+            {/* Alerts */}
+            <div>
+              {error && (
+                <Alert variant="destructive">
+                  <AlertCircleIcon />
+                  <AlertTitle>Email verification failed</AlertTitle>
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
+              )}
+            </div>
+            <Button
+              disabled={isLoading || isButtonDisabled}
+              className="w-full"
+              type="submit"
+            >
               Verify Email
             </Button>
           </form>

@@ -80,8 +80,6 @@ export default function SignupCard() {
   ];
   const labels = ['Too Weak', 'Weak', 'Strong', 'Very Strong'];
 
-  // TODO: login functionality = API call to backend
-
   return (
     <div className="flex flex-col w-full items-center justify-center">
       <Card className="max-w-sm w-full">
