@@ -20,6 +20,7 @@ import { useState, useEffect } from 'react';
 
 export default function LoginCard() {
   const [showPassword, setShowPassword] = useState(false);
+  // TODO: switch error message from local state to useAuthStore as an error source
   const [errorMessage, setErrorMessage] = useState({
     title: '',
     message: '',

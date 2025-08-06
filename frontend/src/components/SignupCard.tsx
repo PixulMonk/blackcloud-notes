@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { FcGoogle } from 'react-icons/fc';
 
 import {
@@ -17,11 +17,35 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
-import { Eye, EyeOff, AlertCircleIcon } from 'lucide-react';
+import { Eye, EyeOff, AlertCircleIcon, Loader } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import { useAuthStore } from '@/store/useAuthStore';
 
 export default function SignupCard() {
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const navigate = useNavigate();
+
+  const { signup, error, isLoading } = useAuthStore();
+
+  //   TODO: data validation
+  const handleSignUp = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    try {
+      const success = await signup(name, email, password);
+      if (success) {
+        navigate('/verify-email');
+      }
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        console.error('Error:', error.message);
+      } else {
+        console.error('Unknown error:', error);
+      }
+    }
+  };
+
   const [showPassword, setShowPassword] = useState(false);
 
   const passwordRequirements = [
@@ -56,11 +80,6 @@ export default function SignupCard() {
   ];
   const labels = ['Too Weak', 'Weak', 'Strong', 'Very Strong'];
 
-  const [errorMessage, setErrorMessage] = useState({
-    title: '',
-    message: '',
-  });
-
   // TODO: login functionality = API call to backend
 
   return (
@@ -83,15 +102,33 @@ export default function SignupCard() {
 
           <CardDescription>Use your email for registration</CardDescription>
 
-          <form>
+          <form onSubmit={handleSignUp}>
             <div className="flex flex-col gap-6 max-w">
               <div className="grid gap-y-2">
                 <Label htmlFor="name">Name</Label>
-                <Input type="text" id="name" placeholder="Name" required />
+                <Input
+                  type="text"
+                  id="name"
+                  value={name}
+                  placeholder="Name"
+                  onChange={(e) => {
+                    setName(e.target.value);
+                  }}
+                  required
+                />
               </div>
               <div className="grid gap-y-2">
                 <Label htmlFor="email">Email</Label>
-                <Input type="email" id="email" placeholder="Email" required />
+                <Input
+                  type="email"
+                  id="email"
+                  value={email}
+                  placeholder="Email"
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                  }}
+                  required
+                />
               </div>
               <div className="grid gap-2">
                 <div className="flex items-center">
@@ -106,14 +143,9 @@ export default function SignupCard() {
                       placeholder="Password"
                       onChange={(e) => {
                         setPassword(e.target.value);
-
-                        // Clear error if user is typing again
-                        if (errorMessage.title || errorMessage.message) {
-                          setErrorMessage({ title: '', message: '' });
-                        }
                       }}
                       required
-                      className="pr-10" // space for the button
+                      className="pr-10"
                     />
                     <Button
                       type="button"
@@ -185,17 +217,11 @@ export default function SignupCard() {
                 </div>
                 {/* Alerts */}
                 <div>
-                  {(errorMessage.title || errorMessage.message) && (
+                  {error && (
                     <Alert variant="destructive">
                       <AlertCircleIcon />
-                      {errorMessage.title && (
-                        <AlertTitle>{errorMessage.title}</AlertTitle>
-                      )}
-                      {errorMessage.message && (
-                        <AlertDescription>
-                          <p>{errorMessage.message}</p>
-                        </AlertDescription>
-                      )}
+                      <AlertTitle>Signup failed</AlertTitle>
+                      <AlertDescription>{error}</AlertDescription>
                     </Alert>
                   )}
                 </div>
@@ -219,9 +245,15 @@ export default function SignupCard() {
                   </p>
                 </div>
               </div>
+              <Button className="w-full" disabled={isLoading} type="submit">
+                {isLoading ? (
+                  <Loader className="animate-spin mx-auto" size={24} />
+                ) : (
+                  'Sign up'
+                )}
+              </Button>
             </div>
           </form>
-          <Button className="w-full">Sign up</Button>
         </CardContent>
         <CardFooter className="flex flex-col gap-4">
           <div className="flex flex-row items-center">
