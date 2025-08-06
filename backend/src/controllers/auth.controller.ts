@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import bcrypt from 'bcrypt';
 import crypto from 'crypto';
-import mongoose from 'mongoose';
+import mongoose, { sanitizeFilter } from 'mongoose';
 import dotenv from 'dotenv';
 
 import asyncHandler from '../utils/asyncHandler';
