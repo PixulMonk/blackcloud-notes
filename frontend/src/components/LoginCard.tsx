@@ -13,12 +13,18 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
-import { Eye, EyeOff } from 'lucide-react';
-import { useState } from 'react';
+import { Eye, EyeOff, AlertCircleIcon } from 'lucide-react';
+import { useState, useEffect } from 'react';
 
 export default function LoginCard() {
   const [showPassword, setShowPassword] = useState(false);
+  // TODO: switch error message from local state to useAuthStore as an error source
+  const [errorMessage, setErrorMessage] = useState({
+    title: '',
+    message: '',
+  });
 
   // TODO: login functionality = API call to backend
 
@@ -79,16 +85,34 @@ export default function LoginCard() {
                     )}
                   </Button>
                 </div>
+                {/* Alerts */}
+                <div>
+                  {(errorMessage.title || errorMessage.message) && (
+                    <Alert variant="destructive">
+                      <AlertCircleIcon />
+                      {errorMessage.title && (
+                        <AlertTitle>{errorMessage.title}</AlertTitle>
+                      )}
+                      {errorMessage.message && (
+                        <AlertDescription>
+                          <p>{errorMessage.message}</p>
+                        </AlertDescription>
+                      )}
+                    </Alert>
+                  )}
+                </div>
               </div>
             </div>
           </form>
           <Button className="w-full">Sign in</Button>
         </CardContent>
-        <CardFooter>
-          <CardDescription>Don't have an account?</CardDescription>
-          <Button variant="link" asChild>
-            <Link to="/signup">Sign up</Link>
-          </Button>
+        <CardFooter className="flex flex-col gap-4">
+          <div className="flex flex-row items-center">
+            <CardDescription>Don't have an account?</CardDescription>
+            <Button variant="link" asChild>
+              <Link to="/signup">Sign up</Link>
+            </Button>
+          </div>
         </CardFooter>
       </Card>
     </div>

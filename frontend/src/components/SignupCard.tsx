@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { FcGoogle } from 'react-icons/fc';
 
 import {
@@ -10,18 +10,75 @@ import {
   CardFooter,
 } from '@/components/ui/card';
 
+import { cn } from '@/lib/utils';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
-import { Eye, EyeOff } from 'lucide-react';
-import { useState } from 'react';
+import { Eye, EyeOff, AlertCircleIcon, Loader } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { useAuthStore } from '@/store/useAuthStore';
 
 export default function SignupCard() {
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const navigate = useNavigate();
+
+  const { signup, error, isLoading } = useAuthStore();
+
+  //   TODO: data validation
+  const handleSignUp = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    try {
+      const success = await signup(name, email, password);
+      if (success) {
+        navigate('/verify-email');
+      }
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        console.error('Error:', error.message);
+      } else {
+        console.error('Unknown error:', error);
+      }
+    }
+  };
+
   const [showPassword, setShowPassword] = useState(false);
 
-  // TODO: login functionality = API call to backend
+  const passwordRequirements = [
+    { label: 'At least 8 characters', test: (pwd: string) => pwd.length >= 8 },
+    {
+      label: 'At least 1 uppercase letter',
+      test: (pwd: string) => /[A-Z]/.test(pwd),
+    },
+    { label: 'At least 1 number', test: (pwd: string) => /\d/.test(pwd) },
+    {
+      label: 'At least 1 special character',
+      test: (pwd: string) => /[^A-Za-z0-9]/.test(pwd),
+    },
+  ];
+
+  const getStrength = (pwd: string): number => {
+    if (!pwd) return 0;
+    let score = 0;
+    if (pwd.length >= 8) score++;
+    if (/[A-Z]/.test(pwd)) score++;
+    if (/[0-9]/.test(pwd)) score++;
+    if (/[^A-Za-z0-9]/.test(pwd)) score++;
+    return score; // 0 to 4
+  };
+
+  const strength: number = getStrength(password);
+  const colors = [
+    'bg-red-500', // Too Weak
+    'bg-yellow-500', // Weak
+    'bg-lime-400', // Strong
+    'bg-green-600', // Very Strong
+  ];
+  const labels = ['Too Weak', 'Weak', 'Strong', 'Very Strong'];
 
   return (
     <div className="flex flex-col w-full items-center justify-center">
@@ -43,40 +100,128 @@ export default function SignupCard() {
 
           <CardDescription>Use your email for registration</CardDescription>
 
-          <form>
+          <form onSubmit={handleSignUp}>
             <div className="flex flex-col gap-6 max-w">
               <div className="grid gap-y-2">
                 <Label htmlFor="name">Name</Label>
-                <Input type="text" id="name" placeholder="Name" required />
+                <Input
+                  type="text"
+                  id="name"
+                  value={name}
+                  placeholder="Name"
+                  onChange={(e) => {
+                    setName(e.target.value);
+                  }}
+                  required
+                />
               </div>
               <div className="grid gap-y-2">
                 <Label htmlFor="email">Email</Label>
-                <Input type="email" id="email" placeholder="Email" required />
+                <Input
+                  type="email"
+                  id="email"
+                  value={email}
+                  placeholder="Email"
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                  }}
+                  required
+                />
               </div>
               <div className="grid gap-2">
                 <div className="flex items-center">
                   <Label htmlFor="password">Password</Label>
                 </div>
                 <div className="relative">
-                  <Input
-                    type={showPassword ? 'text' : 'password'}
-                    id="password"
-                    placeholder="Password"
-                    required
-                  />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    className="absolute right-2 top-1/2 -translate-y-1/2"
-                    onClick={() => setShowPassword((prev) => !prev)}
-                  >
-                    {showPassword ? (
-                      <EyeOff className="h-4 w-4" />
-                    ) : (
-                      <Eye className="h-4 w-4" />
-                    )}
-                  </Button>
+                  <div className="flex items-center">
+                    <Input
+                      type={showPassword ? 'text' : 'password'}
+                      id="password"
+                      value={password}
+                      placeholder="Password"
+                      onChange={(e) => {
+                        setPassword(e.target.value);
+                      }}
+                      required
+                      className="pr-10"
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="absolute right-2"
+                      onClick={() => setShowPassword((prev) => !prev)}
+                    >
+                      {showPassword ? (
+                        <EyeOff className="h-4 w-4" />
+                      ) : (
+                        <Eye className="h-4 w-4" />
+                      )}
+                    </Button>
+                  </div>
+                  {/* Strength bar */}
+                  {password && (
+                    <div className="flex gap-1 mt-2">
+                      {Array.from({ length: 4 }).map((_, i) => (
+                        <div
+                          key={i}
+                          className={cn(
+                            'h-1 flex-1 rounded transition-colors',
+                            i < strength
+                              ? colors[Math.max(strength - 1, 0)]
+                              : 'bg-gray-200'
+                          )}
+                        />
+                      ))}
+                    </div>
+                  )}
+                  {password && strength > 0 && (
+                    <p
+                      className={cn(
+                        'text-sm mt-1',
+                        colors[Math.max(strength - 1, 0)].replace(
+                          'bg-',
+                          'text-'
+                        )
+                      )}
+                    >
+                      {labels[Math.max(strength - 1, 0)]}
+                    </p>
+                  )}
+                  {/* Password Requirements */}
+                  <div className="mt-2 space-y-1 text-xs">
+                    {passwordRequirements.map((req, idx) => {
+                      const valid = req.test(password);
+                      return (
+                        <div key={idx} className="flex items-center gap-2">
+                          <div
+                            className={cn(
+                              'w-2 h-2 rounded-full transition-colors',
+                              valid ? 'bg-green-500' : 'bg-gray-300'
+                            )}
+                          />
+                          <span
+                            className={cn(
+                              'transition-colors',
+                              valid ? 'text-green-600' : 'text-gray-500'
+                            )}
+                          >
+                            {req.label}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+                {/* Alerts */}
+                <div>
+                  {error && (
+                    <Alert variant="destructive">
+                      <AlertCircleIcon />
+                      <AlertTitle>Signup failed</AlertTitle>
+                      <AlertDescription>{error}</AlertDescription>
+                    </Alert>
+                  )}
                 </div>
                 <div className="flex items-center gap-3 mt-3">
                   <Checkbox id="terms" />
@@ -98,15 +243,23 @@ export default function SignupCard() {
                   </p>
                 </div>
               </div>
+              <Button className="w-full" disabled={isLoading} type="submit">
+                {isLoading ? (
+                  <Loader className="animate-spin mx-auto" size={24} />
+                ) : (
+                  'Sign up'
+                )}
+              </Button>
             </div>
           </form>
-          <Button className="w-full">Sign in</Button>
         </CardContent>
-        <CardFooter>
-          <CardDescription>Already have an account?</CardDescription>
-          <Button variant="link" asChild>
-            <Link to="/login">Sign in</Link>
-          </Button>
+        <CardFooter className="flex flex-col gap-4">
+          <div className="flex flex-row items-center">
+            <CardDescription>Already have an account?</CardDescription>
+            <Button variant="link" asChild>
+              <Link to="/login">Sign in</Link>
+            </Button>
+          </div>
         </CardFooter>
       </Card>
     </div>

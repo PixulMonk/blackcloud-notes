@@ -8,16 +8,27 @@ import SettingsPage from './pages/SettingsPage';
 import { useState, useEffect } from 'react';
 import { useThemeStore } from './store/useThemeStore';
 import { updateFavicon } from './lib/utils';
+import VerifyEmailPage from './pages/VerifyEmailPage';
+import { useAuthStore } from './store/useAuthStore';
 
 function App() {
+  const { isCheckingAuth, checkAuth, isAuthenticated, user } = useAuthStore();
   const isDark = useThemeStore((state) => state.isDark);
   const location = useLocation();
-  const hideSidebar = ['/login', '/signup'].includes(location.pathname);
+  const hideSidebar = ['/login', '/signup', '/verify-email'].includes(
+    location.pathname
+  );
 
   useEffect(() => {
     document.documentElement.classList.toggle('dark', isDark);
     localStorage.setItem('theme', isDark ? 'dark' : 'light');
   }, [isDark]);
+
+  useEffect(() => {
+    checkAuth();
+  }, [checkAuth]);
+  console.log('isAuthenticated', isAuthenticated);
+  console.log('user', user);
 
   useEffect(() => {
     updateFavicon(isDark);
@@ -30,10 +41,48 @@ function App() {
         {!hideSidebar && <SidebarTrigger />}
         {/* TODO: Nagivate home page and settings page to login if not authenticated */}
         <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/signup" element={<SignupPage />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/settings" element={<SettingsPage />} />
+          <Route
+            path="/"
+            element={
+              user && isAuthenticated && user.isVerified ? (
+                <HomePage />
+              ) : (
+                <Navigate to="/login" />
+              )
+            }
+          />
+          <Route
+            path="/signup"
+            element={
+              !user && !isAuthenticated ? <SignupPage /> : <Navigate to="/" />
+            }
+          />
+          <Route
+            path="/login"
+            element={
+              !user && !isAuthenticated ? <LoginPage /> : <Navigate to="/" />
+            }
+          />
+          <Route
+            path="/settings"
+            element={
+              user && isAuthenticated ? (
+                <SettingsPage />
+              ) : (
+                <Navigate to="/login" />
+              )
+            }
+          />
+          <Route
+            path="/verify-email"
+            element={
+              user && !user.isVerified ? (
+                <VerifyEmailPage />
+              ) : (
+                <Navigate to={user ? '/' : '/login'} />
+              )
+            }
+          />
         </Routes>
       </main>
     </SidebarProvider>
