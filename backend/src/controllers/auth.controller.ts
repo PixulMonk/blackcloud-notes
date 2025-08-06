@@ -18,6 +18,17 @@ import {
 
 dotenv.config();
 
+export const checkAuth = asyncHandler(
+  async (req: Request, res: Response): Promise<void> => {
+    const user = await User.findById(req.user).select('-password -kdfSalt');
+
+    if (!user) {
+      throw new Error('User not found');
+    }
+    res.status(200).json({ success: true, user: user });
+  }
+);
+
 export const signup = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
     const { name, email, password } = req.body;
