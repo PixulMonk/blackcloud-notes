@@ -17,6 +17,7 @@ interface AuthState {
   error: string | null;
   isLoading: boolean;
   isCheckingAuth: boolean;
+  setError: (error: string | null) => void;
   signup: (name: string, email: string, password: string) => Promise<boolean>;
   login: (email: string, password: string) => Promise<boolean>;
   verifyEmail: (verificationCode: string) => Promise<boolean>;
@@ -31,6 +32,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   isCheckingAuth: true,
 
   //   TODO: data validation
+  setError: (error) => set({ error }),
   signup: async (name, email, password) => {
     set({ isLoading: true, error: null });
     try {

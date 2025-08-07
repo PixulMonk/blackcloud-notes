@@ -25,13 +25,27 @@ export default function SignupCard() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+
+  const [hasAgreedToTerms, setHasAgreedToTerms] = useState(false);
+
   const navigate = useNavigate();
 
-  const { signup, error, isLoading } = useAuthStore();
+  const { signup, error, setError, isLoading } = useAuthStore();
 
   //   TODO: data validation
   const handleSignUp = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (!arePasswordRequirementsMet(password)) {
+      setError('Password does not meet requirements.');
+      return;
+    }
+    if (!hasAgreedToTerms) {
+      setError(
+        'Please agree to the Terms of Service and Conditions before signing up.'
+      );
+      return;
+    }
+
     try {
       const success = await signup(name, email, password);
       if (success) {
@@ -44,6 +58,10 @@ export default function SignupCard() {
         console.error('Unknown error:', error);
       }
     }
+  };
+
+  const arePasswordRequirementsMet = (password: string): boolean => {
+    return passwordRequirements.every((req) => req.test(password));
   };
 
   const [showPassword, setShowPassword] = useState(false);
@@ -224,7 +242,13 @@ export default function SignupCard() {
                   )}
                 </div>
                 <div className="flex items-center gap-3 mt-3">
-                  <Checkbox id="terms" />
+                  <Checkbox
+                    id="terms"
+                    checked={hasAgreedToTerms}
+                    onCheckedChange={(checked) =>
+                      setHasAgreedToTerms(checked === true)
+                    }
+                  />
                   <p className="text-muted-foreground text-xs text-center">
                     I agree to the{' '}
                     <Link
