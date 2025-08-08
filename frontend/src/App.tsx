@@ -5,19 +5,28 @@ import HomePage from './pages/HomePage';
 import SignupPage from './pages/SignupPage';
 import LoginPage from './pages/LoginPage';
 import SettingsPage from './pages/SettingsPage';
-import { useState, useEffect } from 'react';
+import ForgotPasswordPage from './pages/ForgotPasswordPage';
+import { useEffect } from 'react';
 import { useThemeStore } from './store/useThemeStore';
 import { updateFavicon } from './lib/utils';
 import VerifyEmailPage from './pages/VerifyEmailPage';
 import { useAuthStore } from './store/useAuthStore';
+import { Loader } from 'lucide-react';
+import ResetPasswordPage from './pages/ResetPasswordPage';
 
 function App() {
   const { isCheckingAuth, checkAuth, isAuthenticated, user } = useAuthStore();
   const isDark = useThemeStore((state) => state.isDark);
   const location = useLocation();
-  const hideSidebar = ['/login', '/signup', '/verify-email'].includes(
-    location.pathname
-  );
+  const hideSidebar =
+    [
+      '/login',
+      '/signup',
+      '/verify-email',
+      '/forgot-password',
+      '/reset-password/:token',
+    ].includes(location.pathname) ||
+    location.pathname.startsWith('/reset-password/');
 
   useEffect(() => {
     document.documentElement.classList.toggle('dark', isDark);
@@ -26,13 +35,21 @@ function App() {
 
   useEffect(() => {
     checkAuth();
-  }, [checkAuth]);
+  }, []);
   console.log('isAuthenticated', isAuthenticated);
   console.log('user', user);
 
   useEffect(() => {
     updateFavicon(isDark);
   }, [isDark]);
+
+  if (isCheckingAuth) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <Loader className="h-10 w-10 animate-spin text-gray-500" />
+      </div>
+    );
+  }
 
   return (
     <SidebarProvider>
@@ -46,6 +63,8 @@ function App() {
             element={
               user && isAuthenticated && user.isVerified ? (
                 <HomePage />
+              ) : user && isAuthenticated && !user.isVerified ? (
+                <Navigate to="/verify-email" />
               ) : (
                 <Navigate to="/login" />
               )
@@ -82,6 +101,16 @@ function App() {
                 <Navigate to={user ? '/' : '/login'} />
               )
             }
+          />
+          <Route
+            path="/forgot-password"
+            element={
+              isAuthenticated ? <Navigate to="/" /> : <ForgotPasswordPage />
+            }
+          />
+          <Route
+            path="/reset-password/:token"
+            element={<ResetPasswordPage />}
           />
         </Routes>
       </main>

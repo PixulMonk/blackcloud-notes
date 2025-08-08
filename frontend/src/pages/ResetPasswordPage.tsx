@@ -1,7 +1,7 @@
-import LoginCard from '@/components/LoginCard';
+import ResetPasswordCard from '@/components/ResetPasswordCard';
 import { useThemeStore } from '@/store/useThemeStore';
 
-function LoginPage() {
+function ResetPasswordPage() {
   const isDark = useThemeStore((state) => state.isDark);
 
   return (
@@ -13,9 +13,9 @@ function LoginPage() {
         alt="BlackCloud Logo"
         className="h-32 sm:h-36 md:h-40 lg:h-42 w-auto mb-5"
       />
-      <LoginCard />
+      <ResetPasswordCard />
     </div>
   );
 }
 
-export default LoginPage;
+export default ResetPasswordPage;

@@ -1,5 +1,7 @@
-import { Link, useNavigate } from 'react-router-dom';
-import { FcGoogle } from 'react-icons/fc';
+import { useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+
+import { useAuthStore } from '@/store/useAuthStore';
 
 import {
   Card,
@@ -7,50 +9,54 @@ import {
   CardTitle,
   CardDescription,
   CardContent,
-  CardFooter,
 } from '@/components/ui/card';
 
 import { cn } from '@/lib/utils';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 import { Eye, EyeOff, AlertCircleIcon, Loader } from 'lucide-react';
-import { useState } from 'react';
-import { useAuthStore } from '@/store/useAuthStore';
 
-export default function SignupCard() {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
+// TODO: don't forget to warn user about data loss since password is tied to encryption key
+function ResetPasswordCard() {
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  const [hasAgreedToTerms, setHasAgreedToTerms] = useState(false);
+  const { resetPassword, error, setError, isLoading } = useAuthStore();
 
+  const { token } = useParams();
   const navigate = useNavigate();
 
-  const { signup, error, setError, isLoading } = useAuthStore();
-
-  const handleSignUp = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleChangePassword = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
+    if (!password || !confirmPassword) {
+      setError('All fields are required.');
+      return;
+    }
+
+    if (password != confirmPassword) {
+      setError('Passwords do not match.');
+      return;
+    }
     if (!arePasswordRequirementsMet(password)) {
       setError('Password does not meet requirements.');
       return;
     }
-    if (!hasAgreedToTerms) {
-      setError(
-        'Please agree to the Terms of Service and Conditions before signing up.'
-      );
-      return;
-    }
 
     try {
-      const success = await signup(name, email, password);
+      const success = await resetPassword(token!, password);
       if (success) {
-        navigate('/verify-email');
+        navigate('/login', {
+          state: {
+            message:
+              'Your password has been reset successfully. Please log in.',
+          },
+        });
       }
     } catch (error: unknown) {
       if (error instanceof Error) {
@@ -103,54 +109,15 @@ export default function SignupCard() {
     <div className="flex flex-col w-full items-center justify-center">
       <Card className="max-w-sm w-full">
         <CardHeader>
-          <CardTitle className="text-2xl text-center">Create account</CardTitle>
+          <CardTitle className="text-2xl text-center">Reset password</CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
-          <Button className="w-full" variant="outline">
-            <FcGoogle className="h-4 w-4 mr-2" />
-            Sign up with Google
-          </Button>
-
-          <div className="flex items-center gap-4">
-            <hr className="flex-grow border-gray-300" />
-            <span className="text-xs text-gray-500 uppercase">or</span>
-            <hr className="flex-grow border-gray-300" />
-          </div>
-
-          <CardDescription>Use your email for registration</CardDescription>
-
-          <form onSubmit={handleSignUp}>
+          <CardDescription>Please enter your new password</CardDescription>
+          <form onSubmit={handleChangePassword}>
             <div className="flex flex-col gap-6 max-w">
               <div className="grid gap-y-2">
-                <Label htmlFor="name">Name</Label>
-                <Input
-                  type="text"
-                  id="name"
-                  value={name}
-                  placeholder="Name"
-                  onChange={(e) => {
-                    setName(e.target.value);
-                  }}
-                  required
-                />
-              </div>
-              <div className="grid gap-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  type="email"
-                  id="email"
-                  value={email}
-                  placeholder="Email"
-                  onChange={(e) => {
-                    setEmail(e.target.value);
-                  }}
-                  required
-                />
-              </div>
-              <div className="grid gap-2">
-                <div className="flex items-center">
-                  <Label htmlFor="password">Password</Label>
-                </div>
+                <Label htmlFor="password">Password</Label>
+
                 <div className="relative">
                   <div className="flex items-center">
                     <Input
@@ -161,7 +128,6 @@ export default function SignupCard() {
                       onChange={(e) => {
                         setPassword(e.target.value);
                       }}
-                      required
                       className="pr-10"
                     />
                     <Button
@@ -172,6 +138,36 @@ export default function SignupCard() {
                       onClick={() => setShowPassword((prev) => !prev)}
                     >
                       {showPassword ? (
+                        <EyeOff className="h-4 w-4" />
+                      ) : (
+                        <Eye className="h-4 w-4" />
+                      )}
+                    </Button>
+                  </div>
+                </div>
+              </div>
+              <div className="grid gap-y-2">
+                <Label htmlFor="password">Confirm password</Label>
+                <div className="relative">
+                  <div className="flex items-center">
+                    <Input
+                      type={showConfirmPassword ? 'text' : 'password'}
+                      id="confirm-password"
+                      value={confirmPassword}
+                      placeholder="Confirm password"
+                      onChange={(e) => {
+                        setConfirmPassword(e.target.value);
+                      }}
+                      className="pr-10"
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="absolute right-2"
+                      onClick={() => setShowConfirmPassword((prev) => !prev)}
+                    >
+                      {showConfirmPassword ? (
                         <EyeOff className="h-4 w-4" />
                       ) : (
                         <Eye className="h-4 w-4" />
@@ -232,61 +228,30 @@ export default function SignupCard() {
                     })}
                   </div>
                 </div>
-                {/* Alerts */}
-                {error && (
-                  <div>
-                    <Alert variant="destructive">
-                      <AlertCircleIcon />
-                      <AlertTitle>Signup failed</AlertTitle>
-                      <AlertDescription>{error}</AlertDescription>
-                    </Alert>
-                  </div>
-                )}
-                <div className="flex items-center gap-3 mt-3">
-                  <Checkbox
-                    id="terms"
-                    checked={hasAgreedToTerms}
-                    onCheckedChange={(checked) =>
-                      setHasAgreedToTerms(checked === true)
-                    }
-                  />
-                  <p className="text-muted-foreground text-xs text-center">
-                    I agree to the{' '}
-                    <Link
-                      to="#"
-                      className="underline underline-offset-4 hover:text-primary"
-                    >
-                      Terms of Service
-                    </Link>{' '}
-                    and{' '}
-                    <Link
-                      to="#"
-                      className="underline underline-offset-4 hover:text-primary"
-                    >
-                      Conditions
-                    </Link>
-                  </p>
-                </div>
               </div>
+              {/* Alerts */}
+              {error && (
+                <div>
+                  <Alert variant="destructive">
+                    <AlertCircleIcon />
+                    <AlertTitle>Reset password failed</AlertTitle>
+                    <AlertDescription>{error}</AlertDescription>
+                  </Alert>
+                </div>
+              )}
               <Button className="w-full" disabled={isLoading} type="submit">
                 {isLoading ? (
                   <Loader className="animate-spin mx-auto" size={24} />
                 ) : (
-                  'Sign up'
+                  'Change password'
                 )}
               </Button>
             </div>
           </form>
         </CardContent>
-        <CardFooter className="flex flex-col gap-4">
-          <div className="flex flex-row items-center">
-            <CardDescription>Already have an account?</CardDescription>
-            <Button variant="link" asChild>
-              <Link to="/login">Sign in</Link>
-            </Button>
-          </div>
-        </CardFooter>
       </Card>
     </div>
   );
 }
+
+export default ResetPasswordCard;

@@ -124,15 +124,15 @@ function VerifyEmailCard() {
               ))}
             </div>
             {/* Alerts */}
-            <div>
-              {error && (
+            {error && (
+              <div>
                 <Alert variant="destructive">
                   <AlertCircleIcon />
                   <AlertTitle>Email verification failed</AlertTitle>
                   <AlertDescription>{error}</AlertDescription>
                 </Alert>
-              )}
-            </div>
+              </div>
+            )}
             <Button
               disabled={isLoading || isButtonDisabled}
               className="w-full"
