@@ -26,7 +26,6 @@ function ResetPasswordCard() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [doPasswordsMatch, setdoPasswordsMatch] = useState(false);
   const [isResetSuccessful, setIsResetSuccessful] = useState(false);
 
   const { resetPassword, error, setError, isLoading } = useAuthStore();
@@ -42,7 +41,7 @@ function ResetPasswordCard() {
       return;
     }
 
-    if (!doPasswordsMatch) {
+    if (password != confirmPassword) {
       setError('Passwords do not match.');
       return;
     }
@@ -52,7 +51,7 @@ function ResetPasswordCard() {
     }
 
     try {
-      const success = await resetPassword(password);
+      const success = await resetPassword(token!, password);
       if (success) {
         navigate('/login', {
           state: {
