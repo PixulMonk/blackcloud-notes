@@ -80,12 +80,19 @@ export default function LoginCard() {
               <div className="grid gap-2">
                 <div className="flex items-center">
                   <Label htmlFor="password">Password</Label>
-                  <a
+                  <Button
+                    className="ml-auto inline-block text-sm underline-offset-4 hover:underline"
+                    variant="link"
+                    asChild
+                  >
+                    <Link to="/forgot-password">Forgot your password?</Link>
+                  </Button>
+                  {/* <a
                     href="#"
                     className="ml-auto inline-block text-sm underline-offset-4 hover:underline"
                   >
                     Forgot your password?
-                  </a>
+                  </a> */}
                 </div>
                 <div className="relative">
                   <Input

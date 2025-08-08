@@ -14,24 +14,30 @@ interface User {
 interface AuthState {
   user: User | null;
   isAuthenticated: boolean;
+  // Delete message later if unused. Leaving it here for now just in case
+  message: string | null;
   error: string | null;
   isLoading: boolean;
   isCheckingAuth: boolean;
+  setMessage: (message: string | null) => void;
   setError: (error: string | null) => void;
   signup: (name: string, email: string, password: string) => Promise<boolean>;
   login: (email: string, password: string) => Promise<boolean>;
   verifyEmail: (verificationCode: string) => Promise<boolean>;
   checkAuth: () => Promise<void>;
   logout: () => Promise<void>;
+  forgotPassword: (email: string) => Promise<boolean>;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
   user: null,
   isAuthenticated: false,
+  message: null,
   error: null,
   isLoading: false,
   isCheckingAuth: true,
 
+  setMessage: (message) => set({ message }),
   setError: (error) => set({ error }),
   signup: async (name, email, password) => {
     set({ isLoading: true, error: null });
@@ -130,7 +136,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     set({ isLoading: true, error: null });
 
     try {
-      const response = await axios.get(`${API_URL}/logout`);
+      await axios.post(`${API_URL}/logout`);
       set({
         user: null,
         isAuthenticated: false,
@@ -146,6 +152,32 @@ export const useAuthStore = create<AuthState>((set) => ({
       } else {
         set({ error: 'An unexpected error occurred', isLoading: false });
         throw error;
+      }
+    }
+  },
+  forgotPassword: async (email) => {
+    set({ isLoading: true, error: null, message: null });
+    try {
+      const response = await axios.post(`${API_URL}/forgot-password`, {
+        email,
+      });
+      set({
+        message: response.data.message,
+        isLoading: false,
+      });
+      return true;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        set({
+          error:
+            error.response?.data?.message ||
+            'Error sending password reset email',
+          isLoading: false,
+        });
+        return false;
+      } else {
+        set({ error: 'An unexpected error occurred', isLoading: false });
+        return false;
       }
     }
   },

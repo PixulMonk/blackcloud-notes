@@ -5,6 +5,7 @@ import HomePage from './pages/HomePage';
 import SignupPage from './pages/SignupPage';
 import LoginPage from './pages/LoginPage';
 import SettingsPage from './pages/SettingsPage';
+import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import { useEffect } from 'react';
 import { useThemeStore } from './store/useThemeStore';
 import { updateFavicon } from './lib/utils';
@@ -16,9 +17,12 @@ function App() {
   const { isCheckingAuth, checkAuth, isAuthenticated, user } = useAuthStore();
   const isDark = useThemeStore((state) => state.isDark);
   const location = useLocation();
-  const hideSidebar = ['/login', '/signup', '/verify-email'].includes(
-    location.pathname
-  );
+  const hideSidebar = [
+    '/login',
+    '/signup',
+    '/verify-email',
+    '/forgot-password',
+  ].includes(location.pathname);
 
   useEffect(() => {
     document.documentElement.classList.toggle('dark', isDark);
@@ -92,6 +96,12 @@ function App() {
               ) : (
                 <Navigate to={user ? '/' : '/login'} />
               )
+            }
+          />
+          <Route
+            path="/forgot-password"
+            element={
+              isAuthenticated ? <Navigate to="/" /> : <ForgotPasswordPage />
             }
           />
         </Routes>
