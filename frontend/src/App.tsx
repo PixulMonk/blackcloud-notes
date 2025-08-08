@@ -12,17 +12,21 @@ import { updateFavicon } from './lib/utils';
 import VerifyEmailPage from './pages/VerifyEmailPage';
 import { useAuthStore } from './store/useAuthStore';
 import { Loader } from 'lucide-react';
+import ResetPasswordPage from './pages/ResetPasswordPage';
 
 function App() {
   const { isCheckingAuth, checkAuth, isAuthenticated, user } = useAuthStore();
   const isDark = useThemeStore((state) => state.isDark);
   const location = useLocation();
-  const hideSidebar = [
-    '/login',
-    '/signup',
-    '/verify-email',
-    '/forgot-password',
-  ].includes(location.pathname);
+  const hideSidebar =
+    [
+      '/login',
+      '/signup',
+      '/verify-email',
+      '/forgot-password',
+      '/reset-password/:token',
+    ].includes(location.pathname) ||
+    location.pathname.startsWith('/reset-password/');
 
   useEffect(() => {
     document.documentElement.classList.toggle('dark', isDark);
@@ -103,6 +107,10 @@ function App() {
             element={
               isAuthenticated ? <Navigate to="/" /> : <ForgotPasswordPage />
             }
+          />
+          <Route
+            path="/reset-password/:token"
+            element={<ResetPasswordPage />}
           />
         </Routes>
       </main>

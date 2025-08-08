@@ -49,7 +49,7 @@ function ForgotPasswordCard() {
       <Card className="max-w-sm w-full">
         <CardHeader>
           <CardTitle className="text-2xl text-center">
-            Forgot Password
+            Forgot password
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">

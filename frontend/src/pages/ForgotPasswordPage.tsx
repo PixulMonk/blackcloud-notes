@@ -1,4 +1,4 @@
-import ForgotPasswordCard from '@/components/ui/ForgotPasswordCard';
+import ForgotPasswordCard from '@/components/ForgotPasswordCard';
 import { useThemeStore } from '@/store/useThemeStore';
 
 function ForgotPasswordPage() {

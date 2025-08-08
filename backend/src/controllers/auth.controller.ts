@@ -170,7 +170,7 @@ export const forgotPassword = asyncHandler(
     await user?.save();
 
     const APP_BASE_URL: string =
-      process.env.APP_DOMAIN || 'http://localhost:3000';
+      process.env.APP_DOMAIN || 'http://localhost:5173';
 
     await sendPasswordResetEmail(
       user!.name,

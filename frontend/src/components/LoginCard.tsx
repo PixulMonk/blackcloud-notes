@@ -1,4 +1,4 @@
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { FcGoogle } from 'react-icons/fc';
 
 import {
@@ -15,15 +15,24 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
-import { Eye, EyeOff, AlertCircleIcon, Loader } from 'lucide-react';
+import {
+  Eye,
+  EyeOff,
+  AlertCircleIcon,
+  CheckCircle2Icon,
+  Loader,
+} from 'lucide-react';
 import { useState } from 'react';
 import { useAuthStore } from '@/store/useAuthStore';
 
 export default function LoginCard() {
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const successMessage = location.state?.message;
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const navigate = useNavigate();
   const { login, error, isLoading } = useAuthStore();
 
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -121,14 +130,27 @@ export default function LoginCard() {
                 </div>
                 {/* Alerts */}
                 <div>
-                  {error && (
+                  {successMessage && (
+                    <div>
+                      <Alert>
+                        <CheckCircle2Icon />
+                        <AlertTitle>Password reset successful</AlertTitle>
+                        <AlertDescription>{successMessage}</AlertDescription>
+                      </Alert>
+                    </div>
+                  )}
+                  {/* Your login form here */}
+                </div>
+
+                {error && (
+                  <div>
                     <Alert variant="destructive">
                       <AlertCircleIcon />
                       <AlertTitle>Login failed</AlertTitle>
                       <AlertDescription>{error}</AlertDescription>
                     </Alert>
-                  )}
-                </div>
+                  </div>
+                )}
               </div>
               <Button className="w-full" type="submit">
                 {isLoading ? (

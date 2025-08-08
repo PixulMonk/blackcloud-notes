@@ -27,6 +27,7 @@ interface AuthState {
   checkAuth: () => Promise<void>;
   logout: () => Promise<void>;
   forgotPassword: (email: string) => Promise<boolean>;
+  resetPassword: (password: string) => Promise<boolean>;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
@@ -172,6 +173,24 @@ export const useAuthStore = create<AuthState>((set) => ({
           error:
             error.response?.data?.message ||
             'Error sending password reset email',
+          isLoading: false,
+        });
+        return false;
+      } else {
+        set({ error: 'An unexpected error occurred', isLoading: false });
+        return false;
+      }
+    }
+  },
+  resetPassword: async (password) => {
+    set({ isLoading: true, error: null });
+    try {
+      const response = await axios.post(`${API_URL}/reset-password/:token`);
+      return true;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        set({
+          error: error.response?.data?.message || 'Error resetting password',
           isLoading: false,
         });
         return false;

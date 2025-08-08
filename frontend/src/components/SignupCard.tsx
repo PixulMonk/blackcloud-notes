@@ -25,6 +25,7 @@ export default function SignupCard() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
 
   const [hasAgreedToTerms, setHasAgreedToTerms] = useState(false);
 
@@ -34,6 +35,7 @@ export default function SignupCard() {
 
   const handleSignUp = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
     if (!arePasswordRequirementsMet(password)) {
       setError('Password does not meet requirements.');
       return;
@@ -59,11 +61,10 @@ export default function SignupCard() {
     }
   };
 
+  // PASSWORD REQUIREMENTS AND STRENGTH INDICATOR
   const arePasswordRequirementsMet = (password: string): boolean => {
     return passwordRequirements.every((req) => req.test(password));
   };
-
-  const [showPassword, setShowPassword] = useState(false);
 
   const passwordRequirements = [
     { label: 'At least 8 characters', test: (pwd: string) => pwd.length >= 8 },
@@ -78,6 +79,7 @@ export default function SignupCard() {
     },
   ];
 
+  // TODO: move to utils?
   const getStrength = (pwd: string): number => {
     if (!pwd) return 0;
     let score = 0;
@@ -231,15 +233,15 @@ export default function SignupCard() {
                   </div>
                 </div>
                 {/* Alerts */}
-                <div>
-                  {error && (
+                {error && (
+                  <div>
                     <Alert variant="destructive">
                       <AlertCircleIcon />
                       <AlertTitle>Signup failed</AlertTitle>
                       <AlertDescription>{error}</AlertDescription>
                     </Alert>
-                  )}
-                </div>
+                  </div>
+                )}
                 <div className="flex items-center gap-3 mt-3">
                   <Checkbox
                     id="terms"
