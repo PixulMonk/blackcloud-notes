@@ -9,7 +9,6 @@ import {
   CardTitle,
   CardDescription,
   CardContent,
-  CardFooter,
 } from '@/components/ui/card';
 
 import { cn } from '@/lib/utils';
@@ -26,7 +25,6 @@ function ResetPasswordCard() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [isResetSuccessful, setIsResetSuccessful] = useState(false);
 
   const { resetPassword, error, setError, isLoading } = useAuthStore();
 
