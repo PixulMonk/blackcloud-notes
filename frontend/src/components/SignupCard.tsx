@@ -32,7 +32,6 @@ export default function SignupCard() {
 
   const { signup, error, setError, isLoading } = useAuthStore();
 
-  //   TODO: data validation
   const handleSignUp = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!arePasswordRequirementsMet(password)) {

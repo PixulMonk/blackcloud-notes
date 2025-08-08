@@ -22,6 +22,7 @@ interface AuthState {
   login: (email: string, password: string) => Promise<boolean>;
   verifyEmail: (verificationCode: string) => Promise<boolean>;
   checkAuth: () => Promise<void>;
+  logout: () => Promise<void>;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
@@ -31,7 +32,6 @@ export const useAuthStore = create<AuthState>((set) => ({
   isLoading: false,
   isCheckingAuth: true,
 
-  //   TODO: data validation
   setError: (error) => set({ error }),
   signup: async (name, email, password) => {
     set({ isLoading: true, error: null });
@@ -124,6 +124,29 @@ export const useAuthStore = create<AuthState>((set) => ({
       });
     } catch (error) {
       set({ error: null, isCheckingAuth: false, isAuthenticated: false });
+    }
+  },
+  logout: async () => {
+    set({ isLoading: true, error: null });
+
+    try {
+      const response = await axios.get(`${API_URL}/logout`);
+      set({
+        user: null,
+        isAuthenticated: false,
+        isLoading: false,
+      });
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        set({
+          error: error.response?.data?.message || 'Error logging out',
+          isLoading: false,
+        });
+        throw error;
+      } else {
+        set({ error: 'An unexpected error occurred', isLoading: false });
+        throw error;
+      }
     }
   },
 }));
