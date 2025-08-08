@@ -185,10 +185,10 @@ export const useAuthStore = create<AuthState>((set) => ({
   resetPassword: async (token, password) => {
     set({ isLoading: true, error: null });
     try {
-      const response = await axios.post(`${API_URL}/reset-password/${token}`, {
+      await axios.post(`${API_URL}/reset-password/${token}`, {
         password,
       });
-      set({ message: response.data.message, isLoading: false });
+      set({ isLoading: false });
       return true;
     } catch (error) {
       if (axios.isAxiosError(error)) {

@@ -8,6 +8,8 @@ import {
 import { sender } from './mailtrap.config';
 import { emailClient } from './emailClient';
 
+const logoUrl = `${process.env.APP_DOMAIN}/logo/logo-horiz.svg`;
+
 type EmailSender =
   | { name: string; address: string } // Nodemailer format
   | { name: string; email: string }; // Mailtrap format
@@ -42,15 +44,17 @@ export const sendVerificationEmail = async (
   email: string,
   verificationToken: string
 ) => {
-  const template = VERIFY_EMAIL_TEMPLATE.replace('{name}', name).replace(
-    '{verificationToken}',
-    verificationToken
-  );
+  const template = VERIFY_EMAIL_TEMPLATE.replace('{name}', name)
+    .replace('{verificationToken}', verificationToken)
+    .replace('logoUrl', logoUrl);
   await sendEmailTemplate(email, 'Verify Your Email', template);
 };
 
 export const sendWelcomeEmail = async (name: string, email: string) => {
-  const template = WELCOME_EMAIL_TEMPLATE.replace('{name}', name);
+  const template = WELCOME_EMAIL_TEMPLATE.replace('{name}', name).replace(
+    'logoUrl',
+    logoUrl
+  );
   await sendEmailTemplate(email, 'Welcome to BlackCloud', template);
 };
 
@@ -59,10 +63,9 @@ export const sendPasswordResetEmail = async (
   email: string,
   resetLink: string
 ) => {
-  const template = FORGOT_PASSWORD_TEMPLATE.replace('{name}', name).replace(
-    '{resetLink}',
-    resetLink
-  );
+  const template = FORGOT_PASSWORD_TEMPLATE.replace('{name}', name)
+    .replace('{resetLink}', resetLink)
+    .replace('logoUrl', logoUrl);
   await sendEmailTemplate(email, 'Password Reset', template);
 };
 
@@ -70,6 +73,9 @@ export const sendPasswordResetSuccessEmail = async (
   name: string,
   email: string
 ) => {
-  const template = PASSWORD_RESET_SUCCESS_TEMPLATE.replace('{name}', name);
+  const template = PASSWORD_RESET_SUCCESS_TEMPLATE.replace(
+    '{name}',
+    name
+  ).replace('logoUrl', logoUrl);
   await sendEmailTemplate(email, 'Your Password Has Been Reset', template);
 };
