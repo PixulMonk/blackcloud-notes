@@ -92,7 +92,7 @@ const TreeNodeComponent = ({ node }: { node: TreeNode }) => {
       {hasChildren ? (
         <Collapsible>
           <div
-            className={`flex justify-between w-full p-1.5 rounded-md ${
+            className={`flex justify-between w-full px-1.5 rounded-md ${
               isHovered || isMenuOpen ? 'bg-accent/50' : ''
             }`}
             onMouseEnter={() => setIsHovered(true)}
