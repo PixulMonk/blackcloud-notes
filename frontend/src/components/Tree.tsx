@@ -1,3 +1,4 @@
+import React, { useState } from 'react';
 import {
   type LucideIcon,
   ChevronRight,
@@ -39,6 +40,7 @@ interface TreeNode {
 // Renders individual node components
 const TreeNodeComponent = ({ node }: { node: TreeNode }) => {
   const hasChildren = !!node.children?.length;
+  const [isHovered, setIsHovered] = useState(false);
 
   const Icon = node.icon || (node.type === 'folder' ? Folder : File);
 
@@ -53,7 +55,7 @@ const TreeNodeComponent = ({ node }: { node: TreeNode }) => {
   );
 
   const Actions = (
-    <div className="flex items-center">
+    <div className="flex items-center ">
       <Button
         variant="ghost"
         size="icon"
@@ -86,25 +88,31 @@ const TreeNodeComponent = ({ node }: { node: TreeNode }) => {
     <div className="w-full">
       {hasChildren ? (
         <Collapsible>
-          <div className="flex justify-between w-full p-1.5 rounded-md hover:bg-accent/50 transition-colors duration-200">
+          <div
+            className="flex justify-between w-full p-1.5 rounded-md  hover:bg-accent/50 transition-colors duration-200"
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
+          >
             <CollapsibleTrigger asChild>{Label}</CollapsibleTrigger>
-            {Actions}
+            {isHovered && Actions}
           </div>
 
           <CollapsibleContent>
-            <ul className="space-y-1.5">
+            <ul className="pl-4 space-y-1.5">
               {node.children!.map((child) => (
-                <li className="pl-4" key={child.id}>
-                  <TreeNodeComponent node={child} />
-                </li>
+                <TreeNodeComponent key={child.id} node={child} />
               ))}
             </ul>
           </CollapsibleContent>
         </Collapsible>
       ) : (
-        <div className="flex justify-between items-center p-1 rounded-md hover:bg-accent">
+        <div
+          className="flex justify-between items-center p-1 rounded-md group hover:bg-accent"
+          onMouseEnter={() => setIsHovered(true)}
+          onMouseLeave={() => setIsHovered(false)}
+        >
           {Label}
-          {Actions}
+          {isHovered && Actions}
         </div>
       )}
     </div>
