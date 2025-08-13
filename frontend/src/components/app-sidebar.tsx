@@ -2,7 +2,7 @@
 
 import { Tree, type TreeNode } from './Tree';
 
-import { FilePlus2, FolderPlus } from 'lucide-react';
+import { FilePlus2, FolderPlus, Search } from 'lucide-react';
 
 import { Button } from './ui/button';
 
@@ -66,11 +66,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
     <Sidebar {...props}>
       <SidebarHeader className="flex flex-row justify-center mt-2">
-        <Button variant="secondary" size="icon" className="size-8">
+        <Button variant="ghost" size="icon">
           <FolderPlus />
         </Button>
-        <Button variant="secondary" size="icon" className="size-8">
+        <Button variant="ghost" size="icon" className="size-8">
           <FilePlus2 />
+        </Button>
+        <Button variant="ghost" size="icon" className="size-8">
+          <Search />
         </Button>
       </SidebarHeader>
       <SidebarContent>
