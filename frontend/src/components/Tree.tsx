@@ -41,6 +41,7 @@ interface TreeNode {
 const TreeNodeComponent = ({ node }: { node: TreeNode }) => {
   const hasChildren = !!node.children?.length;
   const [isHovered, setIsHovered] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const Icon = node.icon || (node.type === 'folder' ? Folder : File);
 
@@ -70,7 +71,7 @@ const TreeNodeComponent = ({ node }: { node: TreeNode }) => {
         </Button>
       )}
 
-      <DropdownMenu>
+      <DropdownMenu onOpenChange={(open) => setIsMenuOpen(open)}>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" size="icon" className="h-6 w-6">
             <Ellipsis className="h-4 w-4" />
@@ -91,7 +92,9 @@ const TreeNodeComponent = ({ node }: { node: TreeNode }) => {
       {hasChildren ? (
         <Collapsible>
           <div
-            className="flex justify-between w-full p-1.5 rounded-md hover:bg-accent/50 transition-colors duration-200"
+            className={`flex justify-between w-full p-1.5 rounded-md ${
+              isHovered || isMenuOpen ? 'bg-accent/50' : ''
+            }`}
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
           >
