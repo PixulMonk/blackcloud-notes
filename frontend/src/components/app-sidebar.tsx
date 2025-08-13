@@ -20,30 +20,36 @@ const data: TreeNode[] = [
   {
     id: '1',
     name: 'Item 1',
+    type: 'folder',
     children: [
       {
         id: '2',
         name: 'Item 1.1',
+        type: 'folder',
         children: [
           {
             id: '3',
             name: 'Item 1.1.1',
+            type: 'folder',
             children: [
               {
-                id: '3',
-                name: 'Item 1.1.1',
+                id: '7',
+                name: 'Item 1.1.1.1',
+                type: 'file',
               },
             ],
           },
           {
             id: '4',
             name: 'Item 1.1.2',
+            type: 'file',
           },
         ],
       },
       {
         id: '5',
         name: 'Item 1.2 (disabled)',
+        type: 'file',
         // disabled: true,
       },
     ],
@@ -51,6 +57,7 @@ const data: TreeNode[] = [
   {
     id: '6',
     name: 'Item 2 (draggable)',
+    type: 'file',
     // draggable: true,
   },
 ];
