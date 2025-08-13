@@ -56,7 +56,7 @@ const TreeNodeComponent = ({ node }: { node: TreeNode }) => {
 
   const Actions = (
     <div className="flex items-center ">
-      {node.type === 'folder' && (
+      {hasChildren && (
         <Button
           variant="ghost"
           size="icon"
@@ -91,12 +91,14 @@ const TreeNodeComponent = ({ node }: { node: TreeNode }) => {
       {hasChildren ? (
         <Collapsible>
           <div
-            className="flex justify-between w-full p-1.5 rounded-md  hover:bg-accent/50 transition-colors duration-200"
+            className="flex justify-between w-full p-1.5 rounded-md hover:bg-accent/50 transition-colors duration-200"
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
           >
             <CollapsibleTrigger asChild>{Label}</CollapsibleTrigger>
-            {isHovered && Actions}
+            <div className={isHovered ? 'opacity-100' : 'opacity-0'}>
+              {Actions}
+            </div>
           </div>
 
           <CollapsibleContent>
@@ -114,7 +116,9 @@ const TreeNodeComponent = ({ node }: { node: TreeNode }) => {
           onMouseLeave={() => setIsHovered(false)}
         >
           {Label}
-          {isHovered && Actions}
+          <div className={isHovered ? 'opacity-100' : 'opacity-0'}>
+            {Actions}
+          </div>
         </div>
       )}
     </div>
