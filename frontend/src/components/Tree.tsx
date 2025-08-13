@@ -26,15 +26,17 @@ const TreeNodeComponent = ({ node }: { node: TreeNode }) => {
   const hasChildren = !!node.children?.length;
 
   return (
-    <li className="ml-4">
+    <div className="w-full">
       {hasChildren ? (
         <Collapsible>
-          <CollapsibleTrigger className="flex items-center justify-between group w-full p-1 rounded-md hover:bg-accent">
+          <CollapsibleTrigger className="flex justify-between w-full p-1.5 rounded-md hover:bg-accent/50 transition-colors duration-200">
             <div className="flex items-center">
               <ChevronRight className="h-4 w-4 mr-2 shrink-0 transition-transform duration-200 group-data-[state=open]:rotate-90" />
               <Folder className="h-4 w-4 shrink-0 mr-2" />
               <span>{node.name}</span>
             </div>
+
+            {/* Action Buttons */}
             <div className="flex items-center">
               {/* Add button */}
               <Button
@@ -42,8 +44,8 @@ const TreeNodeComponent = ({ node }: { node: TreeNode }) => {
                 size="icon"
                 aria-label="Add"
                 onClick={(e) => {
-                  // e.stopPropagation(); // Prevents the collapsible from toggling when clicking the button.
-                  // /* your add handler */
+                  e.stopPropagation(); // Prevents the collapsible from toggling when clicking the button.
+                  /* your add handler */
                 }}
               >
                 <Plus className="h-4 w-4" />
@@ -68,9 +70,11 @@ const TreeNodeComponent = ({ node }: { node: TreeNode }) => {
 
           {/* Children */}
           <CollapsibleContent>
-            <ul className="pl-6 space-y-1.5">
+            <ul className="space-y-1.5">
               {node.children!.map((child) => (
-                <TreeNodeComponent key={child.id} node={child} />
+                <li className="pl-4">
+                  <TreeNodeComponent key={child.id} node={child} />
+                </li>
               ))}
             </ul>
           </CollapsibleContent>
@@ -81,7 +85,7 @@ const TreeNodeComponent = ({ node }: { node: TreeNode }) => {
           {node.name}
         </span>
       )}
-    </li>
+    </div>
   );
 };
 
