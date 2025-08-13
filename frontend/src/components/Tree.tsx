@@ -56,17 +56,19 @@ const TreeNodeComponent = ({ node }: { node: TreeNode }) => {
 
   const Actions = (
     <div className="flex items-center ">
-      <Button
-        variant="ghost"
-        size="icon"
-        aria-label="Add"
-        onClick={(e) => {
-          e.stopPropagation(); // prevent collapse toggle
-          /* your add handler */
-        }}
-      >
-        <Plus className="h-4 w-4" />
-      </Button>
+      {node.type === 'folder' && (
+        <Button
+          variant="ghost"
+          size="icon"
+          aria-label="Add"
+          onClick={(e) => {
+            e.stopPropagation(); // prevent collapse toggle
+            /* your add handler */
+          }}
+        >
+          <Plus className="h-4 w-4" />
+        </Button>
+      )}
 
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
