@@ -42,6 +42,7 @@ const TreeNodeComponent = ({ node }: { node: TreeNode }) => {
   const hasChildren = !!node.children?.length;
   const [isHovered, setIsHovered] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [treeData, setTreeData] = useState(node);
 
   const Icon = node.icon || (node.type === 'folder' ? Folder : File);
 

@@ -1,4 +1,5 @@
 // The code is dogshit. I have started writing my own. See Tree.tsx
+import { useState } from 'react';
 
 import { Tree, type TreeNode } from './Tree';
 
@@ -63,13 +64,43 @@ const data: TreeNode[] = [
 ];
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  // TODO: craeteNodes function which will create nodes from existing notes in DB
+  const [userData, setUserData] = useState(data);
+
+  // // TODO: replace onClick for the buttons with this function which has an associated backend API call that creates a note in the DB
+  // const handleCreate = () => {
+  //   setUserData((prevData) => [
+  //     ...prevData,
+  //     { id: crypto.randomUUID(), name: 'Untitled', type: 'folder' },
+  //   ]);
+  // };
+
   return (
     <Sidebar {...props}>
       <SidebarHeader className="flex flex-row justify-center mt-2">
-        <Button variant="ghost" size="icon">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => {
+            setUserData((prevData) => [
+              ...prevData,
+              { id: crypto.randomUUID(), name: 'Untitled', type: 'folder' },
+            ]);
+          }}
+        >
           <FolderPlus />
         </Button>
-        <Button variant="ghost" size="icon" className="size-8">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="size-8"
+          onClick={() => {
+            setUserData((prevData) => [
+              ...prevData,
+              { id: crypto.randomUUID(), name: 'Untitled', type: 'file' },
+            ]);
+          }}
+        >
           <FilePlus2 />
         </Button>
         <Button variant="ghost" size="icon" className="size-8">
@@ -81,7 +112,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <SidebarGroupLabel>Notes</SidebarGroupLabel>
         <SidebarGroupContent>
           <SidebarMenu></SidebarMenu>
-          <Tree data={data} />
+          <Tree data={userData} />
         </SidebarGroupContent>
         <SidebarGroup />
       </SidebarContent>
