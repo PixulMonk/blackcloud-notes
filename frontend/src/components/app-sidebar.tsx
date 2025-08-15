@@ -67,13 +67,19 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   // TODO: craeteNodes function which will create nodes from existing notes in DB
   const [userData, setUserData] = useState(data);
 
-  // // TODO: replace onClick for the buttons with this function which has an associated backend API call that creates a note in the DB
-  // const handleCreate = () => {
-  //   setUserData((prevData) => [
-  //     ...prevData,
-  //     { id: crypto.randomUUID(), name: 'Untitled', type: 'folder' },
-  //   ]);
-  // };
+  // TODO: create and move relevant functions to a zustand store for global handling
+  // After that it doesnt need to get passed around as args
+  const [renamingNodeId, setRenamingNodeId] = useState<string | null>(null);
+
+  const handleCreate = (type: 'folder' | 'file') => {
+    const tempId = crypto.randomUUID();
+    setUserData((prevData) => [
+      ...prevData,
+      { id: tempId, name: 'Untitled', type: type },
+    ]);
+    setRenamingNodeId(tempId);
+    // TODO: API call here
+  };
 
   return (
     <Sidebar {...props}>
@@ -81,12 +87,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <Button
           variant="ghost"
           size="icon"
-          onClick={() => {
-            setUserData((prevData) => [
-              ...prevData,
-              { id: crypto.randomUUID(), name: 'Untitled', type: 'folder' },
-            ]);
-          }}
+          className="size-8"
+          onClick={() => handleCreate('folder')}
         >
           <FolderPlus />
         </Button>
@@ -94,12 +96,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           variant="ghost"
           size="icon"
           className="size-8"
-          onClick={() => {
-            setUserData((prevData) => [
-              ...prevData,
-              { id: crypto.randomUUID(), name: 'Untitled', type: 'file' },
-            ]);
-          }}
+          onClick={() => handleCreate('file')}
         >
           <FilePlus2 />
         </Button>
@@ -112,7 +109,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <SidebarGroupLabel>Notes</SidebarGroupLabel>
         <SidebarGroupContent>
           <SidebarMenu></SidebarMenu>
-          <Tree data={userData} />
+          <Tree
+            data={userData}
+            renamingNodeId={renamingNodeId}
+            setRenamingNodeId={setRenamingNodeId}
+          />
         </SidebarGroupContent>
         <SidebarGroup />
       </SidebarContent>

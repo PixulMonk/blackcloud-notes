@@ -24,6 +24,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 
 import { Button } from './ui/button';
+import { Input } from './ui/input';
 
 interface TreeNode {
   id: string;
@@ -37,12 +38,35 @@ interface TreeNode {
   icon?: LucideIcon | React.ComponentType<React.SVGProps<SVGSVGElement>>;
 }
 
+interface TreeeProps {
+  data: TreeNode[];
+  renamingNodeId: string | null;
+  setRenamingNodeId: React.Dispatch<React.SetStateAction<string | null>>;
+}
+
+type TreeNodeComponentProps = Pick<
+  TreeeProps,
+  'renamingNodeId' | 'setRenamingNodeId'
+> & {
+  node: TreeNode;
+};
+
 // Renders individual node components
-const TreeNodeComponent = ({ node }: { node: TreeNode }) => {
+const TreeNodeComponent = ({
+  node,
+  renamingNodeId,
+  setRenamingNodeId,
+}: TreeNodeComponentProps) => {
   const hasChildren = !!node.children?.length;
   const [isHovered, setIsHovered] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [treeData, setTreeData] = useState(node);
+  const isRenaming = node.id === renamingNodeId;
+
+  const handleRenameSubmit = () => {
+    // TODO: API call here
+    setRenamingNodeId(null);
+  };
 
   const Icon = node.icon || (node.type === 'folder' ? Folder : File);
 
@@ -52,7 +76,22 @@ const TreeNodeComponent = ({ node }: { node: TreeNode }) => {
         <ChevronRight className="h-4 w-4 mr-2 shrink-0 transition-transform duration-200 group-data-[state=open]:rotate-90" />
       )}
       <Icon className="h-4 w-4 shrink-0 mr-2" />
-      <span>{node.name}</span>
+      {isRenaming ? (
+        <Input
+          type="text"
+          value={treeData.name}
+          onChange={(e) => setTreeData({ ...treeData, name: e.target.value })}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              handleRenameSubmit();
+            }
+          }}
+          onBlur={handleRenameSubmit}
+          autoFocus
+        />
+      ) : (
+        <span>{treeData.name}</span>
+      )}
     </div>
   );
 
@@ -108,7 +147,12 @@ const TreeNodeComponent = ({ node }: { node: TreeNode }) => {
           <CollapsibleContent>
             <ul className="pl-4 space-y-1.5">
               {node.children!.map((child) => (
-                <TreeNodeComponent key={child.id} node={child} />
+                <TreeNodeComponent
+                  key={child.id}
+                  node={child}
+                  renamingNodeId={renamingNodeId}
+                  setRenamingNodeId={setRenamingNodeId}
+                />
               ))}
             </ul>
           </CollapsibleContent>
@@ -129,11 +173,17 @@ const TreeNodeComponent = ({ node }: { node: TreeNode }) => {
   );
 };
 
+// TODO: maybe separate Tree and TreeNode as different components
 // Handles an array of nodes and passes it to TreeNodeCompoent to be individually rendered
-const Tree = ({ data }: { data: TreeNode[] }) => (
+const Tree = ({ data, renamingNodeId, setRenamingNodeId }: TreeeProps) => (
   <ul className="space-y-1.5">
     {data.map((node) => (
-      <TreeNodeComponent key={node.id} node={node} />
+      <TreeNodeComponent
+        key={node.id}
+        node={node}
+        renamingNodeId={renamingNodeId}
+        setRenamingNodeId={setRenamingNodeId}
+      />
     ))}
   </ul>
 );
