@@ -8,33 +8,9 @@ export const getAllNotes = asyncHandler(async (req, res) => {
     throw new Error('Unauthorized');
   }
 
-  const userNotes = await Note.find({ userId, isDeleted: false });
+  const userNotes = await Note.find({ userId });
 
   res.status(200).json(userNotes);
-});
-
-export const getAllDeleted = asyncHandler(async (req, res) => {
-  const userId = req.user?._id;
-
-  if (!userId) {
-    throw new Error('Unauthorized');
-  }
-
-  const deletedNotes = await Note.find({ userId, isDeleted: true });
-
-  res.status(200).json(deletedNotes);
-});
-
-export const getAllArchived = asyncHandler(async (req, res) => {
-  const userId = req.user?._id;
-
-  if (!userId) {
-    throw new Error('Unauthorized');
-  }
-
-  const archivedNotes = await Note.find({ userId, isArchived: true });
-
-  res.status(200).json(archivedNotes);
 });
 
 export const getNote = asyncHandler(async (req, res) => {
@@ -54,7 +30,7 @@ export const getNote = asyncHandler(async (req, res) => {
 });
 
 export const createNote = asyncHandler(async (req, res) => {
-  const { title, icon, content, tags } = req.body ?? {};
+  const { title, content, tags } = req.body ?? {};
 
   if (!req.user?._id) {
     throw new Error('User not authenticated');
@@ -63,7 +39,6 @@ export const createNote = asyncHandler(async (req, res) => {
   const newNote = new Note({
     userId: req.user?._id,
     title: title || 'Untitled document',
-    icon: icon ?? '',
     encryptedContent: content ?? '',
     tags: tags ?? [],
   });
@@ -78,7 +53,7 @@ export const createNote = asyncHandler(async (req, res) => {
 });
 
 export const updateNote = asyncHandler(async (req, res) => {
-  const { title, icon, content, isArchived, isDeleted, tags } = req.body ?? {};
+  const { title, content, tags } = req.body ?? {};
   const noteId = req.params.id;
 
   if (!req.user?._id) {
@@ -87,10 +62,7 @@ export const updateNote = asyncHandler(async (req, res) => {
 
   const updatedFields: any = {};
   if (title !== undefined) updatedFields.title = title;
-  if (icon !== undefined) updatedFields.icon = icon;
   if (content !== undefined) updatedFields.encryptedContent = content;
-  if (isArchived !== undefined) updatedFields.isArchived = isArchived;
-  if (isDeleted !== undefined) updatedFields.isDeleted = isDeleted;
   if (tags !== undefined) updatedFields.tags = tags;
 
   const noteToUpdate = await Note.findOneAndUpdate(
@@ -129,7 +101,7 @@ export const deleteNote = asyncHandler(async (req, res) => {
 
   res.status(200).json({
     success: true,
-    message: 'Note successfully deleted',
+    message: 'Note deleted successfully',
     note: noteToDelete,
   });
 });

@@ -28,7 +28,7 @@ import { Input } from './ui/input';
 
 interface TreeNode {
   id: string;
-  name: string;
+  title: string;
   type: 'folder' | 'file';
   children?: TreeNode[];
   actions?: React.ReactNode;
@@ -79,8 +79,8 @@ const TreeNodeComponent = ({
       {isRenaming ? (
         <Input
           type="text"
-          value={treeData.name}
-          onChange={(e) => setTreeData({ ...treeData, name: e.target.value })}
+          value={treeData.title}
+          onChange={(e) => setTreeData({ ...treeData, title: e.target.value })}
           onKeyDown={(e) => {
             if (e.key === 'Enter') {
               handleRenameSubmit();
@@ -90,7 +90,7 @@ const TreeNodeComponent = ({
           autoFocus
         />
       ) : (
-        <span>{treeData.name}</span>
+        <span>{treeData.title}</span>
       )}
     </div>
   );

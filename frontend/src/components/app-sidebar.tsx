@@ -1,4 +1,3 @@
-// The code is dogshit. I have started writing my own. See Tree.tsx
 import { useState } from 'react';
 
 import { Tree, type TreeNode } from './Tree';
@@ -20,36 +19,36 @@ import {
 const data: TreeNode[] = [
   {
     id: '1',
-    name: 'Item 1',
+    title: 'Item 1',
     type: 'folder',
     children: [
       {
         id: '2',
-        name: 'Item 1.1',
+        title: 'Item 1.1',
         type: 'folder',
         children: [
           {
             id: '3',
-            name: 'Item 1.1.1',
+            title: 'Item 1.1.1',
             type: 'folder',
             children: [
               {
                 id: '7',
-                name: 'Item 1.1.1.1',
+                title: 'Item 1.1.1.1',
                 type: 'file',
               },
             ],
           },
           {
             id: '4',
-            name: 'Item 1.1.2',
+            title: 'Item 1.1.2',
             type: 'file',
           },
         ],
       },
       {
         id: '5',
-        name: 'Item 1.2 (disabled)',
+        title: 'Item 1.2 (disabled)',
         type: 'file',
         // disabled: true,
       },
@@ -57,7 +56,7 @@ const data: TreeNode[] = [
   },
   {
     id: '6',
-    name: 'Item 2 (draggable)',
+    title: 'Item 2 (draggable)',
     type: 'file',
     // draggable: true,
   },
@@ -75,7 +74,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     const tempId = crypto.randomUUID();
     setUserData((prevData) => [
       ...prevData,
-      { id: tempId, name: 'Untitled', type: type },
+      { id: tempId, title: 'Untitled', type: type },
     ]);
     setRenamingNodeId(tempId);
     // TODO: API call here
