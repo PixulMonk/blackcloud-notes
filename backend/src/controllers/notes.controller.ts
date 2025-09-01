@@ -67,7 +67,7 @@ export const updateNote = asyncHandler(async (req, res) => {
 
   const noteToUpdate = await Note.findOneAndUpdate(
     { _id: noteId, userId: req.user._id },
-    updatedFields,
+    { $set: updatedFields },
     { new: true }
   );
 

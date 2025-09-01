@@ -5,8 +5,6 @@ export interface INote {
   userId: mongoose.Schema.Types.ObjectId;
   title?: string;
   encryptedContent?: string;
-  isArchived?: boolean;
-  isDeleted?: boolean;
   tags?: string[];
 }
 
@@ -19,8 +17,6 @@ const noteSchema = new Schema<INote>(
     },
     title: { type: String },
     encryptedContent: { type: String },
-    isArchived: { type: Boolean, default: false },
-    isDeleted: { type: Boolean, default: false },
     tags: [{ type: String }],
   },
   { timestamps: true }

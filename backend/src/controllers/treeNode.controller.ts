@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import asyncHandler from '../utils/asyncHandler';
 import { TreeNode } from '../models/treeNode.model';
 import { Note } from '../models/note.model';
@@ -92,7 +93,85 @@ export const createTreeNode = asyncHandler(async (req, res) => {
 });
 
 export const updateTreeNode = asyncHandler(async (req, res) => {
-  // TODO: if file, make sure that RELEVANT FIELDS (eg. title, etc.) are updated on the note too
+  const {
+    title,
+    type,
+    position,
+    isArchived,
+    isDeleted,
+    icon,
+    parentId,
+    fileId,
+  } = req.body ?? {};
+
+  const treeNodeId = req.params.id;
+
+  if (!req.user?._id) {
+    throw new Error('User not authenticated');
+  }
+
+  if (!treeNodeId || !mongoose.Types.ObjectId.isValid(treeNodeId)) {
+    return res.status(400).json({
+      success: false,
+      message: 'Invalid tree node ID',
+    });
+  }
+
+  // Prevent a node from being its own parent
+  if (parentId && parentId.toString() === treeNodeId.toString()) {
+    return res.status(400).json({
+      success: false,
+      message: 'A node cannot be its own parent',
+    });
+  }
+
+  const updatedFields: any = {};
+
+  if (title !== undefined) updatedFields.title = title;
+  if (type !== undefined) updatedFields.type = type;
+  if (position !== undefined) updatedFields.position = position;
+  if (isArchived !== undefined) updatedFields.isArchived = isArchived;
+  if (isDeleted !== undefined) updatedFields.isDeleted = isDeleted;
+  if (icon !== undefined) updatedFields.icon = icon;
+  if (parentId !== undefined) updatedFields.parentId = parentId;
+
+  // Only allow fileId updates if node is a file
+  if (fileId !== undefined && type !== 'file') {
+    return res.status(400).json({
+      success: false,
+      message: 'Cannot assign a fileId to a folder node',
+    });
+  }
+
+  const treeNodeToUpdate = await TreeNode.findOneAndUpdate(
+    { _id: treeNodeId, userId: req.user._id },
+    { $set: updatedFields },
+    { new: true }
+  );
+
+  if (!treeNodeToUpdate) {
+    throw new Error('Tree node does not exist or unauthorized');
+  }
+
+  let associatedFile = undefined;
+  if (treeNodeToUpdate.type === 'file' && title !== undefined) {
+    associatedFile = await Note.findOneAndUpdate(
+      { _id: treeNodeToUpdate.fileId, userId: req.user._id },
+      { $set: { title } },
+      { new: true }
+    );
+
+    if (!associatedFile) {
+      throw new Error('Associated note not found or unauthorized');
+    }
+  }
+
+  res.status(200).json({
+    success: true,
+    message: `Tree node updated successfully (${treeNodeToUpdate.type})`,
+    node: treeNodeToUpdate,
+    file: associatedFile,
+  });
 });
 
 export const deleteTreeNode = asyncHandler(async (req, res) => {
@@ -100,6 +179,13 @@ export const deleteTreeNode = asyncHandler(async (req, res) => {
 
   if (!req.user?._id) {
     throw new Error('User not authenticated');
+  }
+
+  if (!treeNodeId || !mongoose.Types.ObjectId.isValid(treeNodeId)) {
+    return res.status(400).json({
+      success: false,
+      message: 'Invalid tree node ID',
+    });
   }
 
   let deletedNotesCount = 0;
