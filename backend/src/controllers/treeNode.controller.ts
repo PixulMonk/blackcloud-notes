@@ -77,8 +77,8 @@ export const createTreeNode = asyncHandler(async (req, res) => {
     position: siblingCount,
     isArchived: isArchived ?? false,
     isDeleted: isDeleted ?? false,
-    icon: icon || null, // null instead of empty string
-    parentId: parentId || null, // Fix: null instead of empty string
+    icon: icon || null,
+    parentId: parentId || null,
     fileId,
   });
 
@@ -87,7 +87,7 @@ export const createTreeNode = asyncHandler(async (req, res) => {
   res.status(201).json({
     success: true,
     message,
-    data: newTreeNode, // Fix: better property name
+    data: newTreeNode,
   });
 });
 
