@@ -1,12 +1,5 @@
 import React, { useState } from 'react';
-import {
-  type LucideIcon,
-  ChevronRight,
-  Ellipsis,
-  File,
-  Folder,
-  Plus,
-} from 'lucide-react';
+import { ChevronRight, Ellipsis, File, Folder, Plus } from 'lucide-react';
 
 import {
   Collapsible,
@@ -26,17 +19,7 @@ import {
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 
-interface TreeNode {
-  id: string;
-  title: string;
-  type: 'folder' | 'file';
-  children?: TreeNode[];
-  actions?: React.ReactNode;
-  draggable?: boolean;
-  droppable?: boolean;
-  disabled?: boolean;
-  icon?: LucideIcon | React.ComponentType<React.SVGProps<SVGSVGElement>>;
-}
+import { type TreeNode } from '../types/tree';
 
 interface TreeeProps {
   data: TreeNode[];
@@ -61,7 +44,7 @@ const TreeNodeComponent = ({
   const [isHovered, setIsHovered] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [treeData, setTreeData] = useState(node);
-  const isRenaming = node.id === renamingNodeId;
+  const isRenaming = node._id === renamingNodeId;
 
   const handleRenameSubmit = () => {
     // TODO: API call here
@@ -148,7 +131,7 @@ const TreeNodeComponent = ({
             <ul className="pl-4 space-y-1.5">
               {node.children!.map((child) => (
                 <TreeNodeComponent
-                  key={child.id}
+                  key={child._id}
                   node={child}
                   renamingNodeId={renamingNodeId}
                   setRenamingNodeId={setRenamingNodeId}
@@ -179,7 +162,7 @@ const Tree = ({ data, renamingNodeId, setRenamingNodeId }: TreeeProps) => (
   <ul className="space-y-1.5">
     {data.map((node) => (
       <TreeNodeComponent
-        key={node.id}
+        key={node._id}
         node={node}
         renamingNodeId={renamingNodeId}
         setRenamingNodeId={setRenamingNodeId}
