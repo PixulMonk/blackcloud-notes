@@ -11,8 +11,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 
@@ -56,6 +54,10 @@ const TreeNodeComponent = ({
     setRenamingNodeId(null);
   };
 
+  const handleSoftDelete = async (id: string) => {
+    updateNode(id, undefined, undefined, undefined, true);
+  };
+
   const Icon = node.icon || (node.type === 'folder' ? Folder : File);
 
   const Label = (
@@ -93,7 +95,7 @@ const TreeNodeComponent = ({
           aria-label="Add"
           onClick={(e) => {
             e.stopPropagation(); // prevent collapse toggle
-            /* your add handler */
+            // TODO: dropdown add button handler
           }}
         >
           <Plus className="h-4 w-4" />
@@ -106,11 +108,19 @@ const TreeNodeComponent = ({
             <Ellipsis className="h-4 w-4" />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent>
-          <DropdownMenuLabel>Actions</DropdownMenuLabel>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem>Rename</DropdownMenuItem>
-          <DropdownMenuItem>Delete</DropdownMenuItem>
+        <DropdownMenuContent className="flex flex-col p-2">
+          <DropdownMenuItem
+            className="py-1 px-2"
+            onClick={() => setRenamingNodeId(node._id)}
+          >
+            Rename
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            className="py-1 px-2"
+            onClick={() => handleSoftDelete(node._id)}
+          >
+            Delete
+          </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
     </div>

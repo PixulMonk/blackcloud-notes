@@ -14,7 +14,7 @@ export interface TreeNode {
   children?: TreeNode[];
 }
 
-interface AddNodeResponse {
+export interface AddNodeResponse {
   success: boolean;
   message: string;
   data: TreeNode;

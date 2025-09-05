@@ -9,7 +9,10 @@ export const buildTree = asyncHandler(async (req, res) => {
   const userId = req.user?._id;
   if (!userId) throw new Error('Unauthorized');
 
-  const nodes = await TreeNode.find({ userId }).lean();
+  const nodes = await TreeNode.find({
+    userId,
+    isDeleted: false,
+  }).lean();
 
   const result: ITreeNodeWithChildren[] = [];
 
@@ -23,6 +26,9 @@ export const buildTree = asyncHandler(async (req, res) => {
 
   // Step 2: link children to parents
   nodes.forEach((node) => {
+    // Skip any node whose parent was deleted
+    if (node.parentId && !nodeMap[node.parentId.toString()]) return;
+
     // Has parents = attach to its parent's children array
     if (node.parentId) {
       const parent = nodeMap[node.parentId.toString()];
