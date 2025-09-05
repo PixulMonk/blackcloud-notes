@@ -80,7 +80,7 @@ const TreeNodeComponent = ({
       {hasChildren ? (
         <ChevronRight className="h-4 w-4 mr-2 shrink-0 transition-transform duration-200 group-data-[state=open]:rotate-90" />
       ) : (
-        <div className="w-4 mr-2" /> // placeholder div same width as chevron
+        <div className="w-4 mr-2" />
       )}
 
       <Icon className="h-4 w-4 shrink-0 mr-2" />
@@ -153,7 +153,7 @@ const TreeNodeComponent = ({
   );
 
   return (
-    <div className="w-full">
+    <div className="w-full px-1.5">
       {hasChildren ? (
         <Collapsible>
           <div
