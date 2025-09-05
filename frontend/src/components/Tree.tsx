@@ -49,7 +49,6 @@ const TreeNodeComponent = ({
   const updateNode = useDataStore((state) => state.updateNode);
 
   const handleRenameSubmit = () => {
-    // TODO: API call here
     if (renamingNodeId) {
       updateNode(renamingNodeId, treeData.title);
     }
@@ -76,6 +75,7 @@ const TreeNodeComponent = ({
             }
           }}
           onBlur={handleRenameSubmit}
+          onFocus={(e) => e.target.select()}
           autoFocus
         />
       ) : (
