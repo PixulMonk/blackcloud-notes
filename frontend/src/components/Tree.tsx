@@ -20,6 +20,7 @@ import { Button } from './ui/button';
 import { Input } from './ui/input';
 
 import { type TreeNode } from '../types/tree';
+import { useDataStore } from '@/store/useDataStore';
 
 interface TreeeProps {
   data: TreeNode[];
@@ -45,9 +46,14 @@ const TreeNodeComponent = ({
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [treeData, setTreeData] = useState(node);
   const isRenaming = node._id === renamingNodeId;
+  const updateNode = useDataStore((state) => state.updateNode);
 
   const handleRenameSubmit = () => {
     // TODO: API call here
+    if (renamingNodeId) {
+      updateNode(renamingNodeId, treeData.title);
+    }
+
     setRenamingNodeId(null);
   };
 

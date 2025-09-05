@@ -21,24 +21,20 @@ import { useDataStore } from '@/store/useDataStore';
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const tree = useDataStore((state) => state.tree);
   const fetchTree = useDataStore((state) => state.fetchTree);
+  const addNode = useDataStore((state) => state.addNode);
 
-  useEffect(() => {
-    fetchTree(); // ✅ load tree on mount
-  }, [fetchTree]);
-
-  // TODO: create and move relevant functions to a zustand store for global handling
-  // After that it doesnt need to get passed around as args
   const [renamingNodeId, setRenamingNodeId] = useState<string | null>(null);
 
-  const handleCreate = (type: 'folder' | 'file') => {
-    // const tempId = crypto.randomUUID();
-    // setUserData((prevData) => [
-    //   ...prevData,
-    //   { id: tempId, title: 'Untitled', type: type },
-    // ]);
-    // setRenamingNodeId(tempId);
-    // // TODO: API call here
+  const handleCreate = async (type: 'folder' | 'file') => {
+    const newNode = await addNode(type);
+    if (newNode?._id) {
+      setRenamingNodeId(newNode._id);
+    }
   };
+
+  useEffect(() => {
+    fetchTree();
+  }, [fetchTree]);
 
   return (
     <Sidebar {...props}>
