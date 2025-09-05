@@ -54,9 +54,12 @@ const TreeNodeComponent = ({
     setRenamingNodeId(null);
   };
 
+  // TODO: if folder, recursively soft delete children
   const handleSoftDelete = async (id: string) => {
     updateNode(id, undefined, undefined, undefined, true);
   };
+  // TODO: add archive button and handleArchive func
+  const handleArchive = async (id: string) => {};
 
   const Icon = node.icon || (node.type === 'folder' ? Folder : File);
 

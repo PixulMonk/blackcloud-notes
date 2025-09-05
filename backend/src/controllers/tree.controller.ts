@@ -9,10 +9,11 @@ export const buildTree = asyncHandler(async (req, res) => {
   const userId = req.user?._id;
   if (!userId) throw new Error('Unauthorized');
 
-  const nodes = await TreeNode.find({
+  const nodes: ITreeNode[] = await TreeNode.find({
     userId,
     isDeleted: false,
-  }).lean();
+    isArchived: false,
+  });
 
   const result: ITreeNodeWithChildren[] = [];
 
@@ -21,7 +22,7 @@ export const buildTree = asyncHandler(async (req, res) => {
 
   // Step 1: put every node into nodeMap and give it an empty children array
   nodes.forEach((node) => {
-    nodeMap[node._id.toString()] = { ...node, children: [] };
+    nodeMap[node._id.toString()] = { ...node.toObject(), children: [] };
   });
 
   // Step 2: link children to parents
