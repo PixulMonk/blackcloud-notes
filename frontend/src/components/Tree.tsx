@@ -65,8 +65,8 @@ const TreeNodeComponent = ({
     }
   }, [isRenaming]);
 
-  // TODO: if folder, recursively soft delete children
   const handleSoftDelete = async (id: string) => {
+    // TODO: Are you sure you want to delete?
     updateNode(id, undefined, undefined, undefined, true);
   };
 
@@ -77,9 +77,12 @@ const TreeNodeComponent = ({
 
   const Label = (
     <div className="flex items-center">
-      {hasChildren && (
+      {hasChildren ? (
         <ChevronRight className="h-4 w-4 mr-2 shrink-0 transition-transform duration-200 group-data-[state=open]:rotate-90" />
+      ) : (
+        <div className="w-4 mr-2" /> // placeholder div same width as chevron
       )}
+
       <Icon className="h-4 w-4 shrink-0 mr-2" />
       {isRenaming ? (
         <Input

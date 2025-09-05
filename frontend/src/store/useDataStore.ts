@@ -128,6 +128,7 @@ export const useDataStore = create<DataState>((set) => ({
         isLoading: false,
       }));
 
+      await useDataStore.getState().fetchTree();
       return updatedNode;
     } catch (error: unknown) {
       if (axios.isAxiosError(error)) {
