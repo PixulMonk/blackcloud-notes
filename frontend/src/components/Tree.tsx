@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react'; // import useRef and useEffect
 import { ChevronRight, Ellipsis, File, Folder, Plus } from 'lucide-react';
 
 import {
@@ -44,20 +44,32 @@ const TreeNodeComponent = ({
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [treeData, setTreeData] = useState(node);
   const isRenaming = node._id === renamingNodeId;
+
+  const inputRef = useRef<HTMLInputElement>(null);
+
   const updateNode = useDataStore((state) => state.updateNode);
 
   const handleRenameSubmit = () => {
     if (renamingNodeId) {
       updateNode(renamingNodeId, treeData.title);
     }
-
     setRenamingNodeId(null);
   };
+
+  useEffect(() => {
+    if (isRenaming) {
+      setTimeout(() => {
+        inputRef.current?.focus();
+        inputRef.current?.select();
+      }, 0);
+    }
+  }, [isRenaming]);
 
   // TODO: if folder, recursively soft delete children
   const handleSoftDelete = async (id: string) => {
     updateNode(id, undefined, undefined, undefined, true);
   };
+
   // TODO: add archive button and handleArchive func
   const handleArchive = async (id: string) => {};
 
@@ -71,17 +83,16 @@ const TreeNodeComponent = ({
       <Icon className="h-4 w-4 shrink-0 mr-2" />
       {isRenaming ? (
         <Input
+          // 2. Attach the ref
+          ref={inputRef}
           type="text"
           value={treeData.title}
           onChange={(e) => setTreeData({ ...treeData, title: e.target.value })}
           onKeyDown={(e) => {
-            if (e.key === 'Enter') {
-              handleRenameSubmit();
-            }
+            if (e.key === 'Enter') handleRenameSubmit();
           }}
           onBlur={handleRenameSubmit}
-          onFocus={(e) => e.target.select()}
-          autoFocus
+          // Remove autoFocus since we are managing it manually
         />
       ) : (
         <span>{treeData.title}</span>
@@ -105,16 +116,25 @@ const TreeNodeComponent = ({
         </Button>
       )}
 
-      <DropdownMenu onOpenChange={(open) => setIsMenuOpen(open)}>
+      <DropdownMenu
+        onOpenChange={(open) => {
+          setIsMenuOpen(open);
+        }}
+      >
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" size="icon" className="h-6 w-6">
             <Ellipsis className="h-4 w-4" />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent className="flex flex-col p-2">
+        <DropdownMenuContent
+          className="flex flex-col p-2"
+          onCloseAutoFocus={(e) => e.preventDefault()}
+        >
           <DropdownMenuItem
             className="py-1 px-2"
-            onClick={() => setRenamingNodeId(node._id)}
+            onClick={() => {
+              setRenamingNodeId(node._id);
+            }}
           >
             Rename
           </DropdownMenuItem>
@@ -141,7 +161,9 @@ const TreeNodeComponent = ({
             onMouseLeave={() => setIsHovered(false)}
           >
             <CollapsibleTrigger asChild>{Label}</CollapsibleTrigger>
-            <div className={isHovered ? 'opacity-100' : 'opacity-0'}>
+            <div
+              className={isHovered || isRenaming ? 'opacity-100' : 'opacity-0'}
+            >
               {Actions}
             </div>
           </div>
@@ -166,7 +188,9 @@ const TreeNodeComponent = ({
           onMouseLeave={() => setIsHovered(false)}
         >
           {Label}
-          <div className={isHovered ? 'opacity-100' : 'opacity-0'}>
+          <div
+            className={isHovered || isRenaming ? 'opacity-100' : 'opacity-0'}
+          >
             {Actions}
           </div>
         </div>
