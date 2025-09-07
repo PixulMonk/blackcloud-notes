@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 
-import { Tree } from './Tree';
+import { Tree } from './Tree/Tree';
 
 import { FilePlus2, FolderPlus, Search } from 'lucide-react';
 

@@ -1,4 +1,4 @@
-// TODO: put tree types here. Also put other types in the types dir for better org
+import type { RefObject } from 'react';
 
 export interface TreeNode {
   _id: string;
@@ -12,6 +12,29 @@ export interface TreeNode {
   parentId?: string | null;
   fileId?: string;
   children?: TreeNode[];
+}
+
+export interface TreeProps {
+  data: TreeNode[];
+  renamingNodeId: string | null;
+  setRenamingNodeId: React.Dispatch<React.SetStateAction<string | null>>;
+}
+
+export type TreeNodeComponentProps = Pick<
+  TreeProps,
+  'renamingNodeId' | 'setRenamingNodeId'
+> & {
+  node: TreeNode;
+};
+
+export interface NodeLabelProps {
+  node: any;
+  isRenaming: boolean;
+  treeData: any;
+  setTreeData: (data: any) => void;
+  inputRef: RefObject<HTMLInputElement | null>;
+  handleRenameSubmit: () => void;
+  className?: string;
 }
 
 export interface AddNodeResponse {
