@@ -45,7 +45,7 @@ function NodeActions({
         </DropdownMenuTrigger>
         <DropdownMenuContent
           className="flex flex-col p-2"
-          onCloseAutoFocus={(e) => e.preventDefault()}
+          onCloseAutoFocus={(e) => e.preventDefault()} // This is what solved Radix' focusing issue
         >
           <DropdownMenuItem
             className="py-1 px-2"

@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { File, Folder, ChevronRight } from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
 
 import {
   Collapsible,
@@ -11,6 +11,7 @@ import NodeActions from './node-components/NodeActions';
 import NodeLabel from './node-components/NodeLabel';
 import { type TreeNodeComponentProps } from '../../types/tree';
 import { useDataStore } from '@/store/useDataStore';
+import { useConfirmDialogue } from '@/hooks/useConfirmDialogue';
 
 // Renders individual node components
 const TreeNodeComponent = ({
@@ -27,7 +28,6 @@ const TreeNodeComponent = ({
   const inputRef = useRef<HTMLInputElement>(null);
 
   const updateNode = useDataStore((state) => state.updateNode);
-
   const handleRenameSubmit = () => {
     if (renamingNodeId) {
       updateNode(renamingNodeId, treeData.title);
@@ -44,9 +44,10 @@ const TreeNodeComponent = ({
     }
   }, [isRenaming]);
 
+  const { confirm } = useConfirmDialogue();
   const handleSoftDelete = async (id: string) => {
-    // TODO: Are you sure you want to delete?
-    updateNode(id, undefined, undefined, undefined, true);
+    const ok = await confirm();
+    if (ok) updateNode(id, undefined, undefined, undefined, true);
   };
 
   // TODO: add archive button and handleArchive func

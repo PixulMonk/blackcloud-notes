@@ -13,9 +13,11 @@ import VerifyEmailPage from './pages/VerifyEmailPage';
 import { useAuthStore } from './store/useAuthStore';
 import { Loader } from 'lucide-react';
 import ResetPasswordPage from './pages/ResetPasswordPage';
+import { useConfirmDialogue } from './hooks/useConfirmDialogue';
 
 function App() {
   const { isCheckingAuth, checkAuth, isAuthenticated, user } = useAuthStore();
+  const { DialogueBox } = useConfirmDialogue();
   const isDark = useThemeStore((state) => state.isDark);
   const location = useLocation();
   const hideSidebar =
@@ -113,6 +115,7 @@ function App() {
             element={<ResetPasswordPage />}
           />
         </Routes>
+        {DialogueBox}
       </main>
     </SidebarProvider>
   );
