@@ -46,7 +46,7 @@ const TreeNodeComponent = ({
 
   const handleSoftDelete = async (id: string) => {
     const ok = await confirm({
-      message: 'Are you sure you wan to delete this item?',
+      message: 'Are you sure you want to delete this item?',
       yesText: 'Delete',
       noText: 'Cancel',
     });
