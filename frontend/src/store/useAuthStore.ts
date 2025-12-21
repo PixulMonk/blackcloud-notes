@@ -60,11 +60,10 @@ export const useAuthStore = create<AuthState>((set) => ({
           error: error.response?.data?.message || 'Error signing up',
           isLoading: false,
         });
-        return false;
       } else {
         set({ error: 'An unexpected error occurred', isLoading: false });
-        return false;
       }
+      return false;
     }
   },
   login: async (email, password) => {
@@ -86,11 +85,10 @@ export const useAuthStore = create<AuthState>((set) => ({
           error: error.response?.data?.message || 'Error signing in',
           isLoading: false,
         });
-        return false;
       } else {
         set({ error: 'An unexpected error occurred', isLoading: false });
-        return false;
       }
+      return false;
     }
   },
   verifyEmail: async (verificationCode) => {
@@ -111,11 +109,10 @@ export const useAuthStore = create<AuthState>((set) => ({
           error: error.response?.data?.message || 'Error verifying email',
           isLoading: false,
         });
-        return false;
       } else {
         set({ error: 'An unexpected error occurred', isLoading: false });
-        return false;
       }
+      return false;
     }
   },
   checkAuth: async () => {
@@ -175,11 +172,10 @@ export const useAuthStore = create<AuthState>((set) => ({
             'Error sending password reset email',
           isLoading: false,
         });
-        return false;
       } else {
         set({ error: 'An unexpected error occurred', isLoading: false });
-        return false;
       }
+      return false;
     }
   },
   resetPassword: async (token, password) => {
@@ -196,11 +192,10 @@ export const useAuthStore = create<AuthState>((set) => ({
           error: error.response?.data?.message || 'Error resetting password',
           isLoading: false,
         });
-        return false;
       } else {
         set({ error: 'An unexpected error occurred', isLoading: false });
-        return false;
       }
+      return false;
     }
   },
 }));

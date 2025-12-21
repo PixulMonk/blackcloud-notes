@@ -116,5 +116,8 @@
   }
   body {
     @apply bg-background text-foreground;
+    /* Line below was added to fix ShadCN UI's alert dialog box freezing the app after making a selection.*/
+    /* Feels like a hack, but too bad (for now)! I haven't had dinner and coffee yet */
+    pointer-events: auto !important;
   }
 }
