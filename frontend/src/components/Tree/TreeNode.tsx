@@ -11,7 +11,7 @@ import NodeActions from './node-components/NodeActions';
 import NodeLabel from './node-components/NodeLabel';
 import { type TreeNodeComponentProps } from '../../types/tree';
 import { useDataStore } from '@/store/useDataStore';
-import { useConfirmDialogue } from '@/hooks/useConfirmDialogue';
+import { confirm } from '../ConfirmDialogue';
 
 // Renders individual node components
 const TreeNodeComponent = ({
@@ -44,9 +44,12 @@ const TreeNodeComponent = ({
     }
   }, [isRenaming]);
 
-  const { confirm } = useConfirmDialogue();
   const handleSoftDelete = async (id: string) => {
-    const ok = await confirm();
+    const ok = await confirm({
+      message: 'Are you sure you wan to delete this item?',
+      yesText: 'Delete',
+      noText: 'Cancel',
+    });
     if (ok) updateNode(id, undefined, undefined, undefined, true);
   };
 
