@@ -30,6 +30,10 @@ interface DataState {
     parentId?: string | null,
     fileId?: string
   ) => Promise<TreeNode | null>;
+  archiveNodeRecursively: (
+    rootId: string,
+    opts?: { isArchived?: boolean; isDeleted?: boolean }
+  ) => Promise<void>;
 }
 
 export const useDataStore = create<DataState>((set) => ({
@@ -140,6 +144,63 @@ export const useDataStore = create<DataState>((set) => ({
         set({ error: 'An unexpected error occurred', isLoading: false });
       }
       return null;
+    }
+  },
+
+  // helper - returns ids (including root)
+  getDescendantIds: (tree: TreeNode[], rootId: string) => {
+    const byParent = new Map<string, string[]>();
+    for (const n of tree) {
+      if (n.parentId)
+        byParent.set(n.parentId, [...(byParent.get(n.parentId) || []), n._id]);
+    }
+    const out: string[] = [];
+    const stack = [rootId];
+    while (stack.length) {
+      const id = stack.pop()!;
+      out.push(id);
+      const kids = byParent.get(id);
+      if (kids) stack.push(...kids);
+    }
+    return out;
+  },
+
+  archiveNodeRecursively: async (
+    rootId: string,
+    opts = { isArchived: true, isDeleted: true }
+  ) => {
+    set({ isLoading: true, error: null });
+    try {
+      const ids = getDescendantIds(useDataStore.getState().tree, rootId);
+
+      // Prefer: single backend bulk endpoint (e.g. POST /treeNodes/bulkPatch)
+      // Fallback: parallel PATCH for each id
+      await Promise.all(
+        ids.map((id) =>
+          axios.patch(`${BASE_URL}/treeNodes/${id}`, {
+            isArchived: opts.isArchived,
+            isDeleted: opts.isDeleted,
+          })
+        )
+      );
+
+      // Apply to local state
+      set((state) => ({
+        tree: state.tree.map((n) =>
+          ids.includes(n._id)
+            ? { ...n, isArchived: opts.isArchived, isDeleted: opts.isDeleted }
+            : n
+        ),
+        isLoading: false,
+      }));
+
+      // Optionally refresh from server if you want canonical data
+      await useDataStore.getState().fetchTree();
+    } catch (err: any) {
+      set({
+        error: err.message || 'Failed to archive nodes',
+        isLoading: false,
+      });
     }
   },
 }));

@@ -44,6 +44,7 @@ const TreeNodeComponent = ({
     }
   }, [isRenaming]);
 
+  // TODO: recursive update for soft delete and archive
   const handleSoftDelete = async (id: string) => {
     const ok = await confirm({
       message: 'Are you sure you want to delete this item?',
@@ -53,8 +54,14 @@ const TreeNodeComponent = ({
     if (ok) updateNode(id, undefined, undefined, undefined, true);
   };
 
-  // TODO: add archive button and handleArchive func
-  const handleArchive = async (id: string) => {};
+  const handleArchive = async (id: string) => {
+    const ok = await confirm({
+      message: 'Are you sure you want to archive this item?',
+      yesText: 'Archive',
+      noText: 'Cancel',
+    });
+    if (ok) updateNode(id, undefined, undefined, true);
+  };
 
   const Label = (
     <NodeLabel
