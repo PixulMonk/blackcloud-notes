@@ -30,10 +30,8 @@ interface DataState {
     parentId?: string | null,
     fileId?: string
   ) => Promise<TreeNode | null>;
-  archiveNodeRecursively: (
-    rootId: string,
-    opts?: { isArchived?: boolean; isDeleted?: boolean }
-  ) => Promise<void>;
+  softDeleteNode: (id: string) => Promise<TreeNode | null>;
+  archiveNode: (id: string) => Promise<TreeNode | null>;
 }
 
 export const useDataStore = create<DataState>((set) => ({
@@ -124,7 +122,6 @@ export const useDataStore = create<DataState>((set) => ({
 
       const updatedNode = response.data.data;
 
-      // Update state immutably
       set((state) => ({
         tree: state.tree.map((n) =>
           n._id === id ? { ...n, ...updatedNode } : n
@@ -147,60 +144,70 @@ export const useDataStore = create<DataState>((set) => ({
     }
   },
 
-  // helper - returns ids (including root)
-  getDescendantIds: (tree: TreeNode[], rootId: string) => {
-    const byParent = new Map<string, string[]>();
-    for (const n of tree) {
-      if (n.parentId)
-        byParent.set(n.parentId, [...(byParent.get(n.parentId) || []), n._id]);
-    }
-    const out: string[] = [];
-    const stack = [rootId];
-    while (stack.length) {
-      const id = stack.pop()!;
-      out.push(id);
-      const kids = byParent.get(id);
-      if (kids) stack.push(...kids);
-    }
-    return out;
-  },
+  // TODO: soft delete and archive have some repetitive code
+  // TODO: Drink a gallon of coffee and combine into recursive update instead
 
-  archiveNodeRecursively: async (
-    rootId: string,
-    opts = { isArchived: true, isDeleted: true }
-  ) => {
+  softDeleteNode: async (id) => {
     set({ isLoading: true, error: null });
-    try {
-      const ids = getDescendantIds(useDataStore.getState().tree, rootId);
 
-      // Prefer: single backend bulk endpoint (e.g. POST /treeNodes/bulkPatch)
-      // Fallback: parallel PATCH for each id
-      await Promise.all(
-        ids.map((id) =>
-          axios.patch(`${BASE_URL}/treeNodes/${id}`, {
-            isArchived: opts.isArchived,
-            isDeleted: opts.isDeleted,
-          })
-        )
+    try {
+      const response = await axios.patch<AddNodeResponse>(
+        `${BASE_URL}/treeNodes/${id}/soft-delete`
       );
 
-      // Apply to local state
+      const updatedNode = response.data.data;
+
       set((state) => ({
         tree: state.tree.map((n) =>
-          ids.includes(n._id)
-            ? { ...n, isArchived: opts.isArchived, isDeleted: opts.isDeleted }
-            : n
+          n._id === id ? { ...n, ...updatedNode } : n
         ),
         isLoading: false,
       }));
 
-      // Optionally refresh from server if you want canonical data
       await useDataStore.getState().fetchTree();
-    } catch (err: any) {
-      set({
-        error: err.message || 'Failed to archive nodes',
+      return updatedNode;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        set({
+          error: error.response?.data?.message || 'Error updating node',
+          isLoading: false,
+        });
+      } else {
+        set({ error: 'An unexpected error occurred', isLoading: false });
+      }
+      return null;
+    }
+  },
+
+  archiveNode: async (id) => {
+    set({ isLoading: true, error: null });
+
+    try {
+      const response = await axios.patch<AddNodeResponse>(
+        `${BASE_URL}/treeNodes/${id}/archive`
+      );
+
+      const updatedNode = response.data.data;
+
+      set((state) => ({
+        tree: state.tree.map((n) =>
+          n._id === id ? { ...n, ...updatedNode } : n
+        ),
         isLoading: false,
-      });
+      }));
+
+      await useDataStore.getState().fetchTree();
+      return updatedNode;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        set({
+          error: error.response?.data?.message || 'Error updating node',
+          isLoading: false,
+        });
+      } else {
+        set({ error: 'An unexpected error occurred', isLoading: false });
+      }
+      return null;
     }
   },
 }));
