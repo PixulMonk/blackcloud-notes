@@ -2,7 +2,10 @@ import mongoose from 'mongoose';
 import asyncHandler from '../utils/asyncHandler';
 import { TreeNode } from '../models/treeNode.model';
 import { Note } from '../models/note.model';
-import { deleteNodeChildren } from '../utils/treeHelpers';
+import {
+  deleteNodeChildren,
+  updateNodeAndChildrenRecursively,
+} from '../utils/treeHelpers';
 
 export const getAllTreeNodes = asyncHandler(async (req, res) => {
   // Returns a FLAT array of all nodes
@@ -238,5 +241,71 @@ export const deleteTreeNode = asyncHandler(async (req, res) => {
       deletedNodes: deletedNodesCount,
       deletedNotes: deletedNotesCount,
     },
+  });
+});
+
+export const softDeleteTreeNode = asyncHandler(async (req, res) => {
+  const treeNodeId = req.params.id;
+
+  if (!req.user?._id) {
+    throw new Error('User not authenticated');
+  }
+
+  if (!treeNodeId || !mongoose.Types.ObjectId.isValid(treeNodeId)) {
+    return res.status(400).json({
+      success: false,
+      message: 'Invalid tree node ID',
+    });
+  }
+  const treeNodeToSoftDelete = await TreeNode.findOneAndUpdate({
+    _id: treeNodeId,
+    userId: req.user._id,
+  });
+
+  if (!treeNodeToSoftDelete) {
+    throw new Error('Tree node does not exist or unauthorized');
+  }
+
+  await updateNodeAndChildrenRecursively(treeNodeId, req.user._id.toString(), {
+    isDeleted: true,
+  });
+
+  res.status(200).json({
+    success: true,
+    message: 'Tree node and all descendants soft-deleted successfully',
+    node: treeNodeToSoftDelete,
+  });
+});
+
+export const archiveTreeNode = asyncHandler(async (req, res) => {
+  const treeNodeId = req.params.id;
+
+  if (!req.user?._id) {
+    throw new Error('User not authenticated');
+  }
+
+  if (!treeNodeId || !mongoose.Types.ObjectId.isValid(treeNodeId)) {
+    return res.status(400).json({
+      success: false,
+      message: 'Invalid tree node ID',
+    });
+  }
+  const treeNodeToArchive = await TreeNode.findOneAndUpdate({
+    _id: treeNodeId,
+    userId: req.user._id,
+  });
+
+  if (!treeNodeToArchive) {
+    throw new Error('Tree node does not exist or unauthorized');
+  }
+
+  await updateNodeAndChildrenRecursively(treeNodeId, req.user._id.toString(), {
+    isArchived: true,
+  });
+
+  res.status(200).json({
+    success: true,
+    message: 'Tree node and all descendants archived successfully',
+    node: treeNodeToArchive,
   });
 });

@@ -1,4 +1,4 @@
-import { TreeNode } from '../models/treeNode.model';
+import { TreeNode, type ITreeNode } from '../models/treeNode.model';
 import { Note } from '../models/note.model';
 
 export const deleteNodeChildren = async (
@@ -25,4 +25,22 @@ export const deleteNodeChildren = async (
   }
 
   return { notes, nodes };
+};
+
+// TODO: guardrails against unsafe updates
+
+export const updateNodeAndChildrenRecursively = async (
+  nodeId: string,
+  userId: string,
+  updates: Partial<ITreeNode>
+) => {
+  await TreeNode.findOneAndUpdate({ _id: nodeId, userId }, { $set: updates });
+  const children = await TreeNode.find({ parentId: nodeId, userId });
+  for (const child of children) {
+    await updateNodeAndChildrenRecursively(
+      child._id.toString(),
+      userId,
+      updates
+    );
+  }
 };
