@@ -45,7 +45,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           variant="ghost"
           size="icon"
           className="size-8"
-          onClick={() => handleCreate('folder')}
+          onClick={(e) => {
+            e.stopPropagation();
+            handleCreate('folder');
+          }}
         >
           <FolderPlus />
         </Button>
@@ -53,7 +56,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           variant="ghost"
           size="icon"
           className="size-8"
-          onClick={() => handleCreate('file')}
+          onClick={(e) => {
+            e.stopPropagation();
+            handleCreate('file');
+          }}
         >
           <FilePlus2 />
         </Button>
