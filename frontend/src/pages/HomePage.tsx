@@ -1,5 +1,11 @@
+import Editor from '@/components/Editor';
+
 function HomePage() {
-  return <div>HomePage</div>;
+  return (
+    <div>
+      <Editor />
+    </div>
+  );
 }
 
 export default HomePage;
