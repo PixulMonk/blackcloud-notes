@@ -13,6 +13,8 @@ import {
   AlignCenter,
   AlignRight,
   AlignJustify,
+  List,
+  ListOrdered,
 } from 'lucide-react';
 
 import { Button } from './ui/button';
@@ -75,14 +77,6 @@ const MenuBar = ({ editor }: MenuBarProps) => {
           </Button>
         </ButtonGroup>
 
-        <Button
-          variant="outline"
-          onMouseDown={run(() => editor.chain().focus().setParagraph().run())}
-          className={editor.isActive('paragraph') ? 'is-active' : ''}
-        >
-          Paragraph
-        </Button>
-
         <ButtonGroup>
           <Button
             variant="outline"
@@ -118,6 +112,13 @@ const MenuBar = ({ editor }: MenuBarProps) => {
             <Highlighter />
           </Button>
         </ButtonGroup>
+        <Button
+          variant="outline"
+          onMouseDown={run(() => editor.chain().focus().setParagraph().run())}
+          className={editor.isActive('paragraph') ? 'is-active' : ''}
+        >
+          Paragraph
+        </Button>
 
         <ButtonGroup>
           <Button
@@ -166,6 +167,28 @@ const MenuBar = ({ editor }: MenuBarProps) => {
             }
           >
             <AlignJustify />
+          </Button>
+        </ButtonGroup>
+
+        <ButtonGroup>
+          <Button
+            variant="outline"
+            onMouseDown={run(() =>
+              editor.chain().focus().toggleBulletList().run()
+            )}
+            className={editor.isActive('bulletList') ? 'is-active' : ''}
+          >
+            <List />
+          </Button>
+
+          <Button
+            variant="outline"
+            onMouseDown={run(() =>
+              editor.chain().focus().toggleOrderedList().run()
+            )}
+            className={editor.isActive('orderedList') ? 'is-active' : ''}
+          >
+            <ListOrdered />
           </Button>
         </ButtonGroup>
       </div>

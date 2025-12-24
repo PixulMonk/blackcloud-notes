@@ -1,4 +1,5 @@
 @import 'tailwindcss';
+@plugin "@tailwindcss/typography";
 @import 'tw-animate-css';
 
 @custom-variant dark (&:is(.dark *));
@@ -122,6 +123,12 @@
   }
 
   /* Tiptap / ProseMirror block styles */
+  /* frontend/src/index.css (or a component stylesheet) */
+  .prose ul > li::marker,
+  .prose ol > li::marker {
+    color: var(--color-foreground) !important;
+  }
+
   .prose h1 {
     @apply text-3xl font-bold my-4;
   }
