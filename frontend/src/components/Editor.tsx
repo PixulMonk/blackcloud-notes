@@ -30,7 +30,7 @@ const Editor = () => {
   return (
     <div className="mx-5 my-15">
       <EditorContext.Provider value={providerValue}>
-        <div className="flex flex-col gap-5">
+        <div className="flex flex-col gap-5 item">
           <MenuBar editor={editor} />
           <EditorContent
             editor={editor}
