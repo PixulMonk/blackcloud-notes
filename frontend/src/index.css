@@ -1,4 +1,5 @@
 @import 'tailwindcss';
+@plugin "@tailwindcss/typography";
 @import 'tw-animate-css';
 
 @custom-variant dark (&:is(.dark *));
@@ -119,5 +120,28 @@
     /* Line below was added to fix ShadCN UI's alert dialog box freezing the app after making a selection.*/
     /* Feels like a hack, but too bad (for now)! I haven't had dinner and coffee yet */
     pointer-events: auto !important;
+  }
+
+  /* Tiptap / ProseMirror block styles */
+  /* frontend/src/index.css (or a component stylesheet) */
+  .prose ul > li::marker,
+  .prose ol > li::marker {
+    color: var(--color-foreground) !important;
+  }
+
+  .prose h1 {
+    @apply text-3xl font-bold my-4;
+  }
+  .prose h2 {
+    @apply text-2xl font-semibold my-3;
+  }
+  .prose h3 {
+    @apply text-xl font-semibold my-2;
+  }
+  .prose p {
+    @apply text-base my-2;
+  }
+  .prose code {
+    @apply bg-muted-foreground text-muted px-1 rounded;
   }
 }
