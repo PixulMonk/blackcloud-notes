@@ -18,5 +18,6 @@ export const useTreeUIStore = create<TreeUIState>((set) => ({
 
   setSelectedNodeId: (id) => {
     set({ selectedNodeId: id });
+    console.log(id);
   },
 }));
