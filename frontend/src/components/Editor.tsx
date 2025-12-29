@@ -26,7 +26,6 @@ const Editor = () => {
   // Memoize the provider value to avoid unnecessary re-renders
   const providerValue = useMemo(() => ({ editor }), [editor]);
 
-  // TODO: change max width of editor. Shouldn't keep increasing vertically
   return (
     <div className="mx-5 my-15">
       <EditorContext.Provider value={providerValue}>

@@ -123,7 +123,10 @@
   }
 
   /* Tiptap / ProseMirror block styles */
-  /* frontend/src/index.css (or a component stylesheet) */
+  .ProseMirror:focus {
+    outline: none;
+  }
+
   .prose ul > li::marker,
   .prose ol > li::marker {
     color: var(--color-foreground) !important;

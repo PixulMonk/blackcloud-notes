@@ -38,6 +38,7 @@ export const useDataStore = create<DataState>((set) => ({
   tree: [],
   isLoading: false,
   error: null,
+  nodeCurrentlySelected: null,
 
   fetchTree: async () => {
     set({ isLoading: true, error: null });
