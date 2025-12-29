@@ -13,17 +13,22 @@ import { type TreeNodeComponentProps } from '../../types/tree';
 import { useDataStore } from '@/store/useDataStore';
 import { confirm } from '../ConfirmDialogue';
 
+import { useTreeUIStore } from '@/store/useTreeUIStoreI';
+
 // Renders individual node components
-const TreeNodeComponent = ({
-  node,
-  renamingNodeId,
-  setRenamingNodeId,
-}: TreeNodeComponentProps) => {
+const TreeNodeComponent = ({ node }: TreeNodeComponentProps) => {
   const hasChildren = !!node.children?.length;
   const [isHovered, setIsHovered] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [treeData, setTreeData] = useState(node);
+
+  const renamingNodeId = useTreeUIStore((state) => state.renamingNodeId);
+  const setRenamingNodeId = useTreeUIStore((state) => state.setRenamingNodeId);
   const isRenaming = node._id === renamingNodeId;
+
+  const selectedNodeId = useTreeUIStore((state) => state.selectedNodeId);
+  const setSelectedNodeId = useTreeUIStore((state) => state.setSelectedNodeId);
+  const isSelected = node._id === selectedNodeId;
 
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -93,11 +98,14 @@ const TreeNodeComponent = ({
       {hasChildren ? (
         <Collapsible>
           <div
-            className={`flex justify-between w-full px-1.5 rounded-md ${
-              isHovered || isMenuOpen ? 'bg-accent/50' : ''
-            }`}
+            className={`flex justify-between w-full px-1.5 rounded-md 
+              ${isSelected && isHovered ? 'bg-accent' : ''}
+              ${isSelected && !isHovered ? 'bg-accent/50' : ''}
+              ${!isSelected && (isHovered || isMenuOpen) ? 'bg-accent/30' : ''}
+              `}
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
+            onClick={() => setSelectedNodeId(node._id)}
           >
             <CollapsibleTrigger asChild>
               <div className="flex items-center">
@@ -118,21 +126,20 @@ const TreeNodeComponent = ({
           <CollapsibleContent>
             <ul className="pl-4 space-y-1.5">
               {node.children!.map((child) => (
-                <TreeNodeComponent
-                  key={child._id}
-                  node={child}
-                  renamingNodeId={renamingNodeId}
-                  setRenamingNodeId={setRenamingNodeId}
-                />
+                <TreeNodeComponent key={child._id} node={child} />
               ))}
             </ul>
           </CollapsibleContent>
         </Collapsible>
       ) : (
         <div
-          className="flex justify-between items-center p-1 rounded-md group hover:bg-accent"
+          className={`flex justify-between items-center p-1 rounded-md group 
+              ${isSelected && isHovered ? 'bg-accent' : ''}
+              ${isSelected && !isHovered ? 'bg-accent/50' : ''}
+              ${!isSelected && isHovered ? 'bg-accent/30' : ''}`}
           onMouseEnter={() => setIsHovered(true)}
           onMouseLeave={() => setIsHovered(false)}
+          onClick={() => setSelectedNodeId(node._id)}
         >
           {Label}
           <div

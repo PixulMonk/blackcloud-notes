@@ -16,16 +16,11 @@ export interface TreeNode {
 
 export interface TreeProps {
   data: TreeNode[];
-  renamingNodeId: string | null;
-  setRenamingNodeId: React.Dispatch<React.SetStateAction<string | null>>;
 }
 
-export type TreeNodeComponentProps = Pick<
-  TreeProps,
-  'renamingNodeId' | 'setRenamingNodeId'
-> & {
+export interface TreeNodeComponentProps {
   node: TreeNode;
-};
+}
 
 export interface NodeLabelProps {
   node: any;
