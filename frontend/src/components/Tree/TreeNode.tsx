@@ -13,16 +13,17 @@ import { type TreeNodeComponentProps } from '../../types/tree';
 import { useDataStore } from '@/store/useDataStore';
 import { confirm } from '../ConfirmDialogue';
 
+import { useTreeUIStore } from '@/store/useTreeUIStoreI';
+
 // Renders individual node components
-const TreeNodeComponent = ({
-  node,
-  renamingNodeId,
-  setRenamingNodeId,
-}: TreeNodeComponentProps) => {
+const TreeNodeComponent = ({ node }: TreeNodeComponentProps) => {
   const hasChildren = !!node.children?.length;
   const [isHovered, setIsHovered] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [treeData, setTreeData] = useState(node);
+
+  const renamingNodeId = useTreeUIStore((state) => state.renamingNodeId);
+  const setRenamingNodeId = useTreeUIStore((state) => state.setRenamingNodeId);
   const isRenaming = node._id === renamingNodeId;
 
   const inputRef = useRef<HTMLInputElement>(null);
@@ -118,12 +119,7 @@ const TreeNodeComponent = ({
           <CollapsibleContent>
             <ul className="pl-4 space-y-1.5">
               {node.children!.map((child) => (
-                <TreeNodeComponent
-                  key={child._id}
-                  node={child}
-                  renamingNodeId={renamingNodeId}
-                  setRenamingNodeId={setRenamingNodeId}
-                />
+                <TreeNodeComponent key={child._id} node={child} />
               ))}
             </ul>
           </CollapsibleContent>

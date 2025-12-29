@@ -1,5 +1,6 @@
 import { create } from 'zustand';
-// TODO: opened document, current selection
+// TODO: Uhh I think these dialogue states are a relict from an old dialog box implementation.
+// These can PROBABLY BE DELETED although I am kinda too much of a pussy to do it
 interface AppStore {
   isDialogueBoxOpen: boolean;
   setIsDialogueBoxOpen: (open: boolean) => void;

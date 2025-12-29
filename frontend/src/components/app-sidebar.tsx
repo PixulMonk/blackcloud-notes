@@ -17,19 +17,18 @@ import {
 } from '@/components/ui/sidebar';
 
 import { useDataStore } from '@/store/useDataStore';
+import { useTreeUIStore } from '@/store/useTreeUIStoreI';
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const tree = useDataStore((state) => state.tree);
   const fetchTree = useDataStore((state) => state.fetchTree);
   const addNode = useDataStore((state) => state.addNode);
 
+  const setRenamingNodeId = useTreeUIStore((state) => state.setRenamingNodeId);
+
   useEffect(() => {
     fetchTree();
   }, [fetchTree]);
-
-  // TODO: create and move relevant functions to a zustand store for global handling
-  // After that it doesnt need to get passed around as args
-  const [renamingNodeId, setRenamingNodeId] = useState<string | null>(null);
 
   const handleCreate = async (type: 'folder' | 'file') => {
     const newNode = await addNode(type);
@@ -72,11 +71,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <SidebarGroupLabel>Notes</SidebarGroupLabel>
         <SidebarGroupContent>
           <SidebarMenu></SidebarMenu>
-          <Tree
-            data={tree}
-            renamingNodeId={renamingNodeId}
-            setRenamingNodeId={setRenamingNodeId}
-          />
+          <Tree data={tree} />
         </SidebarGroupContent>
         <SidebarGroup />
       </SidebarContent>
