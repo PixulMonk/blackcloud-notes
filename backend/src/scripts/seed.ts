@@ -8,6 +8,14 @@ import bcrypt from 'bcrypt';
 
 dotenv.config();
 
+const toTipTapBase64 = (text: string) => {
+  const json = {
+    type: 'doc',
+    content: [{ type: 'paragraph', content: [{ type: 'text', text }] }],
+  };
+  return Buffer.from(JSON.stringify(json)).toString('base64');
+};
+
 (async () => {
   try {
     await connectDB();
@@ -30,29 +38,29 @@ dotenv.config();
       isVerified: true,
     });
 
-    // create some notes
+    // create some notes with TipTap JSON content
     const note1 = await Note.create({
       userId: demoUser._id,
       title: 'Note 1',
-      encryptedContent: 'VGhpcyBpcyBub3RlIDE=',
+      encryptedContent: toTipTapBase64('This is note 1 content'),
     });
 
     const note2 = await Note.create({
       userId: demoUser._id,
       title: 'Note 2',
-      encryptedContent: 'VGhpcyBpcyBub3RlIDI=',
+      encryptedContent: toTipTapBase64('This is note 2 content'),
     });
 
     const note3 = await Note.create({
       userId: demoUser._id,
       title: 'Note 3',
-      encryptedContent: 'VGhpcyBpcyBub3RlIDM=',
+      encryptedContent: toTipTapBase64('This is note 3 content'),
     });
 
     const note4 = await Note.create({
       userId: demoUser._id,
       title: 'Note 4',
-      encryptedContent: 'VGhpcyBpcyBub3RlIDQ=',
+      encryptedContent: toTipTapBase64('This is note 4 content'),
     });
 
     // Root folder
@@ -98,7 +106,7 @@ dotenv.config();
       userId: demoUser._id,
       title: 'Folder A1',
       type: 'folder',
-      position: 2, // after File 1 and File 2
+      position: 2,
       parentId: folderA._id,
     });
 
@@ -106,7 +114,7 @@ dotenv.config();
     const noteA11 = await Note.create({
       userId: demoUser._id,
       title: 'Note A1-1',
-      encryptedContent: 'Tm90ZSBmcm9tIEZvbGRlciBBMS0x',
+      encryptedContent: toTipTapBase64('Note from Folder A1-1'),
     });
 
     await TreeNode.create({
@@ -122,7 +130,7 @@ dotenv.config();
     const noteA12 = await Note.create({
       userId: demoUser._id,
       title: 'Note A1-2',
-      encryptedContent: 'Tm90ZSBmcm9tIEZvbGRlciBBMS0y',
+      encryptedContent: toTipTapBase64('Note from Folder A1-2'),
     });
 
     await TreeNode.create({
@@ -176,7 +184,7 @@ dotenv.config();
     const standaloneNote = await Note.create({
       userId: demoUser._id,
       title: 'Standalone Note',
-      encryptedContent: 'VGhpcyBpcyBhIHN0YW5kYWxvbmUgbm90ZQ==',
+      encryptedContent: toTipTapBase64('This is a standalone note'),
     });
 
     await TreeNode.create({
@@ -192,7 +200,7 @@ dotenv.config();
     const archivedNote = await Note.create({
       userId: demoUser._id,
       title: 'Archived Note',
-      encryptedContent: 'QXJjaGl2ZWQgbm90ZQ==',
+      encryptedContent: toTipTapBase64('Archived note content'),
     });
 
     await TreeNode.create({
@@ -200,7 +208,7 @@ dotenv.config();
       title: 'Archived File',
       type: 'file',
       position: 2,
-      parentId: folderA._id, // put inside Folder A for variety
+      parentId: folderA._id,
       fileId: archivedNote._id,
       isArchived: true,
     });
@@ -209,7 +217,7 @@ dotenv.config();
     const deletedNote = await Note.create({
       userId: demoUser._id,
       title: 'Deleted Note',
-      encryptedContent: 'RGVsZXRlZCBub3Rl',
+      encryptedContent: toTipTapBase64('Deleted note content'),
     });
 
     await TreeNode.create({
@@ -217,7 +225,7 @@ dotenv.config();
       title: 'Deleted File',
       type: 'file',
       position: 4,
-      parentId: root._id, // directly under Root
+      parentId: root._id,
       fileId: deletedNote._id,
       isDeleted: true,
     });
