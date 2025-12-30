@@ -1,16 +1,22 @@
-import { useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 
 import Highlight from '@tiptap/extension-highlight';
 import TextAlign from '@tiptap/extension-text-align';
 import { BulletList, ListItem, OrderedList } from '@tiptap/extension-list';
 
 import { useEditor, EditorContent, EditorContext } from '@tiptap/react';
-import { FloatingMenu, BubbleMenu } from '@tiptap/react/menus';
 import StarterKit from '@tiptap/starter-kit';
 
 import MenuBar from './MenuBar';
 
+import { useTreeUIStore } from '@/store/useTreeUIStore';
+import { useDataStore } from '@/store/useDataStore';
+
 const Editor = () => {
+  const [editorContent, setEditorContent] = useState('');
+  const selectedFileId = useTreeUIStore((state) => state.selectedFileId);
+  const fetchNodeContent = useDataStore((state) => state.fetchNodeContent);
+
   const editor = useEditor({
     extensions: [
       StarterKit,
@@ -20,8 +26,22 @@ const Editor = () => {
       ListItem,
       OrderedList,
     ],
-    content: '<p>Hello World!</p>', // initial content
+    content: editorContent,
   });
+
+  useEffect(() => {
+    if (!selectedFileId) return;
+
+    fetchNodeContent(selectedFileId).then((content) => {
+      if (!content) return;
+      const text = content.encryptedContent || '';
+      setEditorContent(text);
+
+      if (editor) {
+        editor.commands.setContent(text);
+      }
+    });
+  }, [selectedFileId, editor]);
 
   // Memoize the provider value to avoid unnecessary re-renders
   const providerValue = useMemo(() => ({ editor }), [editor]);

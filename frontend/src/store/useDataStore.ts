@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import axios from 'axios';
 import { type TreeNode, type AddNodeResponse } from '../types/tree';
+import { type NoteDTO } from '@/types/note';
 
 const BASE_URL = 'http://localhost:3000/api';
 axios.defaults.withCredentials = true;
@@ -11,6 +12,7 @@ interface DataState {
   tree: TreeNode[];
   isLoading: boolean;
   error: string | null;
+
   fetchTree: () => Promise<void>;
   addNode: (
     type: 'folder' | 'file',
@@ -30,15 +32,15 @@ interface DataState {
     parentId?: string | null,
     fileId?: string
   ) => Promise<TreeNode | null>;
-  softDeleteNode: (id: string) => Promise<TreeNode | null>;
-  archiveNode: (id: string) => Promise<TreeNode | null>;
+  softDeleteNode: (nodeId: string) => Promise<TreeNode | null>;
+  archiveNode: (nodeId: string) => Promise<TreeNode | null>;
+  fetchNodeContent: (fileId: string) => Promise<NoteDTO | null>;
 }
 
 export const useDataStore = create<DataState>((set) => ({
   tree: [],
   isLoading: false,
   error: null,
-  nodeCurrentlySelected: null,
 
   fetchTree: async () => {
     set({ isLoading: true, error: null });
@@ -203,6 +205,25 @@ export const useDataStore = create<DataState>((set) => ({
       if (axios.isAxiosError(error)) {
         set({
           error: error.response?.data?.message || 'Error updating node',
+          isLoading: false,
+        });
+      } else {
+        set({ error: 'An unexpected error occurred', isLoading: false });
+      }
+      return null;
+    }
+  },
+
+  fetchNodeContent: async (id) => {
+    set({ isLoading: true, error: null });
+
+    try {
+      const response = await axios.get(`${BASE_URL}/notes/${id}`);
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        set({
+          error: error.response?.data?.message || 'Error fetching node content',
           isLoading: false,
         });
       } else {

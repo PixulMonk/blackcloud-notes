@@ -13,7 +13,7 @@ import { type TreeNodeComponentProps } from '../../types/tree';
 import { useDataStore } from '@/store/useDataStore';
 import { confirm } from '../ConfirmDialogue';
 
-import { useTreeUIStore } from '@/store/useTreeUIStoreI';
+import { useTreeUIStore } from '@/store/useTreeUIStore';
 
 // Renders individual node components
 const TreeNodeComponent = ({ node }: TreeNodeComponentProps) => {
@@ -27,7 +27,7 @@ const TreeNodeComponent = ({ node }: TreeNodeComponentProps) => {
   const isRenaming = node._id === renamingNodeId;
 
   const selectedNodeId = useTreeUIStore((state) => state.selectedNodeId);
-  const setSelectedNodeId = useTreeUIStore((state) => state.setSelectedNodeId);
+  const selectNode = useTreeUIStore((state) => state.selectNode);
   const isSelected = node._id === selectedNodeId;
 
   const inputRef = useRef<HTMLInputElement>(null);
@@ -105,7 +105,7 @@ const TreeNodeComponent = ({ node }: TreeNodeComponentProps) => {
               `}
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
-            onClick={() => setSelectedNodeId(node._id)}
+            onClick={() => selectNode(node)}
           >
             <CollapsibleTrigger asChild>
               <div className="flex items-center">
@@ -139,7 +139,7 @@ const TreeNodeComponent = ({ node }: TreeNodeComponentProps) => {
               ${!isSelected && isHovered ? 'bg-accent/30' : ''}`}
           onMouseEnter={() => setIsHovered(true)}
           onMouseLeave={() => setIsHovered(false)}
-          onClick={() => setSelectedNodeId(node._id)}
+          onClick={() => selectNode(node)}
         >
           {Label}
           <div
