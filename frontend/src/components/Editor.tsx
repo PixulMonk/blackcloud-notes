@@ -2,7 +2,6 @@ import { useState, useMemo, useEffect } from 'react';
 
 import Highlight from '@tiptap/extension-highlight';
 import TextAlign from '@tiptap/extension-text-align';
-import { BulletList, ListItem, OrderedList } from '@tiptap/extension-list';
 
 import { useEditor, EditorContent, EditorContext } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
@@ -13,35 +12,68 @@ import { useTreeUIStore } from '@/store/useTreeUIStore';
 import { useDataStore } from '@/store/useDataStore';
 
 const Editor = () => {
-  const [editorContent, setEditorContent] = useState('');
   const selectedFileId = useTreeUIStore((state) => state.selectedFileId);
   const fetchNodeContent = useDataStore((state) => state.fetchNodeContent);
+  const updateNote = useDataStore((state) => state.updateNote);
 
   const editor = useEditor({
     extensions: [
       StarterKit,
       TextAlign.configure({ types: ['heading', 'paragraph'] }),
       Highlight,
-      BulletList,
-      ListItem,
-      OrderedList,
     ],
-    content: editorContent,
+    content: '',
   });
 
   useEffect(() => {
     if (!selectedFileId) return;
 
+    editor?.commands.clearContent();
+
     fetchNodeContent(selectedFileId).then((content) => {
       if (!content) return;
-      const text = content.encryptedContent || '';
-      setEditorContent(text);
-
-      if (editor) {
-        editor.commands.setContent(text);
-      }
+      const raw = content.encryptedContent;
+      if (!raw) return;
+      const contentJSON = JSON.parse(raw);
+      editor?.commands.setContent(contentJSON);
     });
   }, [selectedFileId, editor]);
+
+  // Listen for content changes (updates)
+  useEffect(() => {
+    if (!editor) return;
+
+    let timeout: ReturnType<typeof setTimeout>;
+
+    const handleUpdate = () => {
+      clearTimeout(timeout);
+      timeout = setTimeout(() => {
+        const contentJSON = editor.getJSON();
+        const isEmpty = editor.isEmpty;
+        if (isEmpty) return;
+
+        // NOTE: had to stringify contentJSON as a shortcut (to avoid changing the types)
+        // Since we don't have the encryption feature yet, what is being stored in the DB is the
+        // TipTap JSON. Once the encryption feature takes place this is NOT what's going to get
+        // stored in the DB. Instead the TipTap JSON will get stringified which will then
+        // be encrypted BEFORE getting stored in the DB. The reverse will happen for decryption
+
+        updateNote(
+          undefined,
+          JSON.stringify(contentJSON),
+          undefined,
+          selectedFileId!,
+        );
+      }, 1000);
+    };
+
+    editor.on('update', handleUpdate);
+
+    return () => {
+      editor.off('update', handleUpdate);
+      clearTimeout(timeout);
+    };
+  }, [editor, selectedFileId]);
 
   // Memoize the provider value to avoid unnecessary re-renders
   const providerValue = useMemo(() => ({ editor }), [editor]);

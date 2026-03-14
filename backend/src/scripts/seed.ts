@@ -8,12 +8,12 @@ import bcrypt from 'bcrypt';
 
 dotenv.config();
 
-const toTipTapBase64 = (text: string) => {
+const toTipTapJSON = (text: string) => {
   const json = {
     type: 'doc',
     content: [{ type: 'paragraph', content: [{ type: 'text', text }] }],
   };
-  return Buffer.from(JSON.stringify(json)).toString('base64');
+  return JSON.stringify(json);
 };
 
 (async () => {
@@ -42,25 +42,25 @@ const toTipTapBase64 = (text: string) => {
     const note1 = await Note.create({
       userId: demoUser._id,
       title: 'Note 1',
-      encryptedContent: toTipTapBase64('This is note 1 content'),
+      encryptedContent: toTipTapJSON('This is note 1 content'),
     });
 
     const note2 = await Note.create({
       userId: demoUser._id,
       title: 'Note 2',
-      encryptedContent: toTipTapBase64('This is note 2 content'),
+      encryptedContent: toTipTapJSON('This is note 2 content'),
     });
 
     const note3 = await Note.create({
       userId: demoUser._id,
       title: 'Note 3',
-      encryptedContent: toTipTapBase64('This is note 3 content'),
+      encryptedContent: toTipTapJSON('This is note 3 content'),
     });
 
     const note4 = await Note.create({
       userId: demoUser._id,
       title: 'Note 4',
-      encryptedContent: toTipTapBase64('This is note 4 content'),
+      encryptedContent: toTipTapJSON('This is note 4 content'),
     });
 
     // Root folder
@@ -81,20 +81,20 @@ const toTipTapBase64 = (text: string) => {
       parentId: root._id,
     });
 
-    // File 1 inside Folder A
+    // Note 1 inside Folder A
     await TreeNode.create({
       userId: demoUser._id,
-      title: 'File 1',
+      title: 'Note 1',
       type: 'file',
       position: 0,
       parentId: folderA._id,
       fileId: note1._id,
     });
 
-    // File 2 inside Folder A
+    // Note 2 inside Folder A
     await TreeNode.create({
       userId: demoUser._id,
-      title: 'File 2',
+      title: 'Note 2',
       type: 'file',
       position: 1,
       parentId: folderA._id,
@@ -110,32 +110,32 @@ const toTipTapBase64 = (text: string) => {
       parentId: folderA._id,
     });
 
-    // File A1-1 inside Folder A1
+    // Note A1-1 inside Folder A1
     const noteA11 = await Note.create({
       userId: demoUser._id,
       title: 'Note A1-1',
-      encryptedContent: toTipTapBase64('Note from Folder A1-1'),
+      encryptedContent: toTipTapJSON('Note from Folder A1-1'),
     });
 
     await TreeNode.create({
       userId: demoUser._id,
-      title: 'File A1-1',
+      title: 'Note A1-1',
       type: 'file',
       position: 0,
       parentId: folderA1._id,
       fileId: noteA11._id,
     });
 
-    // File A1-2 inside Folder A1
+    // Note A1-2 inside Folder A1
     const noteA12 = await Note.create({
       userId: demoUser._id,
       title: 'Note A1-2',
-      encryptedContent: toTipTapBase64('Note from Folder A1-2'),
+      encryptedContent: toTipTapJSON('Note from Folder A1-2'),
     });
 
     await TreeNode.create({
       userId: demoUser._id,
-      title: 'File A1-2',
+      title: 'Note A1-2',
       type: 'file',
       position: 1,
       parentId: folderA1._id,
@@ -151,20 +151,20 @@ const toTipTapBase64 = (text: string) => {
       parentId: root._id,
     });
 
-    // File 3 inside Folder B
+    // Note 3 inside Folder B
     await TreeNode.create({
       userId: demoUser._id,
-      title: 'File 3',
+      title: 'Note 3',
       type: 'file',
       position: 0,
       parentId: folderB._id,
       fileId: note3._id,
     });
 
-    // File 4 directly under Root
+    // Note 4 directly under Root
     await TreeNode.create({
       userId: demoUser._id,
-      title: 'File 4',
+      title: 'Note 4',
       type: 'file',
       position: 3,
       parentId: root._id,
@@ -180,32 +180,32 @@ const toTipTapBase64 = (text: string) => {
       parentId: null,
     });
 
-    // Standalone file (not under Root)
+    // Standalone Note
     const standaloneNote = await Note.create({
       userId: demoUser._id,
       title: 'Standalone Note',
-      encryptedContent: toTipTapBase64('This is a standalone note'),
+      encryptedContent: toTipTapJSON('This is a standalone note'),
     });
 
     await TreeNode.create({
       userId: demoUser._id,
-      title: 'Standalone File',
+      title: 'Standalone Note',
       type: 'file',
       position: 1,
       parentId: null,
       fileId: standaloneNote._id,
     });
 
-    // Archived file
+    // Archived Note
     const archivedNote = await Note.create({
       userId: demoUser._id,
       title: 'Archived Note',
-      encryptedContent: toTipTapBase64('Archived note content'),
+      encryptedContent: toTipTapJSON('Archived note content'),
     });
 
     await TreeNode.create({
       userId: demoUser._id,
-      title: 'Archived File',
+      title: 'Archived Note',
       type: 'file',
       position: 2,
       parentId: folderA._id,
@@ -213,16 +213,16 @@ const toTipTapBase64 = (text: string) => {
       isArchived: true,
     });
 
-    // Deleted file
+    // Deleted Note
     const deletedNote = await Note.create({
       userId: demoUser._id,
       title: 'Deleted Note',
-      encryptedContent: toTipTapBase64('Deleted note content'),
+      encryptedContent: toTipTapJSON('Deleted note content'),
     });
 
     await TreeNode.create({
       userId: demoUser._id,
-      title: 'Deleted File',
+      title: 'Deleted Note',
       type: 'file',
       position: 4,
       parentId: root._id,

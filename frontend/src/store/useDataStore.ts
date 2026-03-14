@@ -16,25 +16,31 @@ interface DataState {
   fetchTree: () => Promise<void>;
   addNode: (
     type: 'folder' | 'file',
-    title?: string | null,
+    title?: string | undefined,
     isArchived?: boolean,
     isDeleted?: boolean,
-    icon?: string | null,
-    parentId?: string | null
+    icon?: string | undefined,
+    parentId?: string | null,
   ) => Promise<TreeNode | null>;
   updateNode: (
     id: string,
-    title?: string | null,
+    title?: string | undefined,
     type?: 'folder' | 'file',
     isArchived?: boolean,
     isDeleted?: boolean,
-    icon?: string | null,
+    icon?: string | undefined,
     parentId?: string | null,
-    fileId?: string
+    fileId?: string,
   ) => Promise<TreeNode | null>;
   softDeleteNode: (nodeId: string) => Promise<TreeNode | null>;
   archiveNode: (nodeId: string) => Promise<TreeNode | null>;
   fetchNodeContent: (fileId: string) => Promise<NoteDTO | null>;
+  updateNote: (
+    title: string | undefined,
+    content: string | undefined,
+    tags: string | undefined,
+    fileId: string,
+  ) => Promise<NoteDTO | null>;
 }
 
 export const useDataStore = create<DataState>((set) => ({
@@ -46,7 +52,7 @@ export const useDataStore = create<DataState>((set) => ({
     set({ isLoading: true, error: null });
     try {
       const response = await axios.get<{ success: boolean; tree: TreeNode[] }>(
-        `${BASE_URL}/tree/build`
+        `${BASE_URL}/tree/build`,
       );
       set({ tree: response.data.tree, isLoading: false });
     } catch (err: any) {
@@ -56,11 +62,11 @@ export const useDataStore = create<DataState>((set) => ({
 
   addNode: async (
     type,
-    title = null,
+    title = undefined,
     isArchived = false,
     isDeleted = false,
-    icon = null,
-    parentId = null
+    icon = undefined,
+    parentId = null,
   ) => {
     set({ isLoading: true, error: null });
     try {
@@ -73,7 +79,7 @@ export const useDataStore = create<DataState>((set) => ({
           isDeleted,
           icon,
           parentId,
-        }
+        },
       );
 
       const newNode = response.data.data;
@@ -98,20 +104,20 @@ export const useDataStore = create<DataState>((set) => ({
   },
 
   updateNode: async (
-    id,
+    nodeId,
     title,
     type,
     isArchived,
     isDeleted,
     icon,
     parentId,
-    fileId
+    fileId,
   ) => {
     set({ isLoading: true, error: null });
 
     try {
       const response = await axios.patch<AddNodeResponse>(
-        `${BASE_URL}/treeNodes/${id}`,
+        `${BASE_URL}/treeNodes/${nodeId}`,
         {
           title,
           type,
@@ -120,14 +126,14 @@ export const useDataStore = create<DataState>((set) => ({
           icon,
           parentId,
           fileId,
-        }
+        },
       );
 
       const updatedNode = response.data.data;
 
       set((state) => ({
         tree: state.tree.map((n) =>
-          n._id === id ? { ...n, ...updatedNode } : n
+          n._id === nodeId ? { ...n, ...updatedNode } : n,
         ),
         isLoading: false,
       }));
@@ -150,19 +156,19 @@ export const useDataStore = create<DataState>((set) => ({
   // TODO: soft delete and archive have some repetitive code
   // TODO: Drink a gallon of coffee and combine into recursive update instead
 
-  softDeleteNode: async (id) => {
+  softDeleteNode: async (nodeId) => {
     set({ isLoading: true, error: null });
 
     try {
       const response = await axios.patch<AddNodeResponse>(
-        `${BASE_URL}/treeNodes/${id}/soft-delete`
+        `${BASE_URL}/treeNodes/${nodeId}/soft-delete`,
       );
 
       const updatedNode = response.data.data;
 
       set((state) => ({
         tree: state.tree.map((n) =>
-          n._id === id ? { ...n, ...updatedNode } : n
+          n._id === nodeId ? { ...n, ...updatedNode } : n,
         ),
         isLoading: false,
       }));
@@ -182,19 +188,19 @@ export const useDataStore = create<DataState>((set) => ({
     }
   },
 
-  archiveNode: async (id) => {
+  archiveNode: async (nodeId) => {
     set({ isLoading: true, error: null });
 
     try {
       const response = await axios.patch<AddNodeResponse>(
-        `${BASE_URL}/treeNodes/${id}/archive`
+        `${BASE_URL}/treeNodes/${nodeId}/archive`,
       );
 
       const updatedNode = response.data.data;
 
       set((state) => ({
         tree: state.tree.map((n) =>
-          n._id === id ? { ...n, ...updatedNode } : n
+          n._id === nodeId ? { ...n, ...updatedNode } : n,
         ),
         isLoading: false,
       }));
@@ -214,16 +220,37 @@ export const useDataStore = create<DataState>((set) => ({
     }
   },
 
-  fetchNodeContent: async (id) => {
+  fetchNodeContent: async (fileId) => {
     set({ isLoading: true, error: null });
 
     try {
-      const response = await axios.get(`${BASE_URL}/notes/${id}`);
+      const response = await axios.get(`${BASE_URL}/notes/${fileId}`);
       return response.data;
     } catch (error) {
       if (axios.isAxiosError(error)) {
         set({
           error: error.response?.data?.message || 'Error fetching node content',
+          isLoading: false,
+        });
+      } else {
+        set({ error: 'An unexpected error occurred', isLoading: false });
+      }
+      return null;
+    }
+  },
+  updateNote: async (title, content, tags, fileId) => {
+    set({ isLoading: true, error: null });
+    try {
+      const response = await axios.patch(`${BASE_URL}/notes/${fileId}`, {
+        title,
+        content,
+        tags,
+      });
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        set({
+          error: error.response?.data?.message || 'Error updating node content',
           isLoading: false,
         });
       } else {

@@ -27,7 +27,7 @@ export const DocumentTitle = () => {
   if (!selectedNodeId) return null;
 
   const handleUpdate = () => {
-    if (!selectedNodeId || selectedFileTitle === undefined) return;
+    if (!selectedNodeId || selectedFileTitle === null) return;
 
     if (selectedFileTitle !== previousTitle) {
       updateNode(selectedNodeId, selectedFileTitle);
