@@ -14,6 +14,7 @@ import { useDataStore } from '@/store/useDataStore';
 const Editor = () => {
   const selectedFileId = useTreeUIStore((state) => state.selectedFileId);
   const fetchNodeContent = useDataStore((state) => state.fetchNodeContent);
+  const isSyncing = useDataStore((state) => state.isSyncing);
   const setSyncing = useDataStore((state) => state.setSyncing);
   const updateNote = useDataStore((state) => state.updateNote);
 
@@ -39,6 +40,17 @@ const Editor = () => {
       editor?.commands.setContent(contentJSON);
     });
   }, [selectedFileId, editor]);
+
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (isSyncing) {
+        e.preventDefault();
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [isSyncing]);
 
   // Listen for content changes (updates)
   useEffect(() => {
