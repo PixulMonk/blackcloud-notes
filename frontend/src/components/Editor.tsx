@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useMemo, useEffect } from 'react';
 
 import Highlight from '@tiptap/extension-highlight';
 import TextAlign from '@tiptap/extension-text-align';
@@ -14,6 +14,7 @@ import { useDataStore } from '@/store/useDataStore';
 const Editor = () => {
   const selectedFileId = useTreeUIStore((state) => state.selectedFileId);
   const fetchNodeContent = useDataStore((state) => state.fetchNodeContent);
+  const setSyncing = useDataStore((state) => state.setSyncing);
   const updateNote = useDataStore((state) => state.updateNote);
 
   const editor = useEditor({
@@ -57,7 +58,7 @@ const Editor = () => {
         // TipTap JSON. Once the encryption feature takes place this is NOT what's going to get
         // stored in the DB. Instead the TipTap JSON will get stringified which will then
         // be encrypted BEFORE getting stored in the DB. The reverse will happen for decryption
-
+        setSyncing(true);
         updateNote(
           undefined,
           JSON.stringify(contentJSON),
