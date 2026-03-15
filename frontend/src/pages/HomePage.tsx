@@ -1,7 +1,7 @@
 import Editor from '@/components/Editor';
 
 import { DocumentTitle } from '@/components/DocumentTitle';
-import SavingIndicator from '../components/SavingIndicator';
+import SyncingIndicator from '../components/SavingIndicator';
 
 import { useTreeUIStore } from '@/store/useTreeUIStore';
 
@@ -13,7 +13,7 @@ function HomePage() {
       {selectedNodeId ? (
         <div className="w-full max-w-5xl">
           <DocumentTitle />
-          <SavingIndicator />
+          <SyncingIndicator />
           <Editor />
         </div>
       ) : (

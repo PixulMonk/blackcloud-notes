@@ -1,6 +1,6 @@
 import { useDataStore } from '@/store/useDataStore';
 
-const SavingIndicator = () => {
+const SyncingIndicator = () => {
   const isSyncing = useDataStore((state) => state.isSyncing);
   return (
     <div className="mx-4 my-0 text-right">
@@ -13,4 +13,4 @@ const SavingIndicator = () => {
   );
 };
 
-export default SavingIndicator;
+export default SyncingIndicator;
