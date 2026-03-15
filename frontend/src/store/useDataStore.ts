@@ -11,6 +11,7 @@ axios.defaults.withCredentials = true;
 interface DataState {
   tree: TreeNode[];
   isLoading: boolean;
+  isFetchingContent: boolean;
   isSyncing: boolean;
   error: string | null;
 
@@ -48,6 +49,7 @@ interface DataState {
 export const useDataStore = create<DataState>((set) => ({
   tree: [],
   isLoading: false,
+  isFetchingContent: false,
   isSyncing: false,
   error: null,
 
@@ -225,20 +227,23 @@ export const useDataStore = create<DataState>((set) => ({
   },
 
   fetchNodeContent: async (fileId) => {
-    set({ isLoading: true, error: null });
+    set({ isFetchingContent: true, error: null });
 
     try {
       const response = await axios.get(`${BASE_URL}/notes/${fileId}`);
-      set({ isLoading: false });
+      set({ isFetchingContent: false });
       return response.data;
     } catch (error) {
       if (axios.isAxiosError(error)) {
         set({
           error: error.response?.data?.message || 'Error fetching node content',
-          isLoading: false,
+          isFetchingContent: false,
         });
       } else {
-        set({ error: 'An unexpected error occurred', isLoading: false });
+        set({
+          error: 'An unexpected error occurred',
+          isFetchingContent: false,
+        });
       }
       return null;
     }

@@ -1,4 +1,4 @@
-import { useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 
 import Highlight from '@tiptap/extension-highlight';
 import TextAlign from '@tiptap/extension-text-align';
@@ -11,9 +11,15 @@ import MenuBar from './MenuBar';
 import { useTreeUIStore } from '@/store/useTreeUIStore';
 import { useDataStore } from '@/store/useDataStore';
 
+import { SkeletonText } from './SkeletonText';
+
+// TODO: This entire component is an eyesore. Needs refactoring and separation later
+
 const Editor = () => {
+  const [showSkeleton, setShowSkeleton] = useState(false);
   const selectedFileId = useTreeUIStore((state) => state.selectedFileId);
   const fetchNodeContent = useDataStore((state) => state.fetchNodeContent);
+  const isFetchingContent = useDataStore((state) => state.isFetchingContent);
   const isSyncing = useDataStore((state) => state.isSyncing);
   const setSyncing = useDataStore((state) => state.setSyncing);
   const updateNote = useDataStore((state) => state.updateNote);
@@ -26,6 +32,15 @@ const Editor = () => {
     ],
     content: '',
   });
+
+  useEffect(() => {
+    if (!isFetchingContent) {
+      setShowSkeleton(false);
+      return;
+    }
+    const timeout = setTimeout(() => setShowSkeleton(true), 200);
+    return () => clearTimeout(timeout);
+  }, [isFetchingContent]);
 
   useEffect(() => {
     if (!selectedFileId) return;
@@ -95,11 +110,18 @@ const Editor = () => {
     <div className="mx-5 my-15">
       <EditorContext.Provider value={providerValue}>
         <div className="flex flex-col gap-5 item">
-          <MenuBar editor={editor} />
-          <EditorContent
-            editor={editor}
-            className="prose dark:prose-invert max-w-full p-2"
-          />
+          {selectedFileId && !isFetchingContent ? (
+            <MenuBar editor={editor} />
+          ) : null}
+
+          {showSkeleton ? (
+            <SkeletonText />
+          ) : (
+            <EditorContent
+              editor={editor}
+              className="prose dark:prose-invert max-w-full p-2"
+            />
+          )}
         </div>
 
         {/* <BubbleMenu editor={editor}>This is the bubble menu</BubbleMenu> */}
