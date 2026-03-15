@@ -24,6 +24,8 @@ const TreeNodeComponent = ({ node }: TreeNodeComponentProps) => {
 
   const renamingNodeId = useTreeUIStore((state) => state.renamingNodeId);
   const setRenamingNodeId = useTreeUIStore((state) => state.setRenamingNodeId);
+  const setFileTitle = useTreeUIStore((state) => state.setFileTitle);
+
   const isRenaming = node._id === renamingNodeId;
 
   const selectedNodeId = useTreeUIStore((state) => state.selectedNodeId);
@@ -39,9 +41,14 @@ const TreeNodeComponent = ({ node }: TreeNodeComponentProps) => {
   const handleRenameSubmit = () => {
     if (renamingNodeId) {
       updateNode(renamingNodeId, treeData.title);
+      setFileTitle(treeData.title);
     }
     setRenamingNodeId(null);
   };
+
+  useEffect(() => {
+    setTreeData(node);
+  }, [node]);
 
   useEffect(() => {
     if (isRenaming) {
