@@ -22,12 +22,14 @@ export const useTreeUIStore = create<TreeUIState>((set) => ({
     set({ renamingNodeId: id });
   },
 
-  selectNode: (node) =>
+  selectNode: (node) => {
+    if (node.type === 'folder') return;
+
     set({
       selectedNodeId: node._id,
-      selectedFileId: node.type === 'file' ? node.fileId ?? null : null,
-      selectedFileTitle: node.type === 'file' ? node.title ?? null : null,
-    }),
-
+      selectedFileId: node.type === 'file' ? (node.fileId ?? null) : null,
+      selectedFileTitle: node.type === 'file' ? (node.title ?? null) : null,
+    });
+  },
   setFileTitle: (newTitle) => set({ selectedFileTitle: newTitle }),
 }));
