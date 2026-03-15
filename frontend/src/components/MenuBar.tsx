@@ -15,6 +15,7 @@ import {
   AlignJustify,
   List,
   ListOrdered,
+  Underline,
 } from 'lucide-react';
 
 import { Button } from './ui/button';
@@ -91,6 +92,16 @@ const MenuBar = ({ editor }: MenuBarProps) => {
             className={editor.isActive('italic') ? 'is-active' : ''}
           >
             <Italic />
+          </Button>
+
+          <Button
+            variant="outline"
+            onMouseDown={run(() =>
+              editor.chain().focus().toggleUnderline().run(),
+            )}
+            className={editor.isActive('underline') ? 'is-active' : ''}
+          >
+            <Underline />
           </Button>
 
           <Button
