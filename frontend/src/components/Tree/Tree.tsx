@@ -1,6 +1,6 @@
 import { TreeNodeComponent } from './TreeNode';
 import { type TreeProps } from '@/types/tree';
-import { useTreeUIStore } from '@/store/useTreeUIStoreI';
+import { useTreeUIStore } from '@/store/useTreeUIStore';
 
 // Handles an array of nodes and passes it to TreeNodeCompoent to be individually rendered
 const Tree = ({ data }: TreeProps) => {
