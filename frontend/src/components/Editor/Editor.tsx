@@ -6,7 +6,7 @@ import TextAlign from '@tiptap/extension-text-align';
 import { useEditor, EditorContent, EditorContext } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 
-import MenuBar from './MenuBar';
+import MenuBar from '../MenuBar';
 
 import { useTreeUIStore } from '@/store/useTreeUIStore';
 import { useDataStore } from '@/store/useDataStore';
@@ -123,7 +123,6 @@ const Editor = () => {
             />
           )}
         </div>
-
         {/* <BubbleMenu editor={editor}>This is the bubble menu</BubbleMenu> */}
       </EditorContext.Provider>
     </div>

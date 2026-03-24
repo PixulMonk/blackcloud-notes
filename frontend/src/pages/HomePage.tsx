@@ -1,7 +1,7 @@
-import Editor from '@/components/Editor';
+import Editor from '@/components/Editor/Editor';
 
-import { DocumentTitle } from '@/components/DocumentTitle';
-import SyncingIndicator from '@/components/SyncingIndicator';
+import { DocumentTitle } from '@/components/Editor/DocumentTitle';
+import SyncingIndicator from '@/components/Editor/SyncingIndicator';
 import { useTreeUIStore } from '@/store/useTreeUIStore';
 
 function HomePage() {

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useTreeUIStore } from '@/store/useTreeUIStore';
-import { Input } from './ui/input';
+import { Input } from '../ui/input';
 import { useDataStore } from '@/store/useDataStore';
 
 export const DocumentTitle = () => {
