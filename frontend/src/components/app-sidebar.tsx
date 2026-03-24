@@ -17,7 +17,7 @@ import {
 } from '@/components/ui/sidebar';
 
 import { useDataStore } from '@/store/useDataStore';
-import { useTreeUIStore } from '@/store/useTreeUIStoreI';
+import { useTreeUIStore } from '@/store/useTreeUIStore';
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const tree = useDataStore((state) => state.tree);
