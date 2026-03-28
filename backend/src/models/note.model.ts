@@ -2,10 +2,13 @@ import mongoose, { Schema } from 'mongoose';
 
 export interface INote {
   _id: mongoose.Types.ObjectId;
-  userId: mongoose.Schema.Types.ObjectId;
-  title?: string;
-  encryptedContent?: string;
-  tags?: string[];
+  userId: mongoose.Types.ObjectId;
+  encryptedContent?: string; // base64 — IV ‖ ciphertext ‖ tag
+  schemaVersion: number;
+  isDeleted: boolean;
+  deletedAt?: Date;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 const noteSchema = new Schema<INote>(
@@ -15,11 +18,15 @@ const noteSchema = new Schema<INote>(
       ref: 'User',
       required: true,
     },
-    title: { type: String },
     encryptedContent: { type: String },
-    tags: [{ type: String }],
+    schemaVersion: { type: Number, required: true, default: 1 },
+    isDeleted: { type: Boolean, default: false },
+    deletedAt: { type: Date, default: null },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
+
+noteSchema.index({ userId: 1 });
+noteSchema.index({ userId: 1, isDeleted: 1 });
 
 export const Note = mongoose.model<INote>('Note', noteSchema);

@@ -1,14 +1,19 @@
 import mongoose, { Schema } from 'mongoose';
 
-// TODO: maybe add a profile pic field later?
-
 export interface IUser {
   _id: mongoose.Types.ObjectId;
   name: string;
   email: string;
-  password: string;
+  authVerifier: string;
+  protectedDEK: string;
+  argon2Salt: string;
+  argon2Params: {
+    memoryCost: number;
+    timeCost: number;
+    parallelism: number;
+  };
+  schemaVersion: number;
   subscription: string;
-  kdfSalt: string;
   lastLogin: Date;
   isVerified: boolean;
   resetPasswordToken?: string;
@@ -21,9 +26,16 @@ const userSchema = new Schema<IUser>(
   {
     name: { type: String },
     email: { type: String, required: true, unique: true },
-    password: { type: String, required: true },
+    authVerifier: { type: String, required: true },
+    protectedDEK: { type: String, required: true },
+    argon2Salt: { type: String, required: true },
+    argon2Params: {
+      memoryCost: { type: Number, required: true },
+      timeCost: { type: Number, required: true },
+      parallelism: { type: Number, required: true },
+    },
+    schemaVersion: { type: Number, required: true, default: 1 },
     subscription: { type: String },
-    kdfSalt: { type: String, required: true },
     lastLogin: { type: Date, default: Date.now },
     isVerified: { type: Boolean, default: false },
     resetPasswordToken: String,
@@ -31,7 +43,7 @@ const userSchema = new Schema<IUser>(
     verificationToken: String,
     verificationTokenExpiresAt: Date,
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 export const User = mongoose.model<IUser>('User', userSchema);
