@@ -25,6 +25,7 @@
     "nodemailer": "^6.10.1"
   },
   "devDependencies": {
+    "@blackcloud/shared": "*",
     "@types/bcrypt": "^5.0.2",
     "@types/cookie-parser": "^1.4.9",
     "@types/cors": "^2.8.19",

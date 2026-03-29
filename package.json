@@ -1,1 +1,9 @@
-{}
+{
+  "name": "blackcloud-notes",
+  "private": true,
+  "workspaces": [
+    "backend",
+    "frontend",
+    "shared"
+  ]
+}

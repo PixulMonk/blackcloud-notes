@@ -4,9 +4,9 @@ import crypto from 'crypto';
 import mongoose, { sanitizeFilter } from 'mongoose';
 import dotenv from 'dotenv';
 
+import { ENCRYPTION_CONFIG } from '@blackcloud/shared';
 import asyncHandler from '../utils/asyncHandler';
 import { generateSixDigitCode } from '../utils/generateVerificationCode';
-import { generateSalt } from '../utils/generateKDFSalt';
 import { User } from '../models/user.model';
 import { generateTokenAndSetCookie } from '../utils/generateTokenAndSetCookie';
 import {
@@ -67,7 +67,7 @@ export const signup = asyncHandler(
       protectedDEK,
       argon2Salt,
       argon2Params,
-      schemaVersion: 1, // TODO: should probably specify in a config file later instead of hardcoding
+      schemaVersion: ENCRYPTION_CONFIG.schemaVersion,
       verificationToken: generateSixDigitCode(),
       verificationTokenExpiresAt: Date.now() + 5 * 60 * 1000, // expires in 5 minutes
     });
@@ -88,7 +88,9 @@ export const signup = asyncHandler(
     // remove sensitive info for return response
     const {
       hashedAuthToken: _removed,
+      protectedDEK: _dekRemoved,
       argon2Salt: _saltRemoved,
+      argon2Params: _paramsRemoved,
       ...sanitizedUser
     } = newUser.toObject();
 
@@ -100,29 +102,73 @@ export const signup = asyncHandler(
   },
 );
 
+export const getSalt = asyncHandler(
+  async (req: Request, res: Response): Promise<void> => {
+    const { email } = req.body;
+    if (!email) {
+      throw new Error('All fields are required');
+    }
+
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      const fakeSalt = crypto
+        .createHmac('sha256', process.env.SALT_HMAC_SECRET!)
+        .update(email)
+        .digest('base64');
+
+      res.status(200).json({
+        sucess: true,
+        argon2Salt: fakeSalt,
+        argon2Params: ENCRYPTION_CONFIG.argon2,
+      });
+      return;
+    }
+
+    res.status(200).json({
+      success: true,
+      argon2Salt: user.argon2Salt,
+      argon2Params: user.argon2Params,
+    });
+  },
+);
+
 export const login = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
-    const { email, password } = req.body;
+    const { email, authToken } = req.body;
+
+    if (!email || !authToken) {
+      throw new Error('All fields are required');
+    }
+
     const user = await User.findOne({ email });
 
     if (!user) {
       throw new Error('Invalid credentials');
     }
 
-    const isPasswordCorrect = await bcrypt.compare(password, user.password);
+    const isAuthVerified = await bcrypt.compare(
+      authToken,
+      user.hashedAuthToken,
+    );
 
-    if (!isPasswordCorrect) {
+    if (!isAuthVerified) {
       throw new Error('Invalid credentials');
     }
 
     const userId = user._id as mongoose.Types.ObjectId;
     generateTokenAndSetCookie(res, userId.toString());
 
+    // check what you are returning.. See diagram
     const {
-      password: _removed,
-      kdfSalt: _saltRemoved,
+      hashedAuthToken: _removed,
+      argon2Salt: _saltRemoved,
+      argon2Params: _paramsRemoved,
       ...sanitizedUser
     } = user.toObject();
+
+    user.lastLogin = new Date();
+    await user.save();
 
     res.status(200).json({
       success: true,
