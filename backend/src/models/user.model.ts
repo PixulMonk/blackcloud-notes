@@ -4,7 +4,7 @@ export interface IUser {
   _id: mongoose.Types.ObjectId;
   name: string;
   email: string;
-  authVerifier: string;
+  hashedAuthToken: string;
   protectedDEK: string;
   argon2Salt: string;
   argon2Params: {
@@ -26,7 +26,7 @@ const userSchema = new Schema<IUser>(
   {
     name: { type: String },
     email: { type: String, required: true, unique: true },
-    authVerifier: { type: String, required: true },
+    hashedAuthToken: { type: String, required: true },
     protectedDEK: { type: String, required: true },
     argon2Salt: { type: String, required: true },
     argon2Params: {

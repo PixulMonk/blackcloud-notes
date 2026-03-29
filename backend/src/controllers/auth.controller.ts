@@ -26,30 +26,48 @@ export const checkAuth = asyncHandler(
       throw new Error('User not found');
     }
     res.status(200).json({ success: true, user: user });
-  }
+  },
 );
 
 export const signup = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
-    const { name, email, password } = req.body;
-    if (!name || !email || !password) {
+    const {
+      name,
+      email,
+      authToken, // bytes 32-63 from client-side Argon2id
+      protectedDEK, // base64 — IV ‖ ciphertext ‖ tag
+      argon2Salt, // base64 — CSPRNG generated client-side
+      argon2Params, // { memoryCost, timeCost, parallelism }
+    } = req.body;
+
+    if (
+      !name ||
+      !email ||
+      !authToken ||
+      !protectedDEK ||
+      !argon2Salt ||
+      !argon2Params
+    ) {
       throw new Error('All fields are required');
     }
 
     const userAlreadyExists = await User.findOne({ email });
     if (userAlreadyExists) {
       throw new Error(
-        'Unable to create account. Please check your details or try logging in'
+        'Unable to create account. Please check your details or try logging in',
       );
     }
 
-    const hashedPassword: string = await bcrypt.hash(password, 10);
+    const hashedAuthToken: string = await bcrypt.hash(authToken, 12);
 
     const newUser = new User({
       name,
       email,
-      kdfSalt: generateSalt(),
-      password: hashedPassword,
+      hashedAuthToken: hashedAuthToken,
+      protectedDEK,
+      argon2Salt,
+      argon2Params,
+      schemaVersion: 1, // TODO: should probably specify in a config file later instead of hardcoding
       verificationToken: generateSixDigitCode(),
       verificationTokenExpiresAt: Date.now() + 5 * 60 * 1000, // expires in 5 minutes
     });
@@ -64,13 +82,13 @@ export const signup = asyncHandler(
     await sendVerificationEmail(
       newUser.name,
       newUser.email,
-      newUser.verificationToken!
+      newUser.verificationToken!,
     );
 
-    // remove password for return response
+    // remove sensitive info for return response
     const {
-      password: _removed,
-      kdfSalt: _saltRemoved,
+      hashedAuthToken: _removed,
+      argon2Salt: _saltRemoved,
       ...sanitizedUser
     } = newUser.toObject();
 
@@ -79,7 +97,7 @@ export const signup = asyncHandler(
       message: 'User created successfully',
       user: sanitizedUser,
     });
-  }
+  },
 );
 
 export const login = asyncHandler(
@@ -111,7 +129,7 @@ export const login = asyncHandler(
       message: 'Logged in successfully',
       user: sanitizedUser,
     });
-  }
+  },
 );
 
 export const logout = async (req: Request, res: Response): Promise<void> => {
@@ -144,7 +162,7 @@ export const verifyEmail = asyncHandler(
       message: 'User verified successfully',
       user: user,
     });
-  }
+  },
 );
 
 export const forgotPassword = asyncHandler(
@@ -175,7 +193,7 @@ export const forgotPassword = asyncHandler(
     await sendPasswordResetEmail(
       user!.name,
       user!.email,
-      `${APP_BASE_URL}/reset-password/${resetToken}`
+      `${APP_BASE_URL}/reset-password/${resetToken}`,
     );
 
     res.status(200).json({
@@ -183,7 +201,7 @@ export const forgotPassword = asyncHandler(
       message:
         'If an account with that email exists, you will receive further instructions shortly.',
     });
-  }
+  },
 );
 
 export const resetPassword = asyncHandler(
@@ -213,5 +231,5 @@ export const resetPassword = asyncHandler(
       sucess: true,
       message: 'Your password has been reset successfully',
     });
-  }
+  },
 );
