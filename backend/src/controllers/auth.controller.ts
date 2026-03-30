@@ -253,7 +253,16 @@ export const forgotPassword = asyncHandler(
 export const resetPassword = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
     const { token } = req.params;
-    const { password } = req.body;
+    const {
+      authToken, // new auth token derived from new password
+      protectedDEK, // DEK re-encrypted with new KEK
+      argon2Salt, // new CSPRNG salt
+      argon2Params, // new params (may be same as before)
+    } = req.body;
+
+    if (!authToken || !protectedDEK || !argon2Salt || !argon2Params) {
+      throw new Error('All fields are required');
+    }
 
     const user = await User.findOne({
       resetPasswordToken: token,
@@ -264,17 +273,21 @@ export const resetPassword = asyncHandler(
       throw new Error('Invalid or expired reset link');
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedAuthToken = await bcrypt.hash(authToken, 12);
 
-    user!.password = hashedPassword;
-    user!.resetPasswordToken = undefined;
-    user!.resetPasswordExpiresAt = undefined;
-    await user!.save();
+    // atomic update — all fields change together or not at all
+    user.hashedAuthToken = hashedAuthToken;
+    user.protectedDEK = protectedDEK;
+    user.argon2Salt = argon2Salt;
+    user.argon2Params = argon2Params;
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpiresAt = undefined;
+    await user.save();
 
     await sendPasswordResetSuccessEmail(user.name, user.email);
 
     res.status(200).json({
-      sucess: true,
+      success: true,
       message: 'Your password has been reset successfully',
     });
   },

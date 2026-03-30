@@ -113,7 +113,11 @@ export const updateTreeNode = asyncHandler(async (req, res) => {
     throw new Error('User not authenticated');
   }
 
-  if (!treeNodeId || !mongoose.Types.ObjectId.isValid(treeNodeId)) {
+  if (
+    !treeNodeId ||
+    typeof treeNodeId !== 'string' ||
+    !mongoose.Types.ObjectId.isValid(treeNodeId)
+  ) {
     return res.status(400).json({
       success: false,
       message: 'Invalid tree node ID',
@@ -149,7 +153,7 @@ export const updateTreeNode = asyncHandler(async (req, res) => {
   const treeNodeToUpdate = await TreeNode.findOneAndUpdate(
     { _id: treeNodeId, userId: req.user._id },
     { $set: updatedFields },
-    { new: true }
+    { new: true },
   );
 
   if (!treeNodeToUpdate) {
@@ -161,7 +165,7 @@ export const updateTreeNode = asyncHandler(async (req, res) => {
     associatedFile = await Note.findOneAndUpdate(
       { _id: treeNodeToUpdate.fileId, userId: req.user._id },
       { $set: { title } },
-      { new: true }
+      { new: true },
     );
 
     if (!associatedFile) {
@@ -184,7 +188,11 @@ export const deleteTreeNode = asyncHandler(async (req, res) => {
     throw new Error('User not authenticated');
   }
 
-  if (!treeNodeId || !mongoose.Types.ObjectId.isValid(treeNodeId)) {
+  if (
+    !treeNodeId ||
+    typeof treeNodeId !== 'string' ||
+    !mongoose.Types.ObjectId.isValid(treeNodeId)
+  ) {
     return res.status(400).json({
       success: false,
       message: 'Invalid tree node ID',
@@ -215,7 +223,7 @@ export const deleteTreeNode = asyncHandler(async (req, res) => {
   if (treeNodeToDelete.type === 'folder') {
     const { notes, nodes } = await deleteNodeChildren(
       treeNodeId,
-      req.user!._id.toString()
+      req.user!._id.toString(),
     );
     deletedNotesCount += notes;
     deletedNodesCount += nodes;
@@ -251,7 +259,11 @@ export const softDeleteTreeNode = asyncHandler(async (req, res) => {
     throw new Error('User not authenticated');
   }
 
-  if (!treeNodeId || !mongoose.Types.ObjectId.isValid(treeNodeId)) {
+  if (
+    !treeNodeId ||
+    typeof treeNodeId !== 'string' ||
+    !mongoose.Types.ObjectId.isValid(treeNodeId)
+  ) {
     return res.status(400).json({
       success: false,
       message: 'Invalid tree node ID',
@@ -284,7 +296,11 @@ export const archiveTreeNode = asyncHandler(async (req, res) => {
     throw new Error('User not authenticated');
   }
 
-  if (!treeNodeId || !mongoose.Types.ObjectId.isValid(treeNodeId)) {
+  if (
+    !treeNodeId ||
+    typeof treeNodeId !== 'string' ||
+    !mongoose.Types.ObjectId.isValid(treeNodeId)
+  ) {
     return res.status(400).json({
       success: false,
       message: 'Invalid tree node ID',
