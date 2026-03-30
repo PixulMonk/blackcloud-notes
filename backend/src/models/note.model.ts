@@ -5,8 +5,6 @@ export interface INote {
   userId: mongoose.Types.ObjectId;
   encryptedContent?: string; // base64 — IV ‖ ciphertext ‖ tag
   schemaVersion: number;
-  isDeleted: boolean;
-  deletedAt?: Date;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -20,8 +18,6 @@ const noteSchema = new Schema<INote>(
     },
     encryptedContent: { type: String },
     schemaVersion: { type: Number, required: true, default: 1 },
-    isDeleted: { type: Boolean, default: false },
-    deletedAt: { type: Date, default: null },
   },
   { timestamps: true },
 );

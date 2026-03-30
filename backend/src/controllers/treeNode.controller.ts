@@ -252,6 +252,7 @@ export const deleteTreeNode = asyncHandler(async (req, res) => {
   });
 });
 
+// TODO: unify softDeleteTreeNode and archiveTreeNode
 export const softDeleteTreeNode = asyncHandler(async (req, res) => {
   const treeNodeId = req.params.id;
 
@@ -269,7 +270,8 @@ export const softDeleteTreeNode = asyncHandler(async (req, res) => {
       message: 'Invalid tree node ID',
     });
   }
-  const treeNodeToSoftDelete = await TreeNode.findOneAndUpdate({
+
+  const treeNodeToSoftDelete = await TreeNode.findOne({
     _id: treeNodeId,
     userId: req.user._id,
   });
@@ -278,8 +280,13 @@ export const softDeleteTreeNode = asyncHandler(async (req, res) => {
     throw new Error('Tree node does not exist or unauthorized');
   }
 
+  if (treeNodeToSoftDelete.isDeleted) {
+    throw new Error('Node already deleted');
+  }
+
   await updateNodeAndChildrenRecursively(treeNodeId, req.user._id.toString(), {
     isDeleted: true,
+    deletedAt: new Date(),
   });
 
   res.status(200).json({
@@ -306,7 +313,7 @@ export const archiveTreeNode = asyncHandler(async (req, res) => {
       message: 'Invalid tree node ID',
     });
   }
-  const treeNodeToArchive = await TreeNode.findOneAndUpdate({
+  const treeNodeToArchive = await TreeNode.findOne({
     _id: treeNodeId,
     userId: req.user._id,
   });
@@ -315,8 +322,17 @@ export const archiveTreeNode = asyncHandler(async (req, res) => {
     throw new Error('Tree node does not exist or unauthorized');
   }
 
+  if (treeNodeToArchive.isArchived) {
+    throw new Error('Node already archived');
+  }
+
+  if (treeNodeToArchive.isDeleted) {
+    throw new Error('Cannot archive a deleted node');
+  }
+
   await updateNodeAndChildrenRecursively(treeNodeId, req.user._id.toString(), {
     isArchived: true,
+    archivedAt: new Date(),
   });
 
   res.status(200).json({

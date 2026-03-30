@@ -1,3 +1,4 @@
+import { ENCRYPTION_CONFIG } from '@blackcloud/shared';
 import asyncHandler from '../utils/asyncHandler';
 import { Note } from '../models/note.model';
 
@@ -30,7 +31,7 @@ export const getNote = asyncHandler(async (req, res) => {
 });
 
 export const createNote = asyncHandler(async (req, res) => {
-  const { title, content, tags } = req.body ?? {};
+  const { encryptedContent } = req.body ?? {};
 
   if (!req.user?._id) {
     throw new Error('User not authenticated');
@@ -38,9 +39,8 @@ export const createNote = asyncHandler(async (req, res) => {
 
   const newNote = new Note({
     userId: req.user?._id,
-    title: title || 'Untitled document',
-    encryptedContent: content ?? '',
-    tags: tags ?? [],
+    encryptedContent: encryptedContent ?? '',
+    schemaVersion: ENCRYPTION_CONFIG.schemaVersion,
   });
 
   await newNote.save();
@@ -53,7 +53,7 @@ export const createNote = asyncHandler(async (req, res) => {
 });
 
 export const updateNote = asyncHandler(async (req, res) => {
-  const { title, content, tags } = req.body ?? {};
+  const { encryptedContent } = req.body ?? {};
   const noteId = req.params.id;
 
   if (!req.user?._id) {
@@ -61,14 +61,13 @@ export const updateNote = asyncHandler(async (req, res) => {
   }
 
   const updatedFields: any = {};
-  if (title !== undefined) updatedFields.title = title;
-  if (content !== undefined) updatedFields.encryptedContent = content;
-  if (tags !== undefined) updatedFields.tags = tags;
+  if (encryptedContent !== undefined)
+    updatedFields.encryptedContent = encryptedContent;
 
   const noteToUpdate = await Note.findOneAndUpdate(
     { _id: noteId, userId: req.user._id },
     { $set: updatedFields },
-    { new: true }
+    { new: true },
   );
 
   if (!noteToUpdate) {
