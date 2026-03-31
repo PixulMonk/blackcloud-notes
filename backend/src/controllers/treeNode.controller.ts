@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import { ENCRYPTION_CONFIG } from '@blackcloud/shared';
 import asyncHandler from '../utils/asyncHandler';
 import { TreeNode } from '../models/treeNode.model';
 import { Note } from '../models/note.model';
@@ -45,7 +46,8 @@ export const getAllArchived = asyncHandler(async (req, res) => {
 });
 
 export const createTreeNode = asyncHandler(async (req, res) => {
-  const { title, type, isArchived, isDeleted, icon, parentId } = req.body ?? {};
+  const { encryptedTitle, type, isArchived, isDeleted, icon, parentId } =
+    req.body ?? {};
   let message = '';
   let fileId = null;
 
@@ -57,9 +59,8 @@ export const createTreeNode = asyncHandler(async (req, res) => {
     message = 'File created successfully';
     const newNote = new Note({
       userId: req.user._id,
-      title: title || 'Untitled document',
       encryptedContent: '',
-      tags: [],
+      schemaVersion: ENCRYPTION_CONFIG.schemaVersion,
     });
 
     await newNote.save(); // Save first, then get ID
@@ -76,7 +77,10 @@ export const createTreeNode = asyncHandler(async (req, res) => {
 
   const newTreeNode = new TreeNode({
     userId: req.user._id,
-    title: title || 'Untitled document',
+    // IMPORTANT NOTE: prior to the implementation of the encryption feature, the fallback
+    // if title is null was handled here on the backend. Now that the encryption feature has been
+    // implemented, the fallback should happen client side.
+    encryptedTitle: encryptedTitle,
     type,
     position: siblingCount,
     isArchived: isArchived ?? false,
@@ -97,7 +101,7 @@ export const createTreeNode = asyncHandler(async (req, res) => {
 
 export const updateTreeNode = asyncHandler(async (req, res) => {
   const {
-    title,
+    encryptedTitle,
     type,
     position,
     isArchived,
@@ -124,35 +128,18 @@ export const updateTreeNode = asyncHandler(async (req, res) => {
     });
   }
 
-  // Prevent a node from being its own parent
-  if (parentId && parentId.toString() === treeNodeId.toString()) {
+  if (
+    encryptedTitle !== undefined &&
+    (typeof encryptedTitle !== 'string' || encryptedTitle.length === 0)
+  ) {
     return res.status(400).json({
       success: false,
-      message: 'A node cannot be its own parent',
+      message: 'Invalid encrypted title',
     });
   }
 
-  const updatedFields: any = {};
-
-  if (title !== undefined) updatedFields.title = title;
-  if (type !== undefined) updatedFields.type = type;
-  if (position !== undefined) updatedFields.position = position;
-  if (isArchived !== undefined) updatedFields.isArchived = isArchived;
-  if (isDeleted !== undefined) updatedFields.isDeleted = isDeleted;
-  if (icon !== undefined) updatedFields.icon = icon;
-  if (parentId !== undefined) updatedFields.parentId = parentId;
-
-  // Only allow fileId updates if node is a file
-  if (fileId !== undefined && type !== 'file') {
-    return res.status(400).json({
-      success: false,
-      message: 'Cannot assign a fileId to a folder node',
-    });
-  }
-
-  const treeNodeToUpdate = await TreeNode.findOneAndUpdate(
+  const treeNodeToUpdate = await TreeNode.findOne(
     { _id: treeNodeId, userId: req.user._id },
-    { $set: updatedFields },
     { new: true },
   );
 
@@ -160,24 +147,66 @@ export const updateTreeNode = asyncHandler(async (req, res) => {
     throw new Error('Tree node does not exist or unauthorized');
   }
 
-  let associatedFile = undefined;
-  if (treeNodeToUpdate.type === 'file' && title !== undefined) {
-    associatedFile = await Note.findOneAndUpdate(
-      { _id: treeNodeToUpdate.fileId, userId: req.user._id },
-      { $set: { title } },
-      { new: true },
-    );
-
-    if (!associatedFile) {
-      throw new Error('Associated note not found or unauthorized');
-    }
+  if (treeNodeToUpdate.isDeleted) {
+    return res.status(400).json({
+      success: false,
+      message: 'Cannot update a deleted node',
+    });
   }
+
+  if (parentId && parentId.toString() === treeNodeId.toString()) {
+    return res.status(400).json({
+      success: false,
+      message: 'A node cannot be its own parent',
+    });
+  }
+
+  const finalIsDeleted =
+    isDeleted !== undefined ? isDeleted : treeNodeToUpdate.isDeleted;
+  const finalIsArchived =
+    isArchived !== undefined ? isArchived : treeNodeToUpdate.isArchived;
+
+  if (isDeleted && isArchived) {
+    return res.status(400).json({
+      success: false,
+      message: 'Node cannot be both deleted and archived',
+    });
+  }
+
+  if (type !== undefined && type !== treeNodeToUpdate.type) {
+    return res.status(400).json({
+      success: false,
+      message: 'Changing node type is not allowed',
+    });
+  }
+
+  if (fileId !== undefined && type !== 'file') {
+    return res.status(400).json({
+      success: false,
+      message: 'Cannot assign a fileId to a folder node',
+    });
+  }
+
+  const updatedFields: any = {};
+  if (encryptedTitle !== undefined)
+    updatedFields.encryptedTitle = encryptedTitle;
+  if (position !== undefined) updatedFields.position = position;
+  if (isArchived !== undefined) updatedFields.isArchived = isArchived;
+  if (isDeleted !== undefined) updatedFields.isDeleted = isDeleted;
+  if (icon !== undefined) updatedFields.icon = icon;
+  if (parentId !== undefined) updatedFields.parentId = parentId;
+  if (fileId !== undefined) updatedFields.fileId = fileId;
+
+  const updatedTreeNode = await TreeNode.findOneAndUpdate(
+    { _id: treeNodeId, userId: req.user._id },
+    { $set: updatedFields },
+    { new: true },
+  );
 
   res.status(200).json({
     success: true,
     message: `Tree node updated successfully (${treeNodeToUpdate.type})`,
     node: treeNodeToUpdate,
-    file: associatedFile,
   });
 });
 

@@ -6,7 +6,6 @@ export interface ITreeNode extends Document {
   encryptedTitle: string; // base64 — IV ‖ ciphertext ‖ tag
   type: 'folder' | 'file';
   position: number;
-  // TODO: archivedAt and deletedAt were both added recently.. Make sure to update your treeNode controller accordingly
   isArchived?: boolean;
   archivedAt?: Date;
   isDeleted?: boolean;
