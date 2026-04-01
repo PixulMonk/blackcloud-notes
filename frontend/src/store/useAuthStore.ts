@@ -1,6 +1,8 @@
 import { create } from 'zustand';
 import axios from 'axios';
 
+import { type Argon2Params, type ProtectedDEK } from '@/types/encryption';
+
 const API_URL = 'http://localhost:3000/api/auth';
 axios.defaults.withCredentials = true;
 
@@ -21,7 +23,14 @@ interface AuthState {
   isCheckingAuth: boolean;
   setMessage: (message: string | null) => void;
   setError: (error: string | null) => void;
-  signup: (name: string, email: string, password: string) => Promise<boolean>;
+  signup: (
+    name: string,
+    email: string,
+    authToken: Uint8Array,
+    protectedDEK: ProtectedDEK,
+    argon2Salt: Uint8Array,
+    argon2Params: Argon2Params,
+  ) => Promise<boolean>;
   login: (email: string, password: string) => Promise<boolean>;
   verifyEmail: (verificationCode: string) => Promise<boolean>;
   checkAuth: () => Promise<void>;
@@ -40,13 +49,23 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   setMessage: (message) => set({ message }),
   setError: (error) => set({ error }),
-  signup: async (name, email, password) => {
+  signup: async (
+    name,
+    email,
+    authToken,
+    protectedDEK,
+    argon2Salt,
+    argon2Params,
+  ) => {
     set({ isLoading: true, error: null });
     try {
       const response = await axios.post(`${API_URL}/signup`, {
         name,
         email,
-        password,
+        authToken,
+        protectedDEK,
+        argon2Salt,
+        argon2Params,
       });
       set({
         user: response.data.user,

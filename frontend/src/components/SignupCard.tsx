@@ -1,5 +1,12 @@
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FcGoogle } from 'react-icons/fc';
+
+import { Eye, EyeOff, AlertCircleIcon, Loader } from 'lucide-react';
+
+import { cn } from '@/lib/utils';
+import { initializeUserVault } from '@/lib/crypto/vault';
+import keyDerivationFunction from '@/lib/crypto/kdf';
 
 import {
   Card,
@@ -9,16 +16,12 @@ import {
   CardContent,
   CardFooter,
 } from '@/components/ui/card';
-
-import { cn } from '@/lib/utils';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
-import { Eye, EyeOff, AlertCircleIcon, Loader } from 'lucide-react';
-import { useState } from 'react';
 import { useAuthStore } from '@/store/useAuthStore';
 
 export default function SignupCard() {
@@ -42,25 +45,54 @@ export default function SignupCard() {
     }
     if (!hasAgreedToTerms) {
       setError(
-        'Please agree to the Terms of Service and Conditions before signing up.'
+        'Please agree to the Terms of Service and Conditions before signing up.',
       );
       return;
     }
 
     try {
-      const success = await signup(name, email, password);
+      // Derive keys
+      const { argon2Salt, keyEncryptionKey, authToken, argon2Params } =
+        await keyDerivationFunction(password);
+
+      if (!argon2Salt || !keyEncryptionKey || !authToken || !argon2Params) {
+        throw new Error('Key derivation failed: missing required values.');
+      }
+
+      if (!(argon2Salt instanceof Uint8Array)) {
+        throw new Error('Invalid salt format');
+      }
+
+      const { protectedDEK } = await initializeUserVault(keyEncryptionKey);
+
+      if (!protectedDEK) {
+        throw new Error('Vault initialization failed.');
+      }
+
+      const success = await signup(
+        name,
+        email,
+        authToken,
+        protectedDEK,
+        argon2Salt,
+        argon2Params,
+      );
       if (success) {
+        // Add 'await' here
         navigate('/verify-email');
       }
     } catch (error: unknown) {
       if (error instanceof Error) {
         console.error('Error:', error.message);
+        setError(error.message);
       } else {
         console.error('Unknown error:', error);
+        setError('Something went wrong. Please try again.');
       }
     }
   };
 
+  // TODO: extract strength indicator to a new component
   // PASSWORD REQUIREMENTS AND STRENGTH INDICATOR
   const arePasswordRequirementsMet = (password: string): boolean => {
     return passwordRequirements.every((req) => req.test(password));
@@ -188,7 +220,7 @@ export default function SignupCard() {
                             'h-1 flex-1 rounded transition-colors',
                             i < strength
                               ? colors[Math.max(strength - 1, 0)]
-                              : 'bg-gray-200'
+                              : 'bg-gray-200',
                           )}
                         />
                       ))}
@@ -200,8 +232,8 @@ export default function SignupCard() {
                         'text-sm mt-1',
                         colors[Math.max(strength - 1, 0)].replace(
                           'bg-',
-                          'text-'
-                        )
+                          'text-',
+                        ),
                       )}
                     >
                       {labels[Math.max(strength - 1, 0)]}
@@ -216,13 +248,13 @@ export default function SignupCard() {
                           <div
                             className={cn(
                               'w-2 h-2 rounded-full transition-colors',
-                              valid ? 'bg-green-500' : 'bg-gray-300'
+                              valid ? 'bg-green-500' : 'bg-gray-300',
                             )}
                           />
                           <span
                             className={cn(
                               'transition-colors',
-                              valid ? 'text-green-600' : 'text-gray-500'
+                              valid ? 'text-green-600' : 'text-gray-500',
                             )}
                           >
                             {req.label}
