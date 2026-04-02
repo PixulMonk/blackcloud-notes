@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import axios from 'axios';
 
 import { type Argon2Params, type ProtectedDEK } from '@/types/encryption';
+import { toBase64 } from '@/lib/crypto/crypto-utils';
 
 const API_URL = 'http://localhost:3000/api/auth';
 axios.defaults.withCredentials = true;
@@ -59,14 +60,21 @@ export const useAuthStore = create<AuthState>((set) => ({
   ) => {
     set({ isLoading: true, error: null });
     try {
-      const response = await axios.post(`${API_URL}/signup`, {
+      const payload = {
         name,
         email,
-        authToken,
-        protectedDEK,
-        argon2Salt,
+        authToken: toBase64(authToken),
+        protectedDEK: {
+          iv: toBase64(protectedDEK.iv),
+          ciphertext: toBase64(protectedDEK.ciphertext),
+          authTag: toBase64(protectedDEK.authTag),
+        },
+        argon2Salt: toBase64(argon2Salt),
         argon2Params,
-      });
+      };
+
+      const response = await axios.post(`${API_URL}/signup`, payload);
+
       set({
         user: response.data.user,
         isAuthenticated: true,

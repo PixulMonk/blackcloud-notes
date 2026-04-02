@@ -1,4 +1,4 @@
-import * as argon2 from 'argon2-browser';
+import { argon2id } from 'hash-wasm';
 
 import { type DerivationResult } from '@/types/encryption';
 
@@ -9,22 +9,22 @@ export const keyDerivationFunction = async (
   const argon2Salt =
     providedSalt ?? window.crypto.getRandomValues(new Uint8Array(16));
 
-  const derived = await argon2.hash({
-    pass: masterPassword,
+  const derived = await argon2id({
+    password: masterPassword,
     salt: argon2Salt,
-    time: 2,
-    mem: 65536,
-    hashLen: 64,
     parallelism: 4,
-    type: argon2.ArgonType.Argon2id,
+    iterations: 2, // 'time' in your old code
+    memorySize: 65536, // 'mem' in your old code
+    hashLength: 64,
+    outputType: 'binary', // Returns Uint8Array
   });
 
-  if (derived.hash.length !== 64) {
+  if (derived.length !== 64) {
     throw new Error('Invalid key length from Argon2');
   }
 
-  const keyEncryptionKey = derived.hash.slice(0, 32);
-  const authToken = derived.hash.slice(32, 64);
+  const keyEncryptionKey = derived.slice(0, 32);
+  const authToken = derived.slice(32, 64);
 
   return {
     argon2Salt,

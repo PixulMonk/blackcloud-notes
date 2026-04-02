@@ -78,7 +78,6 @@ export default function SignupCard() {
         argon2Params,
       );
       if (success) {
-        // Add 'await' here
         navigate('/verify-email');
       }
     } catch (error: unknown) {
