@@ -26,6 +26,9 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 import { useAuthStore } from '@/store/useAuthStore';
 import keyDerivationFunction from '@/lib/crypto/kdf';
+import { decryptAESGCM } from '@/lib/crypto/aes';
+import { toBase64 } from '@/lib/crypto/crypto-utils';
+import { useVaultStore } from '@/store/useVaultStore';
 
 export default function LoginCard() {
   const location = useLocation();
@@ -36,6 +39,7 @@ export default function LoginCard() {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const { login, getLoginMetadata, error, isLoading } = useAuthStore();
+  const { setKeys, clearKeys } = useVaultStore();
 
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -53,21 +57,24 @@ export default function LoginCard() {
         argon2Salt,
       );
 
-      // TODO: Next, use the KEK to decrypt the protectedDEK
-      const encryptedBuffer = await window.crypto.subtle.encrypt(
-        {
-          name: 'AES-GCM',
-          iv: ivBytes,
-          tagLength: 128,
-        },
-        cryptoKey,
-        dekBytes,
-      );
-      // TODO: Then these keys need to be stored somewhere
+      const authTokenBase64 = toBase64(authToken);
 
-      const success = await login(email, authToken);
+      const success = await login(email, authTokenBase64);
+
       if (success) {
+        const dataEncryptionKey = await decryptAESGCM(
+          protectedDEK.ciphertext,
+          protectedDEK.authTag,
+          keyEncryptionKey,
+          protectedDEK.iv,
+        );
+
+        setKeys(keyEncryptionKey, dataEncryptionKey);
         navigate('/');
+      }
+
+      if (!success) {
+        clearKeys;
       }
     } catch (error: unknown) {
       if (error instanceof Error) {

@@ -37,7 +37,7 @@ interface AuthState {
     argon2Salt: Uint8Array,
     argon2Params: Argon2Params,
   ) => Promise<boolean>;
-  login: (email: string, authToken: Uint8Array) => Promise<boolean>;
+  login: (email: string, authToken: string) => Promise<boolean>;
   getLoginMetadata: (email: string) => Promise<LoginMetaData | undefined>;
   verifyEmail: (verificationCode: string) => Promise<boolean>;
   checkAuth: () => Promise<void>;
