@@ -1,5 +1,14 @@
+import { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { FcGoogle } from 'react-icons/fc';
+
+import {
+  Eye,
+  EyeOff,
+  AlertCircleIcon,
+  CheckCircle2Icon,
+  Loader,
+} from 'lucide-react';
 
 import {
   Card,
@@ -15,15 +24,8 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
-import {
-  Eye,
-  EyeOff,
-  AlertCircleIcon,
-  CheckCircle2Icon,
-  Loader,
-} from 'lucide-react';
-import { useState } from 'react';
 import { useAuthStore } from '@/store/useAuthStore';
+import keyDerivationFunction from '@/lib/crypto/kdf';
 
 export default function LoginCard() {
   const location = useLocation();
@@ -33,12 +35,37 @@ export default function LoginCard() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const { login, error, isLoading } = useAuthStore();
+  const { login, getLoginMetadata, error, isLoading } = useAuthStore();
 
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
     try {
-      const success = await login(email, password);
+      const loginMetaData = await getLoginMetadata(email);
+      if (!loginMetaData) {
+        throw new Error('Failed to fetch login metadata from the database');
+      }
+
+      const { argon2Salt, protectedDEK, argon2Params } = loginMetaData;
+
+      const { authToken, keyEncryptionKey } = await keyDerivationFunction(
+        password,
+        argon2Salt,
+      );
+
+      // TODO: Next, use the KEK to decrypt the protectedDEK
+      const encryptedBuffer = await window.crypto.subtle.encrypt(
+        {
+          name: 'AES-GCM',
+          iv: ivBytes,
+          tagLength: 128,
+        },
+        cryptoKey,
+        dekBytes,
+      );
+      // TODO: Then these keys need to be stored somewhere
+
+      const success = await login(email, authToken);
       if (success) {
         navigate('/');
       }

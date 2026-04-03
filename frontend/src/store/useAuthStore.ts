@@ -1,8 +1,13 @@
 import { create } from 'zustand';
 import axios from 'axios';
 
-import { type Argon2Params, type ProtectedDEK } from '@/types/encryption';
-import { toBase64 } from '@/lib/crypto/crypto-utils';
+import {
+  type Argon2Params,
+  type ProtectedDEK,
+  type LoginMetaData,
+  type LoginMetaDetaResponse,
+} from '@/types/encryption';
+import { toBase64, fromBase64 } from '@/lib/crypto/crypto-utils';
 
 const API_URL = 'http://localhost:3000/api/auth';
 axios.defaults.withCredentials = true;
@@ -32,7 +37,8 @@ interface AuthState {
     argon2Salt: Uint8Array,
     argon2Params: Argon2Params,
   ) => Promise<boolean>;
-  login: (email: string, password: string) => Promise<boolean>;
+  login: (email: string, authToken: Uint8Array) => Promise<boolean>;
+  getLoginMetadata: (email: string) => Promise<LoginMetaData | undefined>;
   verifyEmail: (verificationCode: string) => Promise<boolean>;
   checkAuth: () => Promise<void>;
   logout: () => Promise<void>;
@@ -93,12 +99,12 @@ export const useAuthStore = create<AuthState>((set) => ({
       return false;
     }
   },
-  login: async (email, password) => {
+  login: async (email, authToken) => {
     set({ isLoading: true, error: null });
     try {
       const response = await axios.post(`${API_URL}/login`, {
         email,
-        password,
+        authToken,
       });
       set({
         user: response.data.user,
@@ -118,6 +124,41 @@ export const useAuthStore = create<AuthState>((set) => ({
       return false;
     }
   },
+
+  getLoginMetadata: async (email) => {
+    set({ isLoading: true, error: null });
+    try {
+      const response = await axios.post<LoginMetaDetaResponse>(
+        `${API_URL}/getLoginMetadata`,
+        {
+          email,
+        },
+      );
+      const { argon2Salt, protectedDEK, argon2Params } = response.data;
+      set({ isLoading: false, error: null });
+
+      return {
+        argon2Salt: fromBase64(argon2Salt),
+        protectedDEK: {
+          ciphertext: fromBase64(protectedDEK.ciphertext),
+          iv: fromBase64(protectedDEK.iv),
+          authTag: fromBase64(protectedDEK.authTag),
+        },
+        argon2Params,
+      };
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        set({
+          error: error.response?.data?.message || 'Error signing in',
+          isLoading: false,
+        });
+      } else {
+        set({ error: 'An unexpected error occurred', isLoading: false });
+      }
+      return;
+    }
+  },
+
   verifyEmail: async (verificationCode) => {
     set({ isLoading: true, error: null });
     try {

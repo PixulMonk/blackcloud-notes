@@ -25,3 +25,19 @@ export interface DerivationResult {
   authToken: Uint8Array;
   argon2Params: Argon2Params;
 }
+
+export interface LoginMetaData {
+  argon2Salt: Uint8Array;
+  protectedDEK: ProtectedDEK;
+  argon2Params: Argon2Params;
+}
+
+export interface LoginMetaDetaResponse {
+  argon2Salt: string;
+  protectedDEK: {
+    ciphertext: string;
+    iv: string;
+    authTag: string;
+  };
+  argon2Params: Argon2Params;
+}

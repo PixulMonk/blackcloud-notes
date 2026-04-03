@@ -37,7 +37,7 @@ export const signup = asyncHandler(
       authToken, // bytes 32-63 from client-side Argon2id
       protectedDEK, // base64 — IV ‖ ciphertext ‖ tag
       argon2Salt, // base64 — CSPRNG generated client-side
-      argon2Params, // { memoryCost, timeCost, parallelism }
+      argon2Params, // { memoryCost, timeCost, parallelism, hashLength, type }
     } = req.body;
 
     if (
@@ -102,9 +102,10 @@ export const signup = asyncHandler(
   },
 );
 
-export const getSalt = asyncHandler(
+export const getLoginMetadata = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
     const { email } = req.body;
+
     if (!email) {
       throw new Error('All fields are required');
     }
@@ -117,10 +118,17 @@ export const getSalt = asyncHandler(
         .update(email)
         .digest('base64');
 
+      const fakeProtectedDEK = {
+        ciphertext: crypto.randomBytes(32).toString('base64'),
+        iv: crypto.randomBytes(12).toString('base64'),
+        authTag: crypto.randomBytes(16).toString('base64'),
+      };
+
       res.status(200).json({
-        sucess: true,
+        success: true,
         argon2Salt: fakeSalt,
         argon2Params: ENCRYPTION_CONFIG.argon2,
+        protectedDEK: fakeProtectedDEK,
       });
       return;
     }
@@ -129,6 +137,7 @@ export const getSalt = asyncHandler(
       success: true,
       argon2Salt: user.argon2Salt,
       argon2Params: user.argon2Params,
+      protectedDEK: user.protectedDEK,
     });
   },
 );
