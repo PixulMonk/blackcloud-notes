@@ -61,6 +61,7 @@ const TreeNodeComponent = ({ node }: TreeNodeComponentProps) => {
 
   const handleSoftDelete = async (id: string) => {
     const ok = await confirm({
+      title: 'Archive',
       message: 'Are you sure you want to delete this item?',
       yesText: 'Delete',
       noText: 'Cancel',
@@ -70,6 +71,7 @@ const TreeNodeComponent = ({ node }: TreeNodeComponentProps) => {
 
   const handleArchive = async (id: string) => {
     const ok = await confirm({
+      title: 'Archive',
       message: 'Are you sure you want to archive this item?',
       yesText: 'Archive',
       noText: 'Cancel',

@@ -7,13 +7,19 @@ export interface Argon2Params {
 }
 
 export interface ProtectedDEK {
+  ciphertext: string;
+  iv: string;
+  authTag: string;
+}
+
+export interface RawProtectedDEK {
   ciphertext: Uint8Array;
   iv: Uint8Array;
   authTag: Uint8Array;
 }
 
 export interface VaultInitializationResult {
-  protectedDEK: ProtectedDEK;
+  protectedDEK: RawProtectedDEK;
   argon2Params: Argon2Params;
   schemaVersion: number;
   rawDEK: Uint8Array;
@@ -28,7 +34,7 @@ export interface DerivationResult {
 
 export interface LoginMetaData {
   argon2Salt: Uint8Array;
-  protectedDEK: ProtectedDEK;
+  protectedDEK: RawProtectedDEK;
   argon2Params: Argon2Params;
 }
 

@@ -226,7 +226,6 @@ export const forgotPassword = asyncHandler(
     const user = await User.findOne({ email });
 
     if (!user) {
-      //  Return a generic success message to prevent user enumeration attacks
       res.status(200).json({
         success: true,
         message:
@@ -263,13 +262,13 @@ export const resetPassword = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
     const { token } = req.params;
     const {
-      authToken, // new auth token derived from new password
-      protectedDEK, // DEK re-encrypted with new KEK
-      argon2Salt, // new CSPRNG salt
-      argon2Params, // new params (may be same as before)
+      newAuthToken,
+      newProtectedDEK,
+      newArgon2Salt,
+      argon2Params, // new params or may be same as before
     } = req.body;
 
-    if (!authToken || !protectedDEK || !argon2Salt || !argon2Params) {
+    if (!newAuthToken || !newProtectedDEK || !newArgon2Salt || !argon2Params) {
       throw new Error('All fields are required');
     }
 
@@ -282,12 +281,12 @@ export const resetPassword = asyncHandler(
       throw new Error('Invalid or expired reset link');
     }
 
-    const hashedAuthToken = await bcrypt.hash(authToken, 12);
+    const hashedAuthToken = await bcrypt.hash(newAuthToken, 12);
 
     // atomic update — all fields change together or not at all
     user.hashedAuthToken = hashedAuthToken;
-    user.protectedDEK = protectedDEK;
-    user.argon2Salt = argon2Salt;
+    user.protectedDEK = newProtectedDEK;
+    user.argon2Salt = newArgon2Salt;
     user.argon2Params = argon2Params;
     user.resetPasswordToken = undefined;
     user.resetPasswordExpiresAt = undefined;

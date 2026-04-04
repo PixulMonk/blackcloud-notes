@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 
+import { Eye, EyeOff, AlertCircleIcon, Loader } from 'lucide-react';
+
 import { useAuthStore } from '@/store/useAuthStore';
 
 import {
@@ -16,10 +18,12 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { confirm } from './ConfirmDialogue';
 
-import { Eye, EyeOff, AlertCircleIcon, Loader } from 'lucide-react';
+import keyDerivationFunction from '@/lib/crypto/kdf';
+import { encryptAESGCM } from '@/lib/crypto/aes';
+import { toBase64 } from './../lib/crypto/crypto-utils';
 
-// TODO: don't forget to warn user about data loss since password is tied to encryption key
 function ResetPasswordCard() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -29,10 +33,26 @@ function ResetPasswordCard() {
   const { resetPassword, error, setError, isLoading } = useAuthStore();
 
   const { token } = useParams();
+
   const navigate = useNavigate();
 
-  const handleChangePassword = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
+    const ok = await confirm({
+      title: '⚠️ WARNING: DATA WILL BE LOST',
+      message: `Resetting your password will permanently delete all your encrypted notes.
+      This action cannot be undone.
+      Only proceed if you understand that your data will be lost.`,
+      noText: 'Cancel',
+    });
+    if (ok) await handleChangePassword();
+  };
+
+  const handleChangePassword = async () => {
+    if (!token) {
+      setError('Invalid or expired reset link');
+      return;
+    }
 
     if (!password || !confirmPassword) {
       setError('All fields are required.');
@@ -49,7 +69,44 @@ function ResetPasswordCard() {
     }
 
     try {
-      const success = await resetPassword(token!, password);
+      // Step 1 - generate newArgon2Salt, derive newAuthToken and newKeyEncryptionKey from password
+      const {
+        argon2Salt: newArgon2Salt,
+        keyEncryptionKey: newKeyEncryptionKey,
+        authToken: newAuthToken,
+        argon2Params,
+      } = await keyDerivationFunction(password);
+
+      // Step 2 - generate newIV
+      const newIV = window.crypto.getRandomValues(new Uint8Array(12)); //96-bits
+
+      // Step 3 - Since user is not logged in, generate new DEK
+      const dataEncryptionKey = crypto.getRandomValues(new Uint8Array(32));
+      if (!dataEncryptionKey) {
+        throw new Error('Failed to generate new data encryption key');
+      }
+
+      const { ciphertext, authTag: newAuthTag } = await encryptAESGCM(
+        dataEncryptionKey,
+        newKeyEncryptionKey,
+        newIV,
+      );
+
+      // Step 4 - prepare new DEK payload
+      const newProtectedDEK = {
+        ciphertext: toBase64(ciphertext),
+        iv: toBase64(newIV),
+        authTag: toBase64(newAuthTag),
+      };
+
+      // Step 5 - send to database (make API call)
+      const success = await resetPassword(
+        token,
+        toBase64(newAuthToken),
+        newProtectedDEK,
+        toBase64(newArgon2Salt),
+        argon2Params,
+      );
       if (success) {
         navigate('/login', {
           state: {
@@ -112,8 +169,12 @@ function ResetPasswordCard() {
           <CardTitle className="text-2xl text-center">Reset password</CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
-          <CardDescription>Please enter your new password</CardDescription>
-          <form onSubmit={handleChangePassword}>
+          <CardDescription>
+            <CardDescription>
+              Enter a new password to regain access to your account.
+            </CardDescription>
+          </CardDescription>
+          <form onSubmit={handleSubmit}>
             <div className="flex flex-col gap-6 max-w">
               <div className="grid gap-y-2">
                 <Label htmlFor="password">Password</Label>
@@ -184,7 +245,7 @@ function ResetPasswordCard() {
                             'h-1 flex-1 rounded transition-colors',
                             i < strength
                               ? colors[Math.max(strength - 1, 0)]
-                              : 'bg-gray-200'
+                              : 'bg-gray-200',
                           )}
                         />
                       ))}
@@ -196,8 +257,8 @@ function ResetPasswordCard() {
                         'text-sm mt-1',
                         colors[Math.max(strength - 1, 0)].replace(
                           'bg-',
-                          'text-'
-                        )
+                          'text-',
+                        ),
                       )}
                     >
                       {labels[Math.max(strength - 1, 0)]}
@@ -212,13 +273,13 @@ function ResetPasswordCard() {
                           <div
                             className={cn(
                               'w-2 h-2 rounded-full transition-colors',
-                              valid ? 'bg-green-500' : 'bg-gray-300'
+                              valid ? 'bg-green-500' : 'bg-gray-300',
                             )}
                           />
                           <span
                             className={cn(
                               'transition-colors',
-                              valid ? 'text-green-600' : 'text-gray-500'
+                              valid ? 'text-green-600' : 'text-gray-500',
                             )}
                           >
                             {req.label}
@@ -230,6 +291,15 @@ function ResetPasswordCard() {
                 </div>
               </div>
               {/* Alerts */}
+              <Alert variant="destructive" className="bg-destructive/10">
+                <AlertCircleIcon className="h-4 w-4" />
+                <AlertTitle>Data Loss Warning</AlertTitle>
+                <AlertDescription>
+                  Because your data is end-to-end encrypted, resetting your
+                  password will permanently delete all existing notes. This
+                  cannot be undone.
+                </AlertDescription>
+              </Alert>
               {error && (
                 <div>
                   <Alert variant="destructive">

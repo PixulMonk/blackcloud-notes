@@ -3,6 +3,7 @@ import axios from 'axios';
 
 import {
   type Argon2Params,
+  type RawProtectedDEK,
   type ProtectedDEK,
   type LoginMetaData,
   type LoginMetaDetaResponse,
@@ -30,10 +31,12 @@ interface AuthState {
   setMessage: (message: string | null) => void;
   setError: (error: string | null) => void;
   signup: (
+    // TODO: authToken, protectedDEK, argon2Salt, should all be strings
+    // TODO: decide whether to handle the string conversion here in the store or in the components
     name: string,
     email: string,
     authToken: Uint8Array,
-    protectedDEK: ProtectedDEK,
+    protectedDEK: RawProtectedDEK,
     argon2Salt: Uint8Array,
     argon2Params: Argon2Params,
   ) => Promise<boolean>;
@@ -43,7 +46,13 @@ interface AuthState {
   checkAuth: () => Promise<void>;
   logout: () => Promise<void>;
   forgotPassword: (email: string) => Promise<boolean>;
-  resetPassword: (token: string, password: string) => Promise<boolean>;
+  resetPassword: (
+    token: string,
+    newAuthToken: string,
+    newProtectedDEK: ProtectedDEK,
+    newArgon2Salt: string,
+    Argon2Params: Argon2Params,
+  ) => Promise<boolean>;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
@@ -246,11 +255,20 @@ export const useAuthStore = create<AuthState>((set) => ({
       return false;
     }
   },
-  resetPassword: async (token, password) => {
+  resetPassword: async (
+    token,
+    newAuthToken,
+    newProtectedDEK,
+    newArgon2Salt,
+    argon2Params,
+  ) => {
     set({ isLoading: true, error: null });
     try {
       await axios.post(`${API_URL}/reset-password/${token}`, {
-        password,
+        newAuthToken,
+        newProtectedDEK,
+        newArgon2Salt,
+        argon2Params,
       });
       set({ isLoading: false });
       return true;

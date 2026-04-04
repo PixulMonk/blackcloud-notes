@@ -20,18 +20,19 @@ import {
 function ConfirmDialog({
   show,
   proceed,
+  title,
   message,
   yesText,
   noText,
 }: ConfirmDialogProps<
-  { message: string; yesText?: string; noText?: string },
+  { title: string; message: string; yesText?: string; noText?: string },
   boolean
 >) {
   return (
     <AlertDialog open={show} onOpenChange={(open) => !open && proceed(false)}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Delete</AlertDialogTitle>
+          <AlertDialogTitle>{title}</AlertDialogTitle>
           <AlertDialogDescription>{message}</AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
