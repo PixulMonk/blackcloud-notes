@@ -77,20 +77,17 @@ function ResetPasswordCard() {
         argon2Params,
       } = await keyDerivationFunction(password);
 
-      // Step 2 - generate newIV
-      const newIV = window.crypto.getRandomValues(new Uint8Array(12)); //96-bits
-
       // Step 3 - Since user is not logged in, generate new DEK
       const dataEncryptionKey = crypto.getRandomValues(new Uint8Array(32));
       if (!dataEncryptionKey) {
         throw new Error('Failed to generate new data encryption key');
       }
 
-      const { ciphertext, authTag: newAuthTag } = await encryptAESGCM(
-        dataEncryptionKey,
-        newKeyEncryptionKey,
-        newIV,
-      );
+      const {
+        ciphertext,
+        authTag: newAuthTag,
+        iv: newIV,
+      } = await encryptAESGCM(dataEncryptionKey, newKeyEncryptionKey);
 
       // Step 4 - prepare new DEK payload
       const newProtectedDEK = {

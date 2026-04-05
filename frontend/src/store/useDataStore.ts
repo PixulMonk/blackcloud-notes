@@ -251,6 +251,7 @@ export const useDataStore = create<DataState>((set) => ({
   updateNote: async (title, content, tags, fileId) => {
     set({ error: null });
     try {
+      // TODO: update to match backend
       const response = await axios.patch(`${BASE_URL}/notes/${fileId}`, {
         title,
         content,

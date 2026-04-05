@@ -35,6 +35,9 @@ const useEditorSync = (
         const isEmpty = editor.isEmpty;
         if (isEmpty) return;
 
+        // TODO: encrypt stringified JSON before sending over to updateNote
+        // TODO: this is confusing... need to make an IV for every encryption, but where to generate the IV for notes?
+
         updateNote(
           undefined,
           JSON.stringify(contentJSON),

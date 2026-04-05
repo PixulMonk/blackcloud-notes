@@ -3,13 +3,10 @@ const TAG_LENGTH = 16;
 export const encryptAESGCM = async (
   plaintext: Uint8Array,
   keyBytes: Uint8Array,
-  iv: Uint8Array,
 ) => {
-  if (iv.length !== 12) {
-    throw new Error('Invalid IV length');
-  }
-
   try {
+    const iv = window.crypto.getRandomValues(new Uint8Array(12)); //96-bits
+
     const key = await crypto.subtle.importKey(
       'raw',
       keyBytes as BufferSource,

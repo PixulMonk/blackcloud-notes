@@ -9,13 +9,8 @@ export const initializeUserVault = async (
     throw new Error('Invalid KEK length');
   }
   const dekBytes = window.crypto.getRandomValues(new Uint8Array(32)); //256-bits
-  const ivBytes = window.crypto.getRandomValues(new Uint8Array(12)); //96-bits
 
-  const { ciphertext, authTag, iv } = await encryptAESGCM(
-    dekBytes,
-    kek,
-    ivBytes,
-  );
+  const { ciphertext, authTag, iv } = await encryptAESGCM(dekBytes, kek);
 
   return {
     protectedDEK: {
