@@ -1,7 +1,10 @@
 import { useEffect } from 'react';
 
 import { useDataStore } from '@/store/useDataStore';
+import { useVaultStore } from '@/store/useVaultStore';
 import { type Editor } from '@tiptap/react';
+import { encryptTipTapContent } from '@/lib/crypto/tiptapEncryption';
+import { toBase64 } from '@/lib/crypto/crypto-utils';
 
 const useEditorSync = (
   editor: Editor | null,
@@ -10,6 +13,7 @@ const useEditorSync = (
   const isSyncing = useDataStore((state) => state.isSyncing);
   const setSyncing = useDataStore((state) => state.setSyncing);
   const updateNote = useDataStore((state) => state.updateNote);
+  const dataEncryptionKey = useVaultStore((state) => state.dataEncryptionKey);
 
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
@@ -27,23 +31,31 @@ const useEditorSync = (
 
     let timeout: ReturnType<typeof setTimeout>;
 
-    const handleUpdate = () => {
+    const handleUpdate = async () => {
       setSyncing(true);
       clearTimeout(timeout);
-      timeout = setTimeout(() => {
+      timeout = setTimeout(async () => {
         const contentJSON = editor.getJSON();
         const isEmpty = editor.isEmpty;
         if (isEmpty) return;
 
-        // TODO: encrypt stringified JSON before sending over to updateNote
-        // TODO: this is confusing... need to make an IV for every encryption, but where to generate the IV for notes?
+        if (!dataEncryptionKey) return;
 
-        updateNote(
-          undefined,
-          JSON.stringify(contentJSON),
-          undefined,
-          selectedFileId!,
+        // Encrypt the content
+        const encrypted = await encryptTipTapContent(
+          contentJSON,
+          dataEncryptionKey,
         );
+
+        // Convert to base64
+        const encryptedContent = {
+          ciphertext: toBase64(encrypted.ciphertext),
+          authTag: toBase64(encrypted.authTag),
+          iv: toBase64(encrypted.iv),
+        };
+
+        //
+        updateNote(encryptedContent, selectedFileId!);
       }, 1000);
     };
 

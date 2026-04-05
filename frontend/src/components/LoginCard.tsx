@@ -74,7 +74,7 @@ export default function LoginCard() {
       }
 
       if (!success) {
-        clearKeys;
+        clearKeys();
       }
     } catch (error: unknown) {
       if (error instanceof Error) {

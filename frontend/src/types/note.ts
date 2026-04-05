@@ -2,7 +2,11 @@ export interface NoteDTO {
   _id: string;
   userId: string;
   title?: string;
-  encryptedContent?: string;
+  encryptedContent?: {
+    ciphertext: string;
+    iv: string;
+    authTag: string;
+  };
   tags?: string[];
 }
 

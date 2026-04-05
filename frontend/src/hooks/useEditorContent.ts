@@ -1,6 +1,10 @@
 import { useState, useEffect } from 'react';
-import { useDataStore } from '@/store/useDataStore';
 import { type Editor } from '@tiptap/react';
+
+import { useDataStore } from '@/store/useDataStore';
+import { useVaultStore } from '@/store/useVaultStore';
+import { decryptTipTapContent } from '@/lib/crypto/tiptapEncryption';
+import { fromBase64 } from '@/lib/crypto/crypto-utils';
 
 const useEditorContent = (
   editor: Editor | null,
@@ -9,6 +13,7 @@ const useEditorContent = (
   const [showSkeleton, setShowSkeleton] = useState(false);
   const fetchNodeContent = useDataStore((state) => state.fetchNodeContent);
   const isFetchingContent = useDataStore((state) => state.isFetchingContent);
+  const dataEncryptionKey = useVaultStore((state) => state.dataEncryptionKey);
 
   useEffect(() => {
     if (!isFetchingContent) {
@@ -23,12 +28,24 @@ const useEditorContent = (
 
     editor?.commands.clearContent();
 
-    fetchNodeContent(selectedFileId).then((content) => {
-      if (!content) return;
-      const raw = content.encryptedContent;
-      if (!raw) return;
-      const contentJSON = JSON.parse(raw);
-      editor?.commands.setContent(contentJSON);
+    fetchNodeContent(selectedFileId).then(async (content) => {
+      if (!content || !content.encryptedContent || !dataEncryptionKey) return;
+
+      // Convert base64 to Uint8Array
+      const payload = {
+        ciphertext: fromBase64(content.encryptedContent.ciphertext),
+        authTag: fromBase64(content.encryptedContent.authTag),
+        iv: fromBase64(content.encryptedContent.iv),
+      };
+
+      // Decrypt
+      const decryptedTipTapJSON = await decryptTipTapContent(
+        payload,
+        dataEncryptionKey,
+      );
+
+      // Set editor content
+      editor?.commands.setContent(decryptedTipTapJSON);
     });
   }, [selectedFileId, editor]);
 

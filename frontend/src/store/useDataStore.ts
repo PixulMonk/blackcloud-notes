@@ -2,6 +2,9 @@ import { create } from 'zustand';
 import axios from 'axios';
 import { type TreeNode, type AddNodeResponse } from '../types/tree';
 import { type NoteDTO } from '@/types/note';
+import { type encryptedContent } from '@/types/encryption';
+import { encryptAESGCM } from '@/lib/crypto/aes';
+import { toBase64 } from '@/lib/crypto/crypto-utils';
 
 const BASE_URL = 'http://localhost:3000/api';
 axios.defaults.withCredentials = true;
@@ -19,7 +22,8 @@ interface DataState {
   setSyncing: (value: boolean) => void;
   addNode: (
     type: 'folder' | 'file',
-    title?: string | undefined,
+    dataEncryptionKey: Uint8Array,
+    title?: encryptedContent,
     isArchived?: boolean,
     isDeleted?: boolean,
     icon?: string | undefined,
@@ -39,9 +43,7 @@ interface DataState {
   archiveNode: (nodeId: string) => Promise<TreeNode | null>;
   fetchNodeContent: (fileId: string) => Promise<NoteDTO | null>;
   updateNote: (
-    title: string | undefined,
-    content: string | undefined,
-    tags: string | undefined,
+    encryptedContent: encryptedContent,
     fileId: string,
   ) => Promise<NoteDTO | null>;
 }
@@ -68,18 +70,32 @@ export const useDataStore = create<DataState>((set) => ({
 
   addNode: async (
     type,
-    title = undefined,
+    dataEncryptionKey,
+    encryptedTitle = undefined,
     isArchived = false,
     isDeleted = false,
     icon = undefined,
     parentId = null,
   ) => {
     set({ isLoading: true, error: null });
+    if (!encryptedTitle) {
+      const placeHolderTitle = new TextEncoder().encode('Untitled document');
+      const { ciphertext, iv, authTag } = await encryptAESGCM(
+        placeHolderTitle,
+        dataEncryptionKey!,
+      );
+
+      encryptedTitle = {
+        ciphertext: toBase64(ciphertext),
+        iv: toBase64(iv),
+        authTag: toBase64(authTag),
+      };
+    }
     try {
       const response = await axios.post<AddNodeResponse>(
         `${BASE_URL}/treeNodes/create`,
         {
-          title,
+          encryptedTitle,
           type,
           isArchived,
           isDeleted,
@@ -248,14 +264,12 @@ export const useDataStore = create<DataState>((set) => ({
       return null;
     }
   },
-  updateNote: async (title, content, tags, fileId) => {
+  updateNote: async (encryptedContent, fileId) => {
     set({ error: null });
     try {
       // TODO: update to match backend
       const response = await axios.patch(`${BASE_URL}/notes/${fileId}`, {
-        title,
-        content,
-        tags,
+        encryptedContent,
       });
       set({ isSyncing: false });
       return response.data;

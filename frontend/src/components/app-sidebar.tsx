@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import { Tree } from './Tree/Tree';
 
@@ -18,11 +19,14 @@ import {
 
 import { useDataStore } from '@/store/useDataStore';
 import { useTreeUIStore } from '@/store/useTreeUIStore';
+import { useVaultStore } from '@/store/useVaultStore';
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const navigate = useNavigate();
   const tree = useDataStore((state) => state.tree);
   const fetchTree = useDataStore((state) => state.fetchTree);
   const addNode = useDataStore((state) => state.addNode);
+  const dataEncryptionKey = useVaultStore((state) => state.dataEncryptionKey);
 
   const setRenamingNodeId = useTreeUIStore((state) => state.setRenamingNodeId);
 
@@ -31,7 +35,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   }, [fetchTree]);
 
   const handleCreate = async (type: 'folder' | 'file') => {
-    const newNode = await addNode(type);
+    // TODO: we are getting a no DEK error. On reload, DEK disappears.
+    // TODO: therefore, we need to prompt user to login again: create an "unlock vault"
+    // TODO: ... component and reprompt for password
+    if (!dataEncryptionKey) {
+      navigate('/unlock-vault', { state: { from: location.pathname } });
+      return;
+    }
+    const newNode = await addNode(type, dataEncryptionKey);
     if (newNode?._id) {
       setRenamingNodeId(newNode._id);
     }
