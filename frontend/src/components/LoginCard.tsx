@@ -92,17 +92,6 @@ export default function LoginCard() {
           <CardTitle className="text-2xl text-center">Welcome back</CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
-          <Button className="w-full" variant="outline">
-            <FcGoogle className="h-4 w-4 mr-2" />
-            Sign in with Google
-          </Button>
-
-          <div className="flex items-center gap-4">
-            <hr className="flex-grow border-gray-300" />
-            <span className="text-xs text-gray-500 uppercase">or</span>
-            <hr className="flex-grow border-gray-300" />
-          </div>
-
           <CardDescription>Sign in with your email</CardDescription>
 
           <form onSubmit={handleLogin}>

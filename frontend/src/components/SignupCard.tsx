@@ -137,17 +137,6 @@ export default function SignupCard() {
           <CardTitle className="text-2xl text-center">Create account</CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
-          <Button className="w-full" variant="outline">
-            <FcGoogle className="h-4 w-4 mr-2" />
-            Sign up with Google
-          </Button>
-
-          <div className="flex items-center gap-4">
-            <hr className="flex-grow border-gray-300" />
-            <span className="text-xs text-gray-500 uppercase">or</span>
-            <hr className="flex-grow border-gray-300" />
-          </div>
-
           <CardDescription>Use your email for registration</CardDescription>
 
           <form onSubmit={handleSignUp}>

@@ -18,12 +18,6 @@ export interface RawEncryptedData {
   authTag: Uint8Array;
 }
 
-export interface encryptedContent {
-  ciphertext: string;
-  iv: string;
-  authTag: string;
-}
-
 export interface VaultInitializationResult {
   protectedDEK: RawEncryptedData;
   argon2Params: Argon2Params;

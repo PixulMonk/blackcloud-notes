@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import axios from 'axios';
 import { type TreeNode, type AddNodeResponse } from '../types/tree';
 import { type NoteDTO } from '@/types/note';
-import { type encryptedContent } from '@/types/encryption';
+import { type EncryptedData } from '@/types/encryption';
 import { encryptAESGCM } from '@/lib/crypto/aes';
 import { toBase64 } from '@/lib/crypto/crypto-utils';
 
@@ -23,7 +23,7 @@ interface DataState {
   addNode: (
     type: 'folder' | 'file',
     dataEncryptionKey: Uint8Array,
-    title?: encryptedContent,
+    title?: EncryptedData,
     isArchived?: boolean,
     isDeleted?: boolean,
     icon?: string | undefined,
@@ -43,7 +43,7 @@ interface DataState {
   archiveNode: (nodeId: string) => Promise<TreeNode | null>;
   fetchNodeContent: (fileId: string) => Promise<NoteDTO | null>;
   updateNote: (
-    encryptedContent: encryptedContent,
+    encryptedContent: EncryptedData,
     fileId: string,
   ) => Promise<NoteDTO | null>;
 }
