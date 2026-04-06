@@ -3,8 +3,8 @@ import axios from 'axios';
 
 import {
   type Argon2Params,
-  type RawProtectedDEK,
-  type ProtectedDEK,
+  type RawEncryptedData,
+  type EncryptedData,
   type LoginMetaData,
   type LoginMetaDetaResponse,
 } from '@/types/encryption';
@@ -36,7 +36,7 @@ interface AuthState {
     name: string,
     email: string,
     authToken: Uint8Array,
-    protectedDEK: RawProtectedDEK,
+    protectedDEK: RawEncryptedData,
     argon2Salt: Uint8Array,
     argon2Params: Argon2Params,
   ) => Promise<boolean>;
@@ -49,7 +49,7 @@ interface AuthState {
   resetPassword: (
     token: string,
     newAuthToken: string,
-    newProtectedDEK: ProtectedDEK,
+    newProtectedDEK: EncryptedData,
     newArgon2Salt: string,
     Argon2Params: Argon2Params,
   ) => Promise<boolean>;
