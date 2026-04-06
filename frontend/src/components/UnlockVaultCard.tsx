@@ -74,7 +74,6 @@ export default function UnlockVaultCard() {
     } catch (err: unknown) {
       clearKeys();
       if (err instanceof Error) {
-        // deceptive error on wrong password — don't reveal why it failed
         setError('Incorrect password. Please try again.');
         console.error('Vault unlock error:', err.message);
       }
@@ -90,7 +89,7 @@ export default function UnlockVaultCard() {
           <LockIcon className="h-8 w-8 mb-2 text-muted-foreground mx-auto" />
           <CardTitle className="text-2xl text-center">Vault locked</CardTitle>
           <CardDescription className="text-center">
-            Enter your master password to unlock your vault
+            Enter your password to unlock your vault
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -102,13 +101,13 @@ export default function UnlockVaultCard() {
           <form onSubmit={handleUnlock}>
             <div className="flex flex-col gap-6">
               <div className="grid gap-2">
-                <Label htmlFor="password">Master password</Label>
+                <Label htmlFor="password">Password</Label>
                 <div className="relative">
                   <Input
                     type={showPassword ? 'text' : 'password'}
                     id="password"
                     value={password}
-                    placeholder="Enter your master password"
+                    placeholder="Enter your password"
                     onChange={(e) => setPassword(e.target.value)}
                     required
                     autoFocus
