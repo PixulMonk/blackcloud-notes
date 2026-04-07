@@ -35,9 +35,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   }, [fetchTree]);
 
   const handleCreate = async (type: 'folder' | 'file') => {
-    // TODO: we are getting a no DEK error. On reload, DEK disappears.
-    // TODO: therefore, we need to prompt user to login again: create an "unlock vault"
-    // TODO: ... component and reprompt for password
     if (!dataEncryptionKey) {
       navigate('/unlock-vault', { state: { from: location.pathname } });
       return;

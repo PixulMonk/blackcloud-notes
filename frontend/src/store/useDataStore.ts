@@ -1,11 +1,10 @@
 import { create } from 'zustand';
 import axios from 'axios';
-import { type TreeNode, type AddNodeResponse } from '../types/tree';
-import { type NoteDTO } from '@/types/note';
-import { type EncryptedData } from '@/types/encryption';
+import type { EncryptedData } from '@blackcloud/shared';
+import type { TreeNode, AddNodeResponse } from '../types/tree.types';
+import type { NoteDTO } from '@/types/note.types';
 import { encryptAESGCM } from '@/lib/crypto/aes';
 import { toBase64 } from '@/lib/crypto/crypto-utils';
-
 const BASE_URL = 'http://localhost:3000/api';
 axios.defaults.withCredentials = true;
 
@@ -31,8 +30,10 @@ interface DataState {
   ) => Promise<TreeNode | null>;
   updateNode: (
     id: string,
+    dataEncryptionKey: Uint8Array,
     title?: string | undefined,
     type?: 'folder' | 'file',
+    position?: number,
     isArchived?: boolean,
     isDeleted?: boolean,
     icon?: string | undefined,
@@ -127,8 +128,10 @@ export const useDataStore = create<DataState>((set) => ({
 
   updateNode: async (
     nodeId,
+    dataEncryptionKey,
     title,
     type,
+    position,
     isArchived,
     isDeleted,
     icon,
@@ -138,11 +141,24 @@ export const useDataStore = create<DataState>((set) => ({
     set({ isLoading: true, error: null });
 
     try {
+      // 1. Encrypt title
+      const titlePlainText = new TextEncoder().encode(title);
+      const { ciphertext, iv, authTag } = await encryptAESGCM(
+        titlePlainText,
+        dataEncryptionKey,
+      );
+      const encryptedTitle = {
+        ciphertext: toBase64(ciphertext),
+        iv: toBase64(iv),
+        authTag: toBase64(authTag),
+      };
+
       const response = await axios.patch<AddNodeResponse>(
         `${BASE_URL}/treeNodes/${nodeId}`,
         {
-          title,
+          encryptedTitle,
           type,
+          position,
           isArchived,
           isDeleted,
           icon,
@@ -151,7 +167,11 @@ export const useDataStore = create<DataState>((set) => ({
         },
       );
 
-      const updatedNode = response.data.data;
+      const updatedNode = response.data.data ?? response.data.node;
+
+      if (!updatedNode) {
+        throw new Error('Invalid server response when updating node');
+      }
 
       set((state) => ({
         tree: state.tree.map((n) =>

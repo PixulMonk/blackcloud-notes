@@ -1,5 +1,5 @@
 import { ENCRYPTION_CONFIG } from '@blackcloud/shared';
-import { type VaultInitializationResult } from '@/types/encryption';
+import { type VaultInitializationResult } from '@/types/encryption.types';
 import { encryptAESGCM } from './aes';
 
 export const initializeUserVault = async (

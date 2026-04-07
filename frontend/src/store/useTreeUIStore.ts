@@ -1,4 +1,4 @@
-import type { TreeNode } from '@/types/tree';
+import type { TreeNode } from '@/types/tree.types';
 import { create } from 'zustand';
 
 interface TreeUIState {

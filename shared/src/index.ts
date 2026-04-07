@@ -1,2 +1,2 @@
-export * from './config/encryption';
-export * from './types/encryption';
+export * from './config/encryption.config';
+export * from './types/encryption.types';

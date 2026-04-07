@@ -6,7 +6,10 @@ import type {
   RawEncryptedData,
   EncryptedData,
 } from '@blackcloud/shared';
-import type { LoginMetaData, LoginMetaDetaResponse } from '@/types/encryption';
+import type {
+  LoginMetaData,
+  LoginMetaDetaResponse,
+} from '@/types/encryption.types';
 
 import { toBase64, fromBase64 } from '@/lib/crypto/crypto-utils';
 

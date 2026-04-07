@@ -2,7 +2,6 @@ import { argon2id } from 'hash-wasm';
 
 import { ENCRYPTION_CONFIG } from '@blackcloud/shared/src';
 import type { Argon2Params } from '@blackcloud/shared/src';
-import { fromBase64 } from './crypto-utils';
 
 type DerivedKeys = {
   keyEncryptionKey: Uint8Array;

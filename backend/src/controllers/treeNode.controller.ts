@@ -128,14 +128,23 @@ export const updateTreeNode = asyncHandler(async (req, res) => {
     });
   }
 
-  if (
-    encryptedTitle !== undefined &&
-    (typeof encryptedTitle !== 'string' || encryptedTitle.length === 0)
-  ) {
-    return res.status(400).json({
-      success: false,
-      message: 'Invalid encrypted title',
-    });
+  if (encryptedTitle !== undefined) {
+    const isValidEncryptedTitle =
+      typeof encryptedTitle === 'object' &&
+      encryptedTitle !== null &&
+      typeof encryptedTitle.ciphertext === 'string' &&
+      encryptedTitle.ciphertext.length > 0 &&
+      typeof encryptedTitle.iv === 'string' &&
+      encryptedTitle.iv.length > 0 &&
+      typeof encryptedTitle.authTag === 'string' &&
+      encryptedTitle.authTag.length > 0;
+
+    if (!isValidEncryptedTitle) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid encrypted title',
+      });
+    }
   }
 
   const treeNodeToUpdate = await TreeNode.findOne(
@@ -206,7 +215,7 @@ export const updateTreeNode = asyncHandler(async (req, res) => {
   res.status(200).json({
     success: true,
     message: `Tree node updated successfully (${treeNodeToUpdate.type})`,
-    node: treeNodeToUpdate,
+    data: updatedTreeNode,
   });
 });
 

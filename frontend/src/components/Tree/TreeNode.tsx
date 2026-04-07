@@ -9,11 +9,12 @@ import {
 
 import NodeActions from './node-components/NodeActions';
 import NodeLabel from './node-components/NodeLabel';
-import { type TreeNodeComponentProps } from '../../types/tree';
+import { type TreeNodeComponentProps } from '../../types/tree.types';
 import { useDataStore } from '@/store/useDataStore';
 import { confirm } from '../ConfirmDialogue';
 
 import { useTreeUIStore } from '@/store/useTreeUIStore';
+import { useVaultStore } from '@/store/useVaultStore';
 
 // Renders individual node components
 const TreeNodeComponent = ({ node }: TreeNodeComponentProps) => {
@@ -37,10 +38,13 @@ const TreeNodeComponent = ({ node }: TreeNodeComponentProps) => {
   const updateNode = useDataStore((state) => state.updateNode);
   const softDeleteNode = useDataStore((state) => state.softDeleteNode);
   const archiveNode = useDataStore((state) => state.archiveNode);
+  const dataEncryptionKey = useVaultStore((state) => state.dataEncryptionKey);
 
   const handleRenameSubmit = () => {
+    if (!dataEncryptionKey) return;
+
     if (renamingNodeId) {
-      updateNode(renamingNodeId, treeData.title);
+      updateNode(renamingNodeId, dataEncryptionKey, treeData.title);
       setFileTitle(treeData.title);
     }
     setRenamingNodeId(null);

@@ -1,5 +1,5 @@
 import { TreeNodeComponent } from './TreeNode';
-import { type TreeProps } from '@/types/tree';
+import { type TreeProps } from '@/types/tree.types';
 import { useTreeUIStore } from '@/store/useTreeUIStore';
 
 // Handles an array of nodes and passes it to TreeNodeCompoent to be individually rendered
