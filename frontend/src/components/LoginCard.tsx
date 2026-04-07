@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { FcGoogle } from 'react-icons/fc';
 
 import {
   Eye,
@@ -25,7 +24,7 @@ import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 import { useAuthStore } from '@/store/useAuthStore';
-import keyDerivationFunction from '@/lib/crypto/kdf';
+import { deriveKeysForLogin } from '@/lib/crypto/kdf';
 import { decryptAESGCM } from '@/lib/crypto/aes';
 import { toBase64 } from '@/lib/crypto/crypto-utils';
 import { useVaultStore } from '@/store/useVaultStore';
@@ -52,14 +51,13 @@ export default function LoginCard() {
 
       const { argon2Salt, protectedDEK, argon2Params } = loginMetaData;
 
-      const { authToken, keyEncryptionKey } = await keyDerivationFunction(
+      const { authToken, keyEncryptionKey } = await deriveKeysForLogin(
         password,
         argon2Salt,
+        argon2Params,
       );
 
-      const authTokenBase64 = toBase64(authToken);
-
-      const success = await login(email, authTokenBase64);
+      const success = await login(email, authToken);
 
       if (success) {
         const dataEncryptionKey = await decryptAESGCM(

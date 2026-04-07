@@ -20,7 +20,7 @@ import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { confirm } from './ConfirmDialogue';
 
-import keyDerivationFunction from '@/lib/crypto/kdf';
+import { deriveKeysForNewUser } from '@/lib/crypto/kdf';
 import { encryptAESGCM } from '@/lib/crypto/aes';
 import { toBase64 } from './../lib/crypto/crypto-utils';
 
@@ -75,7 +75,7 @@ function ResetPasswordCard() {
         keyEncryptionKey: newKeyEncryptionKey,
         authToken: newAuthToken,
         argon2Params,
-      } = await keyDerivationFunction(password);
+      } = await deriveKeysForNewUser(password);
 
       // Step 3 - Since user is not logged in, generate new DEK
       const dataEncryptionKey = crypto.getRandomValues(new Uint8Array(32));

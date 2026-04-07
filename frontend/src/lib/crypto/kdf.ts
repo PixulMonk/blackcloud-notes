@@ -1,43 +1,85 @@
 import { argon2id } from 'hash-wasm';
 
-import { type DerivationResult } from '@/types/encryption';
+import { ENCRYPTION_CONFIG } from '@blackcloud/shared/src';
+import type { Argon2Params } from '@blackcloud/shared/src';
+import { fromBase64 } from './crypto-utils';
 
-export const keyDerivationFunction = async (
+type DerivedKeys = {
+  keyEncryptionKey: Uint8Array;
+  authToken: Uint8Array;
+};
+
+// Default config for new users:
+const DEFAULT_ARGON2_PARAMS = ENCRYPTION_CONFIG.argon2;
+
+// Core Argon2ID logic:
+const deriveKeys = async (
   masterPassword: string,
-  providedSalt?: Uint8Array, // On login, a salt will be provided from the DB
-): Promise<DerivationResult> => {
-  const argon2Salt =
-    providedSalt ?? window.crypto.getRandomValues(new Uint8Array(16));
-
+  salt: Uint8Array,
+  params: Argon2Params,
+): Promise<DerivedKeys> => {
   const derived = await argon2id({
     password: masterPassword,
-    salt: argon2Salt,
-    parallelism: 4,
-    iterations: 2, // 'time' in your old code
-    memorySize: 65536, // 'mem' in your old code
-    hashLength: 64,
-    outputType: 'binary', // Returns Uint8Array
+    salt,
+    parallelism: params.parallelism,
+    iterations: params.timeCost,
+    memorySize: params.memoryCost,
+    hashLength: params.hashLength,
+    outputType: 'binary',
   });
 
-  if (derived.length !== 64) {
+  if (params.type !== 'argon2id') {
+    throw new Error('Unsupported KDF type');
+  }
+
+  if (derived.length !== params.hashLength) {
     throw new Error('Invalid key length from Argon2');
   }
 
-  const keyEncryptionKey = derived.slice(0, 32);
-  const authToken = derived.slice(32, 64);
-
   return {
-    argon2Salt,
-    keyEncryptionKey,
-    authToken,
-    argon2Params: {
-      memoryCost: 65536,
-      timeCost: 2,
-      parallelism: 4,
-      hashLength: 64,
-      type: 'argon2id',
-    },
+    keyEncryptionKey: derived.slice(0, 32),
+    authToken: derived.slice(32, params.hashLength),
   };
 };
 
-export default keyDerivationFunction;
+/**
+ * Signup / Vault Initialization
+ * - Generates new salt
+ * - Uses default config
+ * - Returns everything needed for backend
+ */
+export const deriveKeysForNewUser = async (
+  masterPassword: string,
+): Promise<
+  DerivedKeys & {
+    argon2Salt: Uint8Array;
+    argon2Params: Argon2Params;
+  }
+> => {
+  const salt = window.crypto.getRandomValues(new Uint8Array(16));
+
+  const keys = await deriveKeys(masterPassword, salt, DEFAULT_ARGON2_PARAMS);
+
+  return {
+    ...keys,
+    argon2Salt: salt,
+    argon2Params: ENCRYPTION_CONFIG.argon2,
+  };
+};
+
+/**
+ * 🔑 Login / Vault Unlock
+ * - Uses stored salt + params
+ * - MUST match exactly what was used before
+ */
+export const deriveKeysForLogin = async (
+  masterPassword: string,
+  argon2Salt: Uint8Array,
+  argon2Params: Argon2Params,
+): Promise<DerivedKeys> => {
+  if (argon2Params.type !== 'argon2id') {
+    throw new Error('Unsupported KDF type');
+  }
+
+  return deriveKeys(masterPassword, argon2Salt, argon2Params);
+};

@@ -1,13 +1,13 @@
 import { create } from 'zustand';
 import axios from 'axios';
 
-import {
-  type Argon2Params,
-  type RawEncryptedData,
-  type EncryptedData,
-  type LoginMetaData,
-  type LoginMetaDetaResponse,
-} from '@/types/encryption';
+import type {
+  Argon2Params,
+  RawEncryptedData,
+  EncryptedData,
+} from '@blackcloud/shared';
+import type { LoginMetaData, LoginMetaDetaResponse } from '@/types/encryption';
+
 import { toBase64, fromBase64 } from '@/lib/crypto/crypto-utils';
 
 const API_URL = 'http://localhost:3000/api/auth';
@@ -31,8 +31,6 @@ interface AuthState {
   setMessage: (message: string | null) => void;
   setError: (error: string | null) => void;
   signup: (
-    // TODO: authToken, protectedDEK, argon2Salt, should all be strings
-    // TODO: decide whether to handle the string conversion here in the store or in the components
     name: string,
     email: string,
     authToken: Uint8Array,
@@ -40,7 +38,7 @@ interface AuthState {
     argon2Salt: Uint8Array,
     argon2Params: Argon2Params,
   ) => Promise<boolean>;
-  login: (email: string, authToken: string) => Promise<boolean>;
+  login: (email: string, authToken: Uint8Array) => Promise<boolean>;
   getLoginMetadata: (email: string) => Promise<LoginMetaData | undefined>;
   verifyEmail: (verificationCode: string) => Promise<boolean>;
   checkAuth: () => Promise<void>;
@@ -111,10 +109,11 @@ export const useAuthStore = create<AuthState>((set) => ({
   login: async (email, authToken) => {
     set({ isLoading: true, error: null });
     try {
-      const response = await axios.post(`${API_URL}/login`, {
+      const payload = {
         email,
-        authToken,
-      });
+        authToken: toBase64(authToken),
+      };
+      const response = await axios.post(`${API_URL}/login`, payload);
       set({
         user: response.data.user,
         isAuthenticated: true,

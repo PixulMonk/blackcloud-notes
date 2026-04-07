@@ -1,12 +1,11 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { FcGoogle } from 'react-icons/fc';
 
 import { Eye, EyeOff, AlertCircleIcon, Loader } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
 import { initializeUserVault } from '@/lib/crypto/vault';
-import keyDerivationFunction from '@/lib/crypto/kdf';
+import { deriveKeysForNewUser } from '@/lib/crypto/kdf';
 
 import {
   Card,
@@ -53,14 +52,10 @@ export default function SignupCard() {
     try {
       // Derive keys
       const { argon2Salt, keyEncryptionKey, authToken, argon2Params } =
-        await keyDerivationFunction(password);
+        await deriveKeysForNewUser(password);
 
       if (!argon2Salt || !keyEncryptionKey || !authToken || !argon2Params) {
         throw new Error('Key derivation failed: missing required values.');
-      }
-
-      if (!(argon2Salt instanceof Uint8Array)) {
-        throw new Error('Invalid salt format');
       }
 
       const { protectedDEK } = await initializeUserVault(keyEncryptionKey);

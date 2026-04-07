@@ -1,3 +1,5 @@
+import { Argon2Params } from '../types/encryption';
+
 export const ENCRYPTION_CONFIG = {
   schemaVersion: 1,
   argon2: {
@@ -6,5 +8,5 @@ export const ENCRYPTION_CONFIG = {
     parallelism: 4,
     hashLength: 64,
     type: 'argon2id',
-  },
+  } satisfies Argon2Params,
 } as const;

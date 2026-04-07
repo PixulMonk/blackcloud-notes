@@ -1,22 +1,8 @@
-export interface Argon2Params {
-  memoryCost: number;
-  timeCost: number;
-  parallelism: number;
-  hashLength: number;
-  type: 'argon2id';
-}
-
-export interface EncryptedData {
-  ciphertext: string;
-  iv: string;
-  authTag: string;
-}
-
-export interface RawEncryptedData {
-  ciphertext: Uint8Array;
-  iv: Uint8Array;
-  authTag: Uint8Array;
-}
+import type {
+  Argon2Params,
+  EncryptedData,
+  RawEncryptedData,
+} from '@blackcloud/shared/src';
 
 export interface VaultInitializationResult {
   protectedDEK: RawEncryptedData;
@@ -40,10 +26,6 @@ export interface LoginMetaData {
 
 export interface LoginMetaDetaResponse {
   argon2Salt: string;
-  protectedDEK: {
-    ciphertext: string;
-    iv: string;
-    authTag: string;
-  };
+  protectedDEK: EncryptedData;
   argon2Params: Argon2Params;
 }

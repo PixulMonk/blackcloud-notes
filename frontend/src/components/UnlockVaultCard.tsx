@@ -1,4 +1,4 @@
-// UnlockVaultCard.tsx
+// TODO: add logout button? How about forgot password button?
 import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 
@@ -19,7 +19,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 import { useAuthStore } from '@/store/useAuthStore';
 import { useVaultStore } from '@/store/useVaultStore';
-import keyDerivationFunction from '@/lib/crypto/kdf';
+import { deriveKeysForLogin } from '@/lib/crypto/kdf';
 import { decryptAESGCM } from '@/lib/crypto/aes';
 
 export default function UnlockVaultCard() {
@@ -53,12 +53,13 @@ export default function UnlockVaultCard() {
         throw new Error('Failed to fetch vault metadata.');
       }
 
-      const { argon2Salt, protectedDEK } = loginMetaData;
+      const { argon2Salt, protectedDEK, argon2Params } = loginMetaData;
 
       // re-derive KEK from password + salt
-      const { keyEncryptionKey } = await keyDerivationFunction(
+      const { keyEncryptionKey } = await deriveKeysForLogin(
         password,
         argon2Salt,
+        argon2Params,
       );
 
       // decrypt protectedDEK to get DEK back in memory
