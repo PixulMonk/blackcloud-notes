@@ -1,3 +1,4 @@
+// TODO: typing and checking if sensitive data is being leaked in the responses
 import { Request, Response } from 'express';
 import bcrypt from 'bcrypt';
 import crypto from 'crypto';
@@ -20,12 +21,26 @@ dotenv.config();
 
 export const checkAuth = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
-    const user = await User.findById(req.user).select('-password -kdfSalt');
+    const user = await User.findById(req.user);
 
     if (!user) {
       throw new Error('User not found');
     }
-    res.status(200).json({ success: true, user: user });
+
+    // Remove sensitive crypto data before sending to client
+    const {
+      hashedAuthToken: _removed,
+      protectedDEK: _dekRemoved,
+      argon2Salt: _saltRemoved,
+      argon2Params: _paramsRemoved,
+      resetPasswordToken: _resetRemoved,
+      resetPasswordExpiresAt: _resetExpiryRemoved,
+      verificationToken: _verifyRemoved,
+      verificationTokenExpiresAt: _verifyExpiryRemoved,
+      ...sanitizedUser
+    } = user.toObject();
+
+    res.status(200).json({ success: true, user: sanitizedUser });
   },
 );
 
@@ -91,6 +106,8 @@ export const signup = asyncHandler(
       protectedDEK: _dekRemoved,
       argon2Salt: _saltRemoved,
       argon2Params: _paramsRemoved,
+      verificationToken: _verifyRemoved,
+      verificationTokenExpiresAt: _verifyExpiryRemoved,
       ...sanitizedUser
     } = newUser.toObject();
 
@@ -171,8 +188,13 @@ export const login = asyncHandler(
     // check what you are returning.. See diagram
     const {
       hashedAuthToken: _removed,
+      protectedDEK: _dekRemoved,
       argon2Salt: _saltRemoved,
       argon2Params: _paramsRemoved,
+      resetPasswordToken: _resetRemoved,
+      resetPasswordExpiresAt: _resetExpiryRemoved,
+      verificationToken: _verifyRemoved,
+      verificationTokenExpiresAt: _verifyExpiryRemoved,
       ...sanitizedUser
     } = user.toObject();
 
@@ -212,10 +234,23 @@ export const verifyEmail = asyncHandler(
 
     await sendWelcomeEmail(user!.name, user!.email);
 
+    // Remove sensitive data before sending to client
+    const {
+      hashedAuthToken: _removed,
+      protectedDEK: _dekRemoved,
+      argon2Salt: _saltRemoved,
+      argon2Params: _paramsRemoved,
+      resetPasswordToken: _resetRemoved,
+      resetPasswordExpiresAt: _resetExpiryRemoved,
+      verificationToken: _verifyRemoved,
+      verificationTokenExpiresAt: _verifyExpiryRemoved,
+      ...sanitizedUser
+    } = user!.toObject();
+
     res.status(200).json({
       success: true,
       message: 'User verified successfully',
-      user: user,
+      user: sanitizedUser,
     });
   },
 );
