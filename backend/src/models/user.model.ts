@@ -5,7 +5,7 @@ export interface IUser {
   name: string;
   email: string;
   hashedAuthToken: string;
-  protectedDEK: string; //  base64 — IV ‖ ciphertext ‖ tag
+  protectedDEK: string; // base64 — IV ‖ ciphertext ‖ tag
   argon2Salt: string; // base64
   argon2Params: {
     memoryCost: number;

@@ -16,17 +16,33 @@ import {
   sendWelcomeEmail,
   sendPasswordResetSuccessEmail,
 } from '../../mailer/emails';
+import {
+  AuthResponse,
+  ForgotPasswordRequest,
+  LoginMetadataRequest,
+  LoginMetaDataResponse,
+  LoginRequest,
+  ResetPasswordParams,
+  ResetPasswordRequest,
+  SignupRequest,
+  VerifyEmailRequest,
+} from '../types';
+import { SimpleResponse } from '../types/common.types';
 
 dotenv.config();
 
 export const checkAuth = asyncHandler(
-  async (req: Request, res: Response): Promise<void> => {
+  async (
+    req: Request<{}, AuthResponse, {}>,
+    res: Response<AuthResponse>,
+  ): Promise<void> => {
     const user = await User.findById(req.user);
 
     if (!user) {
       throw new Error('User not found');
     }
 
+    // TODO: extract this process to helper
     // Remove sensitive crypto data before sending to client
     const {
       hashedAuthToken: _removed,
@@ -45,7 +61,10 @@ export const checkAuth = asyncHandler(
 );
 
 export const signup = asyncHandler(
-  async (req: Request, res: Response): Promise<void> => {
+  async (
+    req: Request<{}, AuthResponse, SignupRequest>,
+    res: Response<AuthResponse>,
+  ): Promise<void> => {
     const {
       name,
       email,
@@ -120,7 +139,10 @@ export const signup = asyncHandler(
 );
 
 export const getLoginMetadata = asyncHandler(
-  async (req: Request, res: Response): Promise<void> => {
+  async (
+    req: Request<{}, LoginMetaDataResponse, LoginMetadataRequest>,
+    res: Response<LoginMetaDataResponse>,
+  ): Promise<void> => {
     const { email } = req.body;
 
     if (!email) {
@@ -135,17 +157,14 @@ export const getLoginMetadata = asyncHandler(
         .update(email)
         .digest('base64');
 
-      const fakeProtectedDEK = {
-        ciphertext: crypto.randomBytes(32).toString('base64'),
-        iv: crypto.randomBytes(12).toString('base64'),
-        authTag: crypto.randomBytes(16).toString('base64'),
-      };
+      const fakeBinaryBlob = crypto.randomBytes(12 + 32 + 16);
+      const fakeBlobBase64 = fakeBinaryBlob.toString('base64');
 
       res.status(200).json({
         success: true,
         argon2Salt: fakeSalt,
         argon2Params: ENCRYPTION_CONFIG.argon2,
-        protectedDEK: fakeProtectedDEK,
+        protectedDEK: fakeBlobBase64,
       });
       return;
     }
@@ -160,7 +179,10 @@ export const getLoginMetadata = asyncHandler(
 );
 
 export const login = asyncHandler(
-  async (req: Request, res: Response): Promise<void> => {
+  async (
+    req: Request<{}, AuthResponse, LoginRequest>,
+    res: Response<AuthResponse>,
+  ): Promise<void> => {
     const { email, authToken } = req.body;
 
     if (!email || !authToken) {
@@ -209,13 +231,19 @@ export const login = asyncHandler(
   },
 );
 
-export const logout = async (req: Request, res: Response): Promise<void> => {
+export const logout = async (
+  req: Request<{}, SimpleResponse, {}>,
+  res: Response<SimpleResponse>,
+): Promise<void> => {
   res.cookie('jwt', '', { maxAge: 0 });
-  res.status(200).json({ message: 'Logged out successfully' });
+  res.status(200).json({ success: true, message: 'Logged out successfully' });
 };
 
 export const verifyEmail = asyncHandler(
-  async (req: Request, res: Response): Promise<void> => {
+  async (
+    req: Request<{}, AuthResponse, VerifyEmailRequest>,
+    res: Response<AuthResponse>,
+  ): Promise<void> => {
     const { code } = req.body;
 
     const user = await User.findOne({
@@ -256,7 +284,10 @@ export const verifyEmail = asyncHandler(
 );
 
 export const forgotPassword = asyncHandler(
-  async (req: Request, res: Response): Promise<void> => {
+  async (
+    req: Request<{}, SimpleResponse, ForgotPasswordRequest>,
+    res: Response<SimpleResponse>,
+  ): Promise<void> => {
     const { email } = req.body;
     const user = await User.findOne({ email });
 
@@ -294,7 +325,10 @@ export const forgotPassword = asyncHandler(
 );
 
 export const resetPassword = asyncHandler(
-  async (req: Request, res: Response): Promise<void> => {
+  async (
+    req: Request<ResetPasswordParams, SimpleResponse, ResetPasswordRequest>,
+    res: Response<SimpleResponse>,
+  ): Promise<void> => {
     const { token } = req.params;
     const {
       newAuthToken,
