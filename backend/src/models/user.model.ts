@@ -5,12 +5,8 @@ export interface IUser {
   name: string;
   email: string;
   hashedAuthToken: string;
-  protectedDEK: {
-    ciphertext: string;
-    iv: string;
-    authTag: string;
-  };
-  argon2Salt: string;
+  protectedDEK: string; //  base64 — IV ‖ ciphertext ‖ tag
+  argon2Salt: string; // base64
   argon2Params: {
     memoryCost: number;
     timeCost: number;
@@ -33,11 +29,7 @@ const userSchema = new Schema<IUser>(
     name: { type: String },
     email: { type: String, required: true, unique: true },
     hashedAuthToken: { type: String, required: true },
-    protectedDEK: {
-      ciphertext: { type: String, required: true },
-      iv: { type: String, required: true },
-      authTag: { type: String, required: true },
-    },
+    protectedDEK: { type: String, required: true },
     argon2Salt: { type: String, required: true },
     argon2Params: {
       memoryCost: { type: Number, required: true },

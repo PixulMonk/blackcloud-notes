@@ -3,11 +3,7 @@ import mongoose, { Schema } from 'mongoose';
 export interface INote {
   _id: mongoose.Types.ObjectId;
   userId: mongoose.Types.ObjectId;
-  encryptedContent?: {
-    ciphertext: string;
-    iv: string;
-    authTag: string;
-  };
+  encryptedContent?: string; //  base64 — IV ‖ ciphertext ‖ tag
   schemaVersion: number;
   createdAt: Date;
   updatedAt: Date;
@@ -20,11 +16,7 @@ const noteSchema = new Schema<INote>(
       ref: 'User',
       required: true,
     },
-    encryptedContent: {
-      ciphertext: { type: String },
-      iv: { type: String },
-      authTag: { type: String },
-    },
+    encryptedContent: { type: String },
     schemaVersion: { type: Number, required: true, default: 1 },
   },
   { timestamps: true },

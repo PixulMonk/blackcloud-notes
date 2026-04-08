@@ -3,11 +3,7 @@ import mongoose, { Schema, Document } from 'mongoose';
 export interface ITreeNode extends Document {
   _id: mongoose.Types.ObjectId;
   userId: mongoose.Types.ObjectId;
-  encryptedTitle: {
-    ciphertext: string;
-    iv: string;
-    authTag: string;
-  };
+  encryptedTitle: string; //  base64 — IV ‖ ciphertext ‖ tag
   type: 'folder' | 'file';
   position: number;
   isArchived?: boolean;
@@ -23,11 +19,7 @@ export interface ITreeNode extends Document {
 const treeNodeSchema = new Schema<ITreeNode>(
   {
     userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-    encryptedTitle: {
-      ciphertext: { type: String, required: true },
-      iv: { type: String, required: true },
-      authTag: { type: String, required: true },
-    },
+    encryptedTitle: { type: String },
     type: { type: String, enum: ['folder', 'file'], required: true },
     position: { type: Number, required: true, default: 0 },
     isArchived: { type: Boolean, default: false },
