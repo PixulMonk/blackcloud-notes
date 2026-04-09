@@ -1,4 +1,13 @@
+import { Request, Response } from 'express';
 import mongoose from 'mongoose';
+
+import {
+  CreateTreeNodeResponse,
+  DeleteTreeNodeResponse,
+  TreeNodeParams,
+  TreeNodeResponse,
+  UpdateTreeNodeResponse,
+} from '../types/treeNode.types';
 import { ENCRYPTION_CONFIG } from '@blackcloud/shared';
 import asyncHandler from '../utils/asyncHandler';
 import { TreeNode } from '../models/treeNode.model';
@@ -8,374 +17,433 @@ import {
   updateNodeAndChildrenRecursively,
 } from '../utils/treeHelpers';
 
-export const getAllTreeNodes = asyncHandler(async (req, res) => {
-  // Returns a FLAT array of all nodes
-  const userId = req.user?._id;
+export const getAllTreeNodes = asyncHandler(
+  async (
+    req: Request<{}, TreeNodeResponse, {}>,
+    res: Response<TreeNodeResponse>,
+  ): Promise<void> => {
+    // Returns a FLAT array of all nodes
+    const userId = req.user?._id;
 
-  if (!userId) {
-    throw new Error('Unauthorized');
-  }
+    if (!userId) {
+      throw new Error('Unauthorized');
+    }
 
-  const userTreenodes = await TreeNode.find({ userId, isDeleted: false });
+    const userTreenodes = await TreeNode.find({ userId, isDeleted: false });
 
-  res.status(200).json(userTreenodes);
-});
+    res.status(200).json({
+      success: true,
+      message: 'Tree nodes retrieved successfully',
+      data: userTreenodes,
+    });
+  },
+);
 
-export const getAllDeleted = asyncHandler(async (req, res) => {
-  const userId = req.user?._id;
+export const getAllDeleted = asyncHandler(
+  async (
+    req: Request<{}, TreeNodeResponse, {}>,
+    res: Response<TreeNodeResponse>,
+  ): Promise<void> => {
+    const userId = req.user?._id;
 
-  if (!userId) {
-    throw new Error('Unauthorized');
-  }
+    if (!userId) {
+      throw new Error('Unauthorized');
+    }
 
-  const deletedTreeNodes = await TreeNode.find({ userId, isDeleted: true });
+    const deletedTreeNodes = await TreeNode.find({ userId, isDeleted: true });
 
-  res.status(200).json(deletedTreeNodes);
-});
+    res.status(200).json({
+      success: true,
+      message: 'Deleted tree nodes retrieved successfuly',
+      data: deletedTreeNodes,
+    });
+  },
+);
 
-export const getAllArchived = asyncHandler(async (req, res) => {
-  const userId = req.user?._id;
+export const getAllArchived = asyncHandler(
+  async (
+    req: Request<{}, TreeNodeResponse, {}>,
+    res: Response<TreeNodeResponse>,
+  ): Promise<void> => {
+    const userId = req.user?._id;
 
-  if (!userId) {
-    throw new Error('Unauthorized');
-  }
+    if (!userId) {
+      throw new Error('Unauthorized');
+    }
 
-  const archivedTreeNodes = await TreeNode.find({ userId, isArchived: true });
+    const archivedTreeNodes = await TreeNode.find({ userId, isArchived: true });
 
-  res.status(200).json(archivedTreeNodes);
-});
+    res.status(200).json({
+      success: true,
+      message: 'tree nodes retrieved successfuly',
+      data: archivedTreeNodes,
+    });
+  },
+);
 
-export const createTreeNode = asyncHandler(async (req, res) => {
-  const { encryptedTitle, type, isArchived, isDeleted, icon, parentId } =
-    req.body ?? {};
-  let message = '';
-  let fileId = null;
+export const createTreeNode = asyncHandler(
+  async (
+    req: Request<{}, TreeNodeResponse, CreateTreeNodeResponse>,
+    res: Response<TreeNodeResponse>,
+  ): Promise<void> => {
+    const { encryptedTitle, type, isArchived, isDeleted, icon, parentId } =
+      req.body ?? {};
+    let message = '';
+    let fileId = null;
 
-  if (!req.user?._id) {
-    throw new Error('User not authenticated');
-  }
+    if (!req.user?._id) {
+      throw new Error('User not authenticated');
+    }
 
-  if (type === 'file') {
-    message = 'File created successfully';
-    const newNote = new Note({
+    if (type === 'file') {
+      message = 'File created successfully';
+      const newNote = new Note({
+        userId: req.user._id,
+        encryptedContent: '',
+        schemaVersion: ENCRYPTION_CONFIG.schemaVersion,
+      });
+
+      await newNote.save(); // Save first, then get ID
+      fileId = newNote._id;
+    } else {
+      message = 'Folder created successfully';
+    }
+
+    const siblingCount = await TreeNode.countDocuments({
       userId: req.user._id,
-      encryptedContent: '',
-      schemaVersion: ENCRYPTION_CONFIG.schemaVersion,
+      parentId: parentId || null,
+      isDeleted: false,
     });
 
-    await newNote.save(); // Save first, then get ID
-    fileId = newNote._id;
-  } else {
-    message = 'Folder created successfully';
-  }
-
-  const siblingCount = await TreeNode.countDocuments({
-    userId: req.user._id,
-    parentId: parentId || null,
-    isDeleted: false,
-  });
-
-  const newTreeNode = new TreeNode({
-    userId: req.user._id,
-    // IMPORTANT NOTE: prior to the implementation of the encryption feature, the fallback
-    // if title is null was handled here on the backend. Now that the encryption feature has been
-    // implemented, the fallback should happen client side.
-    encryptedTitle: encryptedTitle,
-    type,
-    position: siblingCount,
-    isArchived: isArchived ?? false,
-    isDeleted: isDeleted ?? false,
-    icon: icon || null,
-    parentId: parentId || null,
-    fileId,
-  });
-
-  await newTreeNode.save();
-
-  res.status(201).json({
-    success: true,
-    message,
-    data: newTreeNode,
-  });
-});
-
-export const updateTreeNode = asyncHandler(async (req, res) => {
-  const {
-    encryptedTitle,
-    type,
-    position,
-    isArchived,
-    isDeleted,
-    icon,
-    parentId,
-    fileId,
-  } = req.body ?? {};
-
-  const treeNodeId = req.params.id;
-
-  if (!req.user?._id) {
-    throw new Error('User not authenticated');
-  }
-
-  if (
-    !treeNodeId ||
-    typeof treeNodeId !== 'string' ||
-    !mongoose.Types.ObjectId.isValid(treeNodeId)
-  ) {
-    return res.status(400).json({
-      success: false,
-      message: 'Invalid tree node ID',
+    const newTreeNode = new TreeNode({
+      userId: req.user._id,
+      // IMPORTANT NOTE: prior to the implementation of the encryption feature, the fallback
+      // if title is null was handled here on the backend. Now that the encryption feature has been
+      // implemented, the fallback should happen client side.
+      encryptedTitle: encryptedTitle,
+      type,
+      position: siblingCount,
+      isArchived: isArchived ?? false,
+      isDeleted: isDeleted ?? false,
+      icon: icon || null,
+      parentId: parentId || null,
+      fileId,
     });
-  }
 
-  if (encryptedTitle !== undefined) {
-    const isValidEncryptedTitle =
-      typeof encryptedTitle === 'object' &&
-      encryptedTitle !== null &&
-      typeof encryptedTitle.ciphertext === 'string' &&
-      encryptedTitle.ciphertext.length > 0 &&
-      typeof encryptedTitle.iv === 'string' &&
-      encryptedTitle.iv.length > 0 &&
-      typeof encryptedTitle.authTag === 'string' &&
-      encryptedTitle.authTag.length > 0;
+    await newTreeNode.save();
 
-    if (!isValidEncryptedTitle) {
+    res.status(201).json({
+      success: true,
+      message,
+      data: newTreeNode,
+    });
+  },
+);
+
+export const updateTreeNode = asyncHandler(
+  async (
+    req: Request<TreeNodeParams, TreeNodeResponse, UpdateTreeNodeResponse>,
+    res: Response<TreeNodeResponse>,
+  ) => {
+    const {
+      encryptedTitle,
+      type,
+      position,
+      isArchived,
+      isDeleted,
+      icon,
+      parentId,
+      fileId,
+    } = req.body ?? {};
+
+    const treeNodeId = req.params.id;
+
+    if (!req.user?._id) {
+      throw new Error('User not authenticated');
+    }
+
+    if (
+      !treeNodeId ||
+      typeof treeNodeId !== 'string' ||
+      !mongoose.Types.ObjectId.isValid(treeNodeId)
+    ) {
       return res.status(400).json({
         success: false,
-        message: 'Invalid encrypted title',
+        message: 'Invalid tree node ID',
       });
     }
-  }
 
-  const treeNodeToUpdate = await TreeNode.findOne(
-    { _id: treeNodeId, userId: req.user._id },
-    { new: true },
-  );
+    if (encryptedTitle !== undefined) {
+      // 1. Basic type check
+      if (typeof encryptedTitle !== 'string') {
+        return res.status(400).json({
+          success: false,
+          message: 'Title must be a string',
+        });
+      }
 
-  if (!treeNodeToUpdate) {
-    throw new Error('Tree node does not exist or unauthorized');
-  }
+      if (encryptedTitle.length < 40) {
+        return res.status(400).json({
+          success: false,
+          message: 'Encrypted title blob is too short or corrupted',
+        });
+      }
+    }
 
-  if (treeNodeToUpdate.isDeleted) {
-    return res.status(400).json({
-      success: false,
-      message: 'Cannot update a deleted node',
+    const treeNodeToUpdate = await TreeNode.findOne(
+      { _id: treeNodeId, userId: req.user._id },
+      { new: true },
+    );
+
+    if (!treeNodeToUpdate) {
+      throw new Error('Tree node does not exist or unauthorized');
+    }
+
+    if (treeNodeToUpdate.isDeleted) {
+      return res.status(400).json({
+        success: false,
+        message: 'Cannot update a deleted node',
+      });
+    }
+
+    if (parentId && parentId.toString() === treeNodeId.toString()) {
+      return res.status(400).json({
+        success: false,
+        message: 'A node cannot be its own parent',
+      });
+    }
+
+    const finalIsDeleted =
+      isDeleted !== undefined ? isDeleted : treeNodeToUpdate.isDeleted;
+    const finalIsArchived =
+      isArchived !== undefined ? isArchived : treeNodeToUpdate.isArchived;
+
+    if (isDeleted && isArchived) {
+      return res.status(400).json({
+        success: false,
+        message: 'Node cannot be both deleted and archived',
+      });
+    }
+
+    if (type !== undefined && type !== treeNodeToUpdate.type) {
+      return res.status(400).json({
+        success: false,
+        message: 'Changing node type is not allowed',
+      });
+    }
+
+    if (fileId !== undefined && type !== 'file') {
+      return res.status(400).json({
+        success: false,
+        message: 'Cannot assign a fileId to a folder node',
+      });
+    }
+
+    const updatedFields: any = {};
+    if (encryptedTitle !== undefined)
+      updatedFields.encryptedTitle = encryptedTitle;
+    if (position !== undefined) updatedFields.position = position;
+    if (isArchived !== undefined) updatedFields.isArchived = isArchived;
+    if (isDeleted !== undefined) updatedFields.isDeleted = isDeleted;
+    if (icon !== undefined) updatedFields.icon = icon;
+    if (parentId !== undefined) updatedFields.parentId = parentId;
+    if (fileId !== undefined) updatedFields.fileId = fileId;
+
+    const updatedTreeNode = await TreeNode.findOneAndUpdate(
+      { _id: treeNodeId, userId: req.user._id },
+      { $set: updatedFields },
+      { new: true },
+    );
+
+    res.status(200).json({
+      success: true,
+      message: `Tree node updated successfully (${treeNodeToUpdate.type})`,
+      data: updatedTreeNode,
     });
-  }
+  },
+);
 
-  if (parentId && parentId.toString() === treeNodeId.toString()) {
-    return res.status(400).json({
-      success: false,
-      message: 'A node cannot be its own parent',
+export const deleteTreeNode = asyncHandler(
+  async (
+    req: Request<TreeNodeParams, DeleteTreeNodeResponse, {}>,
+    res: Response<DeleteTreeNodeResponse>,
+  ): Promise<void> => {
+    const treeNodeId = req.params.id;
+
+    if (!req.user?._id) {
+      throw new Error('User not authenticated');
+    }
+
+    if (
+      !treeNodeId ||
+      typeof treeNodeId !== 'string' ||
+      !mongoose.Types.ObjectId.isValid(treeNodeId)
+    ) {
+      res.status(400).json({
+        success: false,
+        message: 'Invalid tree node ID',
+        data: null,
+      });
+    }
+
+    let deletedNotesCount = 0;
+    let deletedNodesCount = 0;
+
+    // verify node belongs to user
+    const treeNodeToDelete = await TreeNode.findOne({
+      _id: treeNodeId,
+      userId: req.user._id,
     });
-  }
 
-  const finalIsDeleted =
-    isDeleted !== undefined ? isDeleted : treeNodeToUpdate.isDeleted;
-  const finalIsArchived =
-    isArchived !== undefined ? isArchived : treeNodeToUpdate.isArchived;
+    if (!treeNodeToDelete) {
+      throw new Error('Tree node not found or unauthorized');
+    }
 
-  if (isDeleted && isArchived) {
-    return res.status(400).json({
-      success: false,
-      message: 'Node cannot be both deleted and archived',
-    });
-  }
+    if (treeNodeToDelete.type === 'file') {
+      const noteToDelete = await Note.findOneAndDelete({
+        _id: treeNodeToDelete.fileId,
+        userId: req.user!._id,
+      });
+      if (noteToDelete) deletedNotesCount++;
+    }
 
-  if (type !== undefined && type !== treeNodeToUpdate.type) {
-    return res.status(400).json({
-      success: false,
-      message: 'Changing node type is not allowed',
-    });
-  }
+    if (treeNodeToDelete.type === 'folder') {
+      const { notes, nodes } = await deleteNodeChildren(
+        treeNodeId,
+        req.user!._id.toString(),
+      );
+      deletedNotesCount += notes;
+      deletedNodesCount += nodes;
+    }
 
-  if (fileId !== undefined && type !== 'file') {
-    return res.status(400).json({
-      success: false,
-      message: 'Cannot assign a fileId to a folder node',
-    });
-  }
-
-  const updatedFields: any = {};
-  if (encryptedTitle !== undefined)
-    updatedFields.encryptedTitle = encryptedTitle;
-  if (position !== undefined) updatedFields.position = position;
-  if (isArchived !== undefined) updatedFields.isArchived = isArchived;
-  if (isDeleted !== undefined) updatedFields.isDeleted = isDeleted;
-  if (icon !== undefined) updatedFields.icon = icon;
-  if (parentId !== undefined) updatedFields.parentId = parentId;
-  if (fileId !== undefined) updatedFields.fileId = fileId;
-
-  const updatedTreeNode = await TreeNode.findOneAndUpdate(
-    { _id: treeNodeId, userId: req.user._id },
-    { $set: updatedFields },
-    { new: true },
-  );
-
-  res.status(200).json({
-    success: true,
-    message: `Tree node updated successfully (${treeNodeToUpdate.type})`,
-    data: updatedTreeNode,
-  });
-});
-
-export const deleteTreeNode = asyncHandler(async (req, res) => {
-  const treeNodeId = req.params.id;
-
-  if (!req.user?._id) {
-    throw new Error('User not authenticated');
-  }
-
-  if (
-    !treeNodeId ||
-    typeof treeNodeId !== 'string' ||
-    !mongoose.Types.ObjectId.isValid(treeNodeId)
-  ) {
-    return res.status(400).json({
-      success: false,
-      message: 'Invalid tree node ID',
-    });
-  }
-
-  let deletedNotesCount = 0;
-  let deletedNodesCount = 0;
-
-  // verify node belongs to user
-  const treeNodeToDelete = await TreeNode.findOne({
-    _id: treeNodeId,
-    userId: req.user._id,
-  });
-
-  if (!treeNodeToDelete) {
-    throw new Error('Tree node not found or unauthorized');
-  }
-
-  if (treeNodeToDelete.type === 'file') {
-    const noteToDelete = await Note.findOneAndDelete({
-      _id: treeNodeToDelete.fileId,
+    // delete the root node itself
+    const deletedRoot = await TreeNode.findOneAndDelete({
+      _id: treeNodeId,
       userId: req.user!._id,
     });
-    if (noteToDelete) deletedNotesCount++;
-  }
+    if (deletedRoot) deletedNodesCount++;
 
-  if (treeNodeToDelete.type === 'folder') {
-    const { notes, nodes } = await deleteNodeChildren(
-      treeNodeId,
-      req.user!._id.toString(),
-    );
-    deletedNotesCount += notes;
-    deletedNodesCount += nodes;
-  }
+    const message =
+      treeNodeToDelete.type === 'file'
+        ? 'File and note deleted successfully'
+        : `Folder deleted successfully (${deletedNodesCount} nodes, ${deletedNotesCount} notes)`;
 
-  // delete the root node itself
-  const deletedRoot = await TreeNode.findOneAndDelete({
-    _id: treeNodeId,
-    userId: req.user!._id,
-  });
-  if (deletedRoot) deletedNodesCount++;
-
-  const message =
-    treeNodeToDelete.type === 'file'
-      ? 'File and note deleted successfully'
-      : `Folder deleted successfully (${deletedNodesCount} nodes, ${deletedNotesCount} notes)`;
-
-  res.status(200).json({
-    success: true,
-    message,
-    node: treeNodeToDelete,
-    statistics: {
-      deletedNodes: deletedNodesCount,
-      deletedNotes: deletedNotesCount,
-    },
-  });
-});
+    res.status(200).json({
+      success: true,
+      message,
+      data: treeNodeToDelete,
+      statistics: {
+        deletedNodes: deletedNodesCount,
+        deletedNotes: deletedNotesCount,
+      },
+    });
+  },
+);
 
 // TODO: unify softDeleteTreeNode and archiveTreeNode
-export const softDeleteTreeNode = asyncHandler(async (req, res) => {
-  const treeNodeId = req.params.id;
+export const softDeleteTreeNode = asyncHandler(
+  async (
+    req: Request<TreeNodeParams, TreeNodeResponse, {}>,
+    res: Response<TreeNodeResponse>,
+  ): Promise<void> => {
+    const treeNodeId = req.params.id;
 
-  if (!req.user?._id) {
-    throw new Error('User not authenticated');
-  }
+    if (!req.user?._id) {
+      throw new Error('User not authenticated');
+    }
 
-  if (
-    !treeNodeId ||
-    typeof treeNodeId !== 'string' ||
-    !mongoose.Types.ObjectId.isValid(treeNodeId)
-  ) {
-    return res.status(400).json({
-      success: false,
-      message: 'Invalid tree node ID',
+    if (
+      !treeNodeId ||
+      typeof treeNodeId !== 'string' ||
+      !mongoose.Types.ObjectId.isValid(treeNodeId)
+    ) {
+      res.status(400).json({
+        success: false,
+        message: 'Invalid tree node ID',
+      });
+    }
+
+    const treeNodeToSoftDelete = await TreeNode.findOne({
+      _id: treeNodeId,
+      userId: req.user._id,
     });
-  }
 
-  const treeNodeToSoftDelete = await TreeNode.findOne({
-    _id: treeNodeId,
-    userId: req.user._id,
-  });
+    if (!treeNodeToSoftDelete) {
+      throw new Error('Tree node does not exist or unauthorized');
+    }
 
-  if (!treeNodeToSoftDelete) {
-    throw new Error('Tree node does not exist or unauthorized');
-  }
+    if (treeNodeToSoftDelete.isDeleted) {
+      throw new Error('Node already deleted');
+    }
 
-  if (treeNodeToSoftDelete.isDeleted) {
-    throw new Error('Node already deleted');
-  }
+    await updateNodeAndChildrenRecursively(
+      treeNodeId,
+      req.user._id.toString(),
+      {
+        isDeleted: true,
+        deletedAt: new Date(),
+      },
+    );
 
-  await updateNodeAndChildrenRecursively(treeNodeId, req.user._id.toString(), {
-    isDeleted: true,
-    deletedAt: new Date(),
-  });
-
-  res.status(200).json({
-    success: true,
-    message: 'Tree node and all descendants soft-deleted successfully',
-    node: treeNodeToSoftDelete,
-  });
-});
-
-export const archiveTreeNode = asyncHandler(async (req, res) => {
-  const treeNodeId = req.params.id;
-
-  if (!req.user?._id) {
-    throw new Error('User not authenticated');
-  }
-
-  if (
-    !treeNodeId ||
-    typeof treeNodeId !== 'string' ||
-    !mongoose.Types.ObjectId.isValid(treeNodeId)
-  ) {
-    return res.status(400).json({
-      success: false,
-      message: 'Invalid tree node ID',
+    res.status(200).json({
+      success: true,
+      message: 'Tree node and all descendants soft-deleted successfully',
+      data: treeNodeToSoftDelete,
     });
-  }
-  const treeNodeToArchive = await TreeNode.findOne({
-    _id: treeNodeId,
-    userId: req.user._id,
-  });
+  },
+);
 
-  if (!treeNodeToArchive) {
-    throw new Error('Tree node does not exist or unauthorized');
-  }
+export const archiveTreeNode = asyncHandler(
+  async (
+    req: Request<TreeNodeParams, TreeNodeResponse, {}>,
+    res: Response<TreeNodeResponse>,
+  ): Promise<void> => {
+    const treeNodeId = req.params.id;
 
-  if (treeNodeToArchive.isArchived) {
-    throw new Error('Node already archived');
-  }
+    if (!req.user?._id) {
+      throw new Error('User not authenticated');
+    }
 
-  if (treeNodeToArchive.isDeleted) {
-    throw new Error('Cannot archive a deleted node');
-  }
+    if (
+      !treeNodeId ||
+      typeof treeNodeId !== 'string' ||
+      !mongoose.Types.ObjectId.isValid(treeNodeId)
+    ) {
+      res.status(400).json({
+        success: false,
+        message: 'Invalid tree node ID',
+      });
+    }
+    const treeNodeToArchive = await TreeNode.findOne({
+      _id: treeNodeId,
+      userId: req.user._id,
+    });
 
-  await updateNodeAndChildrenRecursively(treeNodeId, req.user._id.toString(), {
-    isArchived: true,
-    archivedAt: new Date(),
-  });
+    if (!treeNodeToArchive) {
+      throw new Error('Tree node does not exist or unauthorized');
+    }
 
-  res.status(200).json({
-    success: true,
-    message: 'Tree node and all descendants archived successfully',
-    node: treeNodeToArchive,
-  });
-});
+    if (treeNodeToArchive.isArchived) {
+      throw new Error('Node already archived');
+    }
+
+    if (treeNodeToArchive.isDeleted) {
+      throw new Error('Cannot archive a deleted node');
+    }
+
+    await updateNodeAndChildrenRecursively(
+      treeNodeId,
+      req.user._id.toString(),
+      {
+        isArchived: true,
+        archivedAt: new Date(),
+      },
+    );
+
+    res.status(200).json({
+      success: true,
+      message: 'Tree node and all descendants archived successfully',
+      data: treeNodeToArchive,
+    });
+  },
+);

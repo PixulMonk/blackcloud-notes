@@ -5,12 +5,12 @@ import { Note, type INote } from '../models/note.model';
 import { IUser } from '../models/user.model';
 
 export interface NoteResponse extends SimpleResponse {
-  note?: INote;
+  note?: INote | INote[];
 }
 
 export interface GetAllNotesRequest extends Request<
   ParamsDictionary,
-  INote[],
+  NoteResponse,
   {}
 > {
   user?: IUser;

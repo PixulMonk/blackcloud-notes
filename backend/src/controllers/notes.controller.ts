@@ -15,7 +15,10 @@ import {
 } from '../types/notes.types';
 
 export const getAllNotes = asyncHandler(
-  async (req: GetAllNotesRequest, res: Response<INote[]>): Promise<void> => {
+  async (
+    req: GetAllNotesRequest,
+    res: Response<NoteResponse>,
+  ): Promise<void> => {
     const userId = req.user?._id;
 
     if (!userId) {
@@ -24,7 +27,13 @@ export const getAllNotes = asyncHandler(
 
     const userNotes = await Note.find({ userId });
 
-    res.status(200).json(userNotes);
+    res
+      .status(200)
+      .json({
+        success: true,
+        message: 'Notes retrieved successfully',
+        note: userNotes,
+      });
   },
 );
 
