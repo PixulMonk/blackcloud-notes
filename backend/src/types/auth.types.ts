@@ -1,4 +1,5 @@
-import { ParamsDictionary } from 'express-serve-static-core';
+import { Request } from 'express';
+import { ParamsDictionary, Query } from 'express-serve-static-core';
 import { Argon2Params } from '@blackcloud/shared';
 import { IUser } from '../models/user.model';
 import { SimpleResponse } from './common.types';

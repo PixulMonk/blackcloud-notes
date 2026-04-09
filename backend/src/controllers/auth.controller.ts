@@ -2,7 +2,7 @@
 import { Request, Response } from 'express';
 import bcrypt from 'bcrypt';
 import crypto from 'crypto';
-import mongoose, { sanitizeFilter } from 'mongoose';
+import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 
 import { ENCRYPTION_CONFIG } from '@blackcloud/shared';
