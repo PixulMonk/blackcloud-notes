@@ -10,14 +10,10 @@ export const initializeUserVault = async (
   }
   const dekBytes = window.crypto.getRandomValues(new Uint8Array(32)); //256-bits
 
-  const { ciphertext, authTag, iv } = await encryptAESGCM(dekBytes, kek);
+  const protectedDEK = await encryptAESGCM(dekBytes, kek);
 
   return {
-    protectedDEK: {
-      ciphertext: ciphertext,
-      iv,
-      authTag: authTag,
-    },
+    protectedDEK,
     argon2Params: ENCRYPTION_CONFIG.argon2,
     schemaVersion: ENCRYPTION_CONFIG.schemaVersion,
     rawDEK: dekBytes,

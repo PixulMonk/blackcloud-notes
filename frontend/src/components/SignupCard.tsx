@@ -21,21 +21,21 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
-import { useAuthStore } from '@/store/useAuthStore';
+import { useAuth, useAuthActions } from '@/store/useAuthStore';
 
 export default function SignupCard() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-
   const [hasAgreedToTerms, setHasAgreedToTerms] = useState(false);
+
+  const { error, isLoading } = useAuth();
+  const { signup, setError } = useAuthActions();
 
   const navigate = useNavigate();
 
-  const { signup, error, setError, isLoading } = useAuthStore();
-
-  const handleSignUp = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSignUp = async (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     if (!arePasswordRequirementsMet(password)) {
@@ -93,26 +93,32 @@ export default function SignupCard() {
   };
 
   const passwordRequirements = [
-    { label: 'At least 8 characters', test: (pwd: string) => pwd.length >= 8 },
+    {
+      label: 'At least 8 characters',
+      test: (password: string) => password.length >= 8,
+    },
     {
       label: 'At least 1 uppercase letter',
-      test: (pwd: string) => /[A-Z]/.test(pwd),
+      test: (password: string) => /[A-Z]/.test(password),
     },
-    { label: 'At least 1 number', test: (pwd: string) => /\d/.test(pwd) },
+    {
+      label: 'At least 1 number',
+      test: (password: string) => /\d/.test(password),
+    },
     {
       label: 'At least 1 special character',
-      test: (pwd: string) => /[^A-Za-z0-9]/.test(pwd),
+      test: (password: string) => /[^A-Za-z0-9]/.test(password),
     },
   ];
 
   // TODO: move to utils?
-  const getStrength = (pwd: string): number => {
-    if (!pwd) return 0;
+  const getStrength = (password: string): number => {
+    if (!password) return 0;
     let score = 0;
-    if (pwd.length >= 8) score++;
-    if (/[A-Z]/.test(pwd)) score++;
-    if (/[0-9]/.test(pwd)) score++;
-    if (/[^A-Za-z0-9]/.test(pwd)) score++;
+    if (password.length >= 8) score++;
+    if (/[A-Z]/.test(password)) score++;
+    if (/[0-9]/.test(password)) score++;
+    if (/[^A-Za-z0-9]/.test(password)) score++;
     return score; // 0 to 4
   };
 

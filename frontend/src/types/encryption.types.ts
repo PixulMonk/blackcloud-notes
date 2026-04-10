@@ -1,11 +1,7 @@
-import type {
-  Argon2Params,
-  EncryptedData,
-  RawEncryptedData,
-} from '@blackcloud/shared/src';
+import type { Argon2Params } from '@blackcloud/shared/src';
 
 export interface VaultInitializationResult {
-  protectedDEK: RawEncryptedData;
+  protectedDEK: string;
   argon2Params: Argon2Params;
   schemaVersion: number;
   rawDEK: Uint8Array;
@@ -20,12 +16,13 @@ export interface DerivationResult {
 
 export interface LoginMetaData {
   argon2Salt: Uint8Array;
-  protectedDEK: RawEncryptedData;
+  protectedDEK: Uint8Array;
   argon2Params: Argon2Params;
 }
 
 export interface LoginMetaDetaResponse {
-  argon2Salt: string;
-  protectedDEK: EncryptedData;
+  success: boolean;
+  argon2Salt: string; // base64
   argon2Params: Argon2Params;
+  protectedDEK: string; // base64 — IV ‖ ciphertext ‖ tag
 }
