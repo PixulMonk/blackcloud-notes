@@ -2,17 +2,17 @@ import { fromBase64, toBase64 } from './crypto-utils';
 
 const TAG_LENGTH = 16;
 
-// TODO: Change logic so that byte conversions are taking place HERE in this function
-// TODO: Both functions should accept STRINGS which are converted to bytes
 export const encryptAESGCM = async (
-  plaintext: string,
+  plaintext: string | Uint8Array,
   keyBytes: Uint8Array,
 ): Promise<string> => {
   try {
     const iv = window.crypto.getRandomValues(new Uint8Array(12)); //96-bits
 
-    const encoder = new TextEncoder();
-    const encodedPlaintext = encoder.encode(plaintext);
+    const data =
+      typeof plaintext === 'string'
+        ? new TextEncoder().encode(plaintext)
+        : plaintext;
 
     const key = await crypto.subtle.importKey(
       'raw',
@@ -29,7 +29,7 @@ export const encryptAESGCM = async (
         tagLength: 128,
       },
       key,
-      encodedPlaintext,
+      data as BufferSource,
     );
 
     const encrypted = new Uint8Array(encryptedBuffer);
@@ -46,6 +46,7 @@ export const encryptAESGCM = async (
   }
 };
 
+// Decrypting to string: notes, titles, etc.
 export const decryptAESGCM = async (
   payload: string, //base64
   keyBytes: Uint8Array,
@@ -77,7 +78,7 @@ export const decryptAESGCM = async (
         tagLength: 128,
       },
       key,
-      encrypted,
+      encrypted as BufferSource,
     );
 
     const decoder = new TextDecoder();
@@ -88,4 +89,35 @@ export const decryptAESGCM = async (
     console.error('Decryption error:', error);
     throw new Error('Decryption failed (invalid key or corrupted data)');
   }
+};
+
+// Decrypting to bytes (DEKs, binary data, etc.)
+export const decryptAESGCMBytes = async (
+  payload: string,
+  keyBytes: Uint8Array,
+): Promise<Uint8Array> => {
+  const payloadBytes = fromBase64(payload);
+
+  if (payloadBytes.length < 12 + 16) {
+    throw new Error('Invalid payload length');
+  }
+
+  const iv = payloadBytes.slice(0, 12);
+  const encrypted = payloadBytes.slice(12);
+
+  const key = await crypto.subtle.importKey(
+    'raw',
+    keyBytes as BufferSource,
+    'AES-GCM',
+    false,
+    ['decrypt'],
+  );
+
+  const decryptedBuffer = await crypto.subtle.decrypt(
+    { name: 'AES-GCM', iv },
+    key,
+    encrypted,
+  );
+
+  return new Uint8Array(decryptedBuffer);
 };
