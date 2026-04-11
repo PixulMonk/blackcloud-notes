@@ -102,8 +102,8 @@ const useAuthStore = create<AuthState>((set) => ({
         set({ isLoading: false, error: null });
 
         return {
-          argon2Salt: fromBase64(argon2Salt),
-          protectedDEK: fromBase64(protectedDEK), // encrypted Uint8Array
+          argon2Salt,
+          protectedDEK,
           argon2Params,
         };
       } catch (error) {

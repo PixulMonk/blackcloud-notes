@@ -19,14 +19,14 @@ import {
 
 import { useDataStore } from '@/store/useDataStore';
 import { useTreeUIStore } from '@/store/useTreeUIStore';
-import { useVaultStore } from '@/store/useVaultStore';
+import { useDataEncryptionKey } from '@/store/useVaultStore';
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const navigate = useNavigate();
   const tree = useDataStore((state) => state.tree);
   const fetchTree = useDataStore((state) => state.fetchTree);
   const addNode = useDataStore((state) => state.addNode);
-  const dataEncryptionKey = useVaultStore((state) => state.dataEncryptionKey);
+  const dataEncryptionKey = useDataEncryptionKey();
 
   const setRenamingNodeId = useTreeUIStore((state) => state.setRenamingNodeId);
 

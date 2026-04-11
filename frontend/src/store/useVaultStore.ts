@@ -1,24 +1,29 @@
 import { create } from 'zustand';
 
-interface VaultState {
-  keyEncryptionKey?: Uint8Array | undefined;
-  dataEncryptionKey?: Uint8Array | undefined;
-  setKeys: (kek: Uint8Array, dek: Uint8Array) => void;
-  clearKeys: () => void;
-}
+import type { VaultState } from '@/types/vault.types';
 
-export const useVaultStore = create<VaultState>((set) => ({
+const useVaultStore = create<VaultState>((set) => ({
   keyEncryptionKey: undefined,
   dataEncryptionKey: undefined,
-  setKeys: (kek, dek) => set({ keyEncryptionKey: kek, dataEncryptionKey: dek }),
-  clearKeys: () =>
-    set((state) => {
-      state.keyEncryptionKey?.fill(0);
-      state.dataEncryptionKey?.fill(0);
+  actions: {
+    setKeys: (kek, dek) =>
+      set({ keyEncryptionKey: kek, dataEncryptionKey: dek }),
+    clearKeys: () =>
+      set((state) => {
+        // Manually zero out the sensitive data in memory before clearing the reference
+        if (state.keyEncryptionKey) state.keyEncryptionKey.fill(0);
+        if (state.dataEncryptionKey) state.dataEncryptionKey.fill(0);
 
-      return {
-        keyEncryptionKey: undefined,
-        dataEncryptionKey: undefined,
-      };
-    }),
+        return {
+          keyEncryptionKey: undefined,
+          dataEncryptionKey: undefined,
+        };
+      }),
+  },
 }));
+
+export const useKeyEncryptionKey = () =>
+  useVaultStore((s) => s.keyEncryptionKey);
+export const useDataEncryptionKey = () =>
+  useVaultStore((s) => s.dataEncryptionKey);
+export const useVaultActions = () => useVaultStore((s) => s.actions);

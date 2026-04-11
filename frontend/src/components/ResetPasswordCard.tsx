@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 
 import { Eye, EyeOff, AlertCircleIcon, Loader } from 'lucide-react';
 
-import { useAuthStore } from '@/store/useAuthStore';
+import { useAuth, useAuthActions } from '@/store/useAuthStore';
 
 import {
   Card,
@@ -12,8 +12,6 @@ import {
   CardDescription,
   CardContent,
 } from '@/components/ui/card';
-
-import { cn } from '@/lib/utils';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
@@ -23,6 +21,9 @@ import { confirm } from './ConfirmDialogue';
 import { deriveKeysForNewUser } from '@/lib/crypto/kdf';
 import { encryptAESGCM } from '@/lib/crypto/aes';
 import { toBase64 } from './../lib/crypto/crypto-utils';
+import PasswordStrengthBar from './PasswordStrengthBar';
+import PasswordRequirements from './PasswordRequirements';
+import { arePasswordRequirementsMet } from '@/utils/passwordRules';
 
 function ResetPasswordCard() {
   const [password, setPassword] = useState('');
@@ -30,7 +31,9 @@ function ResetPasswordCard() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  const { resetPassword, error, setError, isLoading } = useAuthStore();
+  const { error, isLoading } = useAuth();
+
+  const { resetPassword, setError } = useAuthActions();
 
   const { token } = useParams();
 
@@ -121,44 +124,6 @@ function ResetPasswordCard() {
     }
   };
 
-  // PASSWORD REQUIREMENTS AND STRENGTH INDICATOR
-  const arePasswordRequirementsMet = (password: string): boolean => {
-    return passwordRequirements.every((req) => req.test(password));
-  };
-
-  const passwordRequirements = [
-    { label: 'At least 8 characters', test: (pwd: string) => pwd.length >= 8 },
-    {
-      label: 'At least 1 uppercase letter',
-      test: (pwd: string) => /[A-Z]/.test(pwd),
-    },
-    { label: 'At least 1 number', test: (pwd: string) => /\d/.test(pwd) },
-    {
-      label: 'At least 1 special character',
-      test: (pwd: string) => /[^A-Za-z0-9]/.test(pwd),
-    },
-  ];
-
-  // TODO: move to utils?
-  const getStrength = (pwd: string): number => {
-    if (!pwd) return 0;
-    let score = 0;
-    if (pwd.length >= 8) score++;
-    if (/[A-Z]/.test(pwd)) score++;
-    if (/[0-9]/.test(pwd)) score++;
-    if (/[^A-Za-z0-9]/.test(pwd)) score++;
-    return score; // 0 to 4
-  };
-
-  const strength: number = getStrength(password);
-  const colors = [
-    'bg-red-500', // Too Weak
-    'bg-yellow-500', // Weak
-    'bg-lime-400', // Strong
-    'bg-green-600', // Very Strong
-  ];
-  const labels = ['Too Weak', 'Weak', 'Strong', 'Very Strong'];
-
   return (
     <div className="flex flex-col w-full items-center justify-center">
       <Card className="max-w-sm w-full">
@@ -232,59 +197,8 @@ function ResetPasswordCard() {
                       )}
                     </Button>
                   </div>
-                  {/* Strength bar */}
-                  {password && (
-                    <div className="flex gap-1 mt-2">
-                      {Array.from({ length: 4 }).map((_, i) => (
-                        <div
-                          key={i}
-                          className={cn(
-                            'h-1 flex-1 rounded transition-colors',
-                            i < strength
-                              ? colors[Math.max(strength - 1, 0)]
-                              : 'bg-gray-200',
-                          )}
-                        />
-                      ))}
-                    </div>
-                  )}
-                  {password && strength > 0 && (
-                    <p
-                      className={cn(
-                        'text-sm mt-1',
-                        colors[Math.max(strength - 1, 0)].replace(
-                          'bg-',
-                          'text-',
-                        ),
-                      )}
-                    >
-                      {labels[Math.max(strength - 1, 0)]}
-                    </p>
-                  )}
-                  {/* Password Requirements */}
-                  <div className="mt-2 space-y-1 text-xs">
-                    {passwordRequirements.map((req, idx) => {
-                      const valid = req.test(password);
-                      return (
-                        <div key={idx} className="flex items-center gap-2">
-                          <div
-                            className={cn(
-                              'w-2 h-2 rounded-full transition-colors',
-                              valid ? 'bg-green-500' : 'bg-gray-300',
-                            )}
-                          />
-                          <span
-                            className={cn(
-                              'transition-colors',
-                              valid ? 'text-green-600' : 'text-gray-500',
-                            )}
-                          >
-                            {req.label}
-                          </span>
-                        </div>
-                      );
-                    })}
-                  </div>
+                  <PasswordStrengthBar password={password} />
+                  <PasswordRequirements password={password} />
                 </div>
               </div>
               {/* Alerts */}

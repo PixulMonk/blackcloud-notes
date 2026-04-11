@@ -13,14 +13,16 @@ import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { AlertCircleIcon } from 'lucide-react';
 
-import { useAuthStore } from '@/store/useAuthStore';
+import { useAuth, useAuthActions } from '@/store/useAuthStore';
 
 function VerifyEmailCard() {
   const [code, setCode] = useState(['', '', '', '', '', '']);
   const [isButtonDisabled, setIsButtonDisabled] = useState(true);
   const inputRefs = useRef<HTMLInputElement[]>([]);
   const navigate = useNavigate();
-  const { verifyEmail, error, isLoading } = useAuthStore();
+
+  const { error, isLoading } = useAuth();
+  const { verifyEmail } = useAuthActions();
 
   const handleChange = (value: string, index: number) => {
     const newCode = [...code];
@@ -35,7 +37,7 @@ function VerifyEmailCard() {
 
   const handlePaste = (
     e: React.ClipboardEvent<HTMLInputElement>,
-    index: number
+    index: number,
   ) => {
     e.preventDefault();
     const pasteData = e.clipboardData.getData('Text').slice(0, 6);
@@ -62,7 +64,7 @@ function VerifyEmailCard() {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
     const verificationCode = code.join('');
     console.log('Submitted code:', verificationCode);

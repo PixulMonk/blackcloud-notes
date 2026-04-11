@@ -1,6 +1,6 @@
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
-import { AppSidebar } from '@/components/app-sidebar';
+import { AppSidebar } from './components/AppSideBar';
 import HomePage from './pages/HomePage';
 import SignupPage from './pages/SignupPage';
 import LoginPage from './pages/LoginPage';
@@ -10,15 +10,16 @@ import { useEffect } from 'react';
 import { useThemeStore } from './store/useThemeStore';
 import { updateFavicon } from './lib/utils';
 import VerifyEmailPage from './pages/VerifyEmailPage';
-import { useAuthStore } from './store/useAuthStore';
+import { useAuth, useAuthActions } from './store/useAuthStore';
 import { Loader } from 'lucide-react';
 import ResetPasswordPage from './pages/ResetPasswordPage';
 import UnlockVaultPage from './pages/UnlockVaultPage';
-import { useVaultStore } from './store/useVaultStore';
+import { useDataEncryptionKey } from './store/useVaultStore';
 
 function App() {
-  const { isCheckingAuth, checkAuth, isAuthenticated, user } = useAuthStore();
-  const { dataEncryptionKey } = useVaultStore();
+  const { user, isCheckingAuth, isAuthenticated } = useAuth();
+  const { checkAuth } = useAuthActions();
+  const dataEncryptionKey = useDataEncryptionKey();
   const isDark = useThemeStore((state) => state.isDark);
   const location = useLocation();
 

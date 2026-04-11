@@ -21,7 +21,6 @@ export interface LoginMetaData {
 }
 
 export interface LoginMetaDetaResponse {
-  success: boolean;
   argon2Salt: string; // base64
   argon2Params: Argon2Params;
   protectedDEK: string; // base64 — IV ‖ ciphertext ‖ tag

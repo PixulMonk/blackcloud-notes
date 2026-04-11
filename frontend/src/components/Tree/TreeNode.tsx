@@ -14,7 +14,7 @@ import { useDataStore } from '@/store/useDataStore';
 import { confirm } from '../ConfirmDialogue';
 
 import { useTreeUIStore } from '@/store/useTreeUIStore';
-import { useVaultStore } from '@/store/useVaultStore';
+// import { useVaultStore } from '@/store/useVaultStore';
 
 // Renders individual node components
 const TreeNodeComponent = ({ node }: TreeNodeComponentProps) => {

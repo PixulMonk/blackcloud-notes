@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { type Editor } from '@tiptap/react';
 
 import { useDataStore } from '@/store/useDataStore';
-import { useVaultStore } from '@/store/useVaultStore';
+import { useDataEncryptionKey } from '@/store/useVaultStore';
 import { decryptTipTapContent } from '@/lib/crypto/tiptapEncryption';
 import { fromBase64 } from '@/lib/crypto/crypto-utils';
 
@@ -13,7 +13,7 @@ const useEditorContent = (
   const [showSkeleton, setShowSkeleton] = useState(false);
   const fetchNodeContent = useDataStore((state) => state.fetchNodeContent);
   const isFetchingContent = useDataStore((state) => state.isFetchingContent);
-  const dataEncryptionKey = useVaultStore((state) => state.dataEncryptionKey);
+  const dataEncryptionKey = useDataEncryptionKey();
 
   useEffect(() => {
     if (!isFetchingContent) {

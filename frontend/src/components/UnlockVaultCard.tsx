@@ -1,7 +1,6 @@
 // TODO: add logout button? How about forgot password button?
 import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-
 import { Eye, EyeOff, AlertCircleIcon, Loader, LockIcon } from 'lucide-react';
 
 import {
@@ -11,16 +10,16 @@ import {
   CardDescription,
   CardContent,
 } from '@/components/ui/card';
-
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
-import { useAuthStore } from '@/store/useAuthStore';
-import { useVaultStore } from '@/store/useVaultStore';
+import { useAuth, useAuthActions } from '@/store/useAuthStore';
+import { useVaultActions } from '@/store/useVaultStore';
 import { deriveKeysForLogin } from '@/lib/crypto/kdf';
-import { decryptAESGCM } from '@/lib/crypto/aes';
+import { decryptAESGCMBytes } from '@/lib/crypto/aes';
+import { fromBase64 } from '@/lib/crypto/crypto-utils';
 
 export default function UnlockVaultCard() {
   const navigate = useNavigate();
@@ -31,8 +30,9 @@ export default function UnlockVaultCard() {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  const { user, getLoginMetadata } = useAuthStore();
-  const { setKeys, clearKeys } = useVaultStore();
+  const { user } = useAuth();
+  const { getLoginMetadata } = useAuthActions();
+  const { setKeys, clearKeys } = useVaultActions();
 
   // redirect back to where they came from, or home
   const from = location.state?.from ?? '/';
@@ -56,18 +56,16 @@ export default function UnlockVaultCard() {
       const { argon2Salt, protectedDEK, argon2Params } = loginMetaData;
 
       // re-derive KEK from password + salt
-      const { keyEncryptionKey } = await deriveKeysForLogin(
+      const { authToken, keyEncryptionKey } = await deriveKeysForLogin(
         password,
-        argon2Salt,
+        fromBase64(argon2Salt),
         argon2Params,
       );
 
       // decrypt protectedDEK to get DEK back in memory
-      const dataEncryptionKey = await decryptAESGCM(
-        protectedDEK.ciphertext,
-        protectedDEK.authTag,
+      const dataEncryptionKey = await decryptAESGCMBytes(
+        protectedDEK,
         keyEncryptionKey,
-        protectedDEK.iv,
       );
 
       setKeys(keyEncryptionKey, dataEncryptionKey);

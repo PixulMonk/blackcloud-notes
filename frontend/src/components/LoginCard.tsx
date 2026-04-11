@@ -23,10 +23,11 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
-import { useAuthStore } from '@/store/useAuthStore';
+import { useAuth, useAuthActions } from '@/store/useAuthStore';
 import { deriveKeysForLogin } from '@/lib/crypto/kdf';
-import { decryptAESGCM } from '@/lib/crypto/aes';
-import { useVaultStore } from '@/store/useVaultStore';
+import { fromBase64 } from '@/lib/crypto/crypto-utils';
+import { decryptAESGCM, decryptAESGCMBytes } from '@/lib/crypto/aes';
+import { useVaultActions } from '@/store/useVaultStore';
 
 export default function LoginCard() {
   const location = useLocation();
@@ -36,10 +37,11 @@ export default function LoginCard() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const { login, getLoginMetadata, error, isLoading } = useAuthStore();
-  const { setKeys, clearKeys } = useVaultStore();
+  const { error, isLoading } = useAuth();
+  const { login, getLoginMetadata } = useAuthActions();
+  const { setKeys, clearKeys } = useVaultActions();
 
-  const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleLogin = async (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     try {
@@ -52,18 +54,16 @@ export default function LoginCard() {
 
       const { authToken, keyEncryptionKey } = await deriveKeysForLogin(
         password,
-        argon2Salt,
+        fromBase64(argon2Salt),
         argon2Params,
       );
 
       const success = await login(email, authToken);
 
       if (success) {
-        const dataEncryptionKey = await decryptAESGCM(
-          protectedDEK.ciphertext,
-          protectedDEK.authTag,
+        const dataEncryptionKey = await decryptAESGCMBytes(
+          protectedDEK,
           keyEncryptionKey,
-          protectedDEK.iv,
         );
 
         setKeys(keyEncryptionKey, dataEncryptionKey);

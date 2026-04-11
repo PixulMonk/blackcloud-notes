@@ -1,5 +1,5 @@
 import type { Argon2Params } from '@blackcloud/shared';
-import type { LoginMetaData } from '@/types/encryption.types';
+import type { LoginMetaDetaResponse } from '@/types/encryption.types';
 
 // TODO: check if matches SanitizedUser returned by backend
 export interface User {
@@ -22,7 +22,9 @@ export interface AuthStateActions {
   ) => Promise<boolean>;
 
   login: (email: string, authToken: Uint8Array) => Promise<boolean>;
-  getLoginMetadata: (email: string) => Promise<LoginMetaData | undefined>;
+  getLoginMetadata: (
+    email: string,
+  ) => Promise<LoginMetaDetaResponse | undefined>;
   verifyEmail: (verificationCode: string) => Promise<boolean>;
   checkAuth: () => Promise<void>;
   logout: () => Promise<void>;

@@ -20,8 +20,11 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import PasswordStrengthBar from './PasswordStrengthBar';
 
 import { useAuth, useAuthActions } from '@/store/useAuthStore';
+import PasswordRequirements from './PasswordRequirements';
+import { arePasswordRequirementsMet } from '@/utils/passwordRules';
 
 export default function SignupCard() {
   const [name, setName] = useState('');
@@ -85,51 +88,6 @@ export default function SignupCard() {
       }
     }
   };
-
-  // TODO: extract strength indicator to a new component
-  // PASSWORD REQUIREMENTS AND STRENGTH INDICATOR
-  const arePasswordRequirementsMet = (password: string): boolean => {
-    return passwordRequirements.every((req) => req.test(password));
-  };
-
-  const passwordRequirements = [
-    {
-      label: 'At least 8 characters',
-      test: (password: string) => password.length >= 8,
-    },
-    {
-      label: 'At least 1 uppercase letter',
-      test: (password: string) => /[A-Z]/.test(password),
-    },
-    {
-      label: 'At least 1 number',
-      test: (password: string) => /\d/.test(password),
-    },
-    {
-      label: 'At least 1 special character',
-      test: (password: string) => /[^A-Za-z0-9]/.test(password),
-    },
-  ];
-
-  // TODO: move to utils?
-  const getStrength = (password: string): number => {
-    if (!password) return 0;
-    let score = 0;
-    if (password.length >= 8) score++;
-    if (/[A-Z]/.test(password)) score++;
-    if (/[0-9]/.test(password)) score++;
-    if (/[^A-Za-z0-9]/.test(password)) score++;
-    return score; // 0 to 4
-  };
-
-  const strength: number = getStrength(password);
-  const colors = [
-    'bg-red-500', // Too Weak
-    'bg-yellow-500', // Weak
-    'bg-lime-400', // Strong
-    'bg-green-600', // Very Strong
-  ];
-  const labels = ['Too Weak', 'Weak', 'Strong', 'Very Strong'];
 
   return (
     <div className="flex flex-col w-full items-center justify-center">
@@ -199,59 +157,8 @@ export default function SignupCard() {
                       )}
                     </Button>
                   </div>
-                  {/* Strength bar */}
-                  {password && (
-                    <div className="flex gap-1 mt-2">
-                      {Array.from({ length: 4 }).map((_, i) => (
-                        <div
-                          key={i}
-                          className={cn(
-                            'h-1 flex-1 rounded transition-colors',
-                            i < strength
-                              ? colors[Math.max(strength - 1, 0)]
-                              : 'bg-gray-200',
-                          )}
-                        />
-                      ))}
-                    </div>
-                  )}
-                  {password && strength > 0 && (
-                    <p
-                      className={cn(
-                        'text-sm mt-1',
-                        colors[Math.max(strength - 1, 0)].replace(
-                          'bg-',
-                          'text-',
-                        ),
-                      )}
-                    >
-                      {labels[Math.max(strength - 1, 0)]}
-                    </p>
-                  )}
-                  {/* Password Requirements */}
-                  <div className="mt-2 space-y-1 text-xs">
-                    {passwordRequirements.map((req, idx) => {
-                      const valid = req.test(password);
-                      return (
-                        <div key={idx} className="flex items-center gap-2">
-                          <div
-                            className={cn(
-                              'w-2 h-2 rounded-full transition-colors',
-                              valid ? 'bg-green-500' : 'bg-gray-300',
-                            )}
-                          />
-                          <span
-                            className={cn(
-                              'transition-colors',
-                              valid ? 'text-green-600' : 'text-gray-500',
-                            )}
-                          >
-                            {req.label}
-                          </span>
-                        </div>
-                      );
-                    })}
-                  </div>
+                  <PasswordStrengthBar password={password} />
+                  <PasswordRequirements password={password} />
                 </div>
                 {/* Alerts */}
                 {error && (

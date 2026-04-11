@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 
 import { useDataStore } from '@/store/useDataStore';
-import { useVaultStore } from '@/store/useVaultStore';
+import { useDataEncryptionKey } from '@/store/useVaultStore';
 import { type Editor } from '@tiptap/react';
 import { encryptTipTapContent } from '@/lib/crypto/tiptapEncryption';
 import { toBase64 } from '@/lib/crypto/crypto-utils';
@@ -13,7 +13,7 @@ const useEditorSync = (
   const isSyncing = useDataStore((state) => state.isSyncing);
   const setSyncing = useDataStore((state) => state.setSyncing);
   const updateNote = useDataStore((state) => state.updateNote);
-  const dataEncryptionKey = useVaultStore((state) => state.dataEncryptionKey);
+  const dataEncryptionKey = useDataEncryptionKey();
 
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useTreeUIStore } from '@/store/useTreeUIStore';
-import { useVaultStore } from '@/store/useVaultStore';
+import { useDataEncryptionKey } from '@/store/useVaultStore';
 import { Input } from '../ui/input';
 import { useDataStore } from '@/store/useDataStore';
 
@@ -12,7 +12,7 @@ export const DocumentTitle = () => {
   const selectedFileTitle = useTreeUIStore((state) => state.selectedFileTitle);
   const [previousTitle, setPreviousTitle] = useState(selectedFileTitle);
   const setFileTitle = useTreeUIStore((state) => state.setFileTitle);
-  const dataEncryptionKey = useVaultStore((state) => state.dataEncryptionKey);
+  const dataEncryptionKey = useDataEncryptionKey();
   const updateNode = useDataStore((state) => state.updateNode);
 
   useEffect(() => {
