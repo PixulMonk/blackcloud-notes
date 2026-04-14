@@ -31,9 +31,3 @@ export interface NodeLabelProps {
   handleRenameSubmit: () => void;
   className?: string;
 }
-
-export interface AddNodeResponse {
-  success: boolean;
-  message: string;
-  data: TreeNode;
-}

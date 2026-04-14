@@ -10,7 +10,6 @@ export interface NoteDTO {
   tags?: string[];
 }
 
-// TO be used later when decrypting content
 export interface NoteContentDTO {
   _id: string;
   title?: string;
@@ -18,7 +17,7 @@ export interface NoteContentDTO {
   tags?: string[];
 }
 
-export interface GetNoteResponse {
+export interface NoteResponse {
   success: boolean;
   message: string;
   data: NoteDTO;

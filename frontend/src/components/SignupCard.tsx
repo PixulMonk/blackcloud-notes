@@ -3,7 +3,6 @@ import { Link, useNavigate } from 'react-router-dom';
 
 import { Eye, EyeOff, AlertCircleIcon, Loader } from 'lucide-react';
 
-import { cn } from '@/lib/utils';
 import { initializeUserVault } from '@/lib/crypto/vault';
 import { deriveKeysForNewUser } from '@/lib/crypto/kdf';
 
