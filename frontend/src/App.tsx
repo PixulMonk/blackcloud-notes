@@ -1,13 +1,13 @@
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
-import { AppSidebar } from './components/AppSideBar';
+import { AppSidebar } from './components/AppSidebar';
 import HomePage from './pages/HomePage';
 import SignupPage from './pages/SignupPage';
 import LoginPage from './pages/LoginPage';
 import SettingsPage from './pages/SettingsPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import { useEffect } from 'react';
-import { useThemeStore } from './store/useThemeStore';
+import { useIsDark } from './store/useThemeStore';
 import { updateFavicon } from './lib/utils';
 import VerifyEmailPage from './pages/VerifyEmailPage';
 import { useAuth, useAuthActions } from './store/useAuthStore';
@@ -20,7 +20,7 @@ function App() {
   const { user, isCheckingAuth, isAuthenticated } = useAuth();
   const { checkAuth } = useAuthActions();
   const dataEncryptionKey = useDataEncryptionKey();
-  const isDark = useThemeStore((state) => state.isDark);
+  const isDark = useIsDark();
   const location = useLocation();
 
   const authRoutes = [

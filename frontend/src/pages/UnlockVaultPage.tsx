@@ -1,8 +1,8 @@
 import UnlockVaultCard from '@/components/UnlockVaultCard';
-import { useThemeStore } from '@/store/useThemeStore';
+import { useIsDark } from '@/store/useThemeStore';
 
 function UnlockVaultPage() {
-  const isDark = useThemeStore((state) => state.isDark);
+  const isDark = useIsDark();
 
   return (
     <div className="flex flex-col items-center justify-center h-screen">

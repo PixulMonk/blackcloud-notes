@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 
-import type { VaultState } from '@/types/vault.types';
+import type { VaultActions, VaultState } from '@/types/vault.types';
 
 const useVaultStore = create<VaultState>((set) => ({
   keyEncryptionKey: undefined,
@@ -26,4 +26,5 @@ export const useKeyEncryptionKey = () =>
   useVaultStore((s) => s.keyEncryptionKey);
 export const useDataEncryptionKey = () =>
   useVaultStore((s) => s.dataEncryptionKey);
-export const useVaultActions = () => useVaultStore((s) => s.actions);
+export const useVaultActions = (): VaultActions =>
+  useVaultStore((s) => s.actions);

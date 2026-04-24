@@ -4,13 +4,13 @@ import { EditorContent, EditorContext } from '@tiptap/react';
 import useEditorSetup from '@/hooks/useEditorSetup';
 import useEditorContent from '@/hooks/useEditorContent';
 import useEditorSync from '@/hooks/useEditorSync';
-import { useTreeUIStore } from '@/store/useTreeUIStore';
+import { useTreeUI } from '@/store/useTreeUIStore';
 
 import MenuBar from '../MenuBar';
 import { SkeletonText } from './SkeletonText';
 
 const Editor = () => {
-  const selectedFileId = useTreeUIStore((state) => state.selectedFileId);
+  const { selectedFileId } = useTreeUI();
   const editor = useEditorSetup();
   const { showSkeleton, isFetchingContent } = useEditorContent(
     editor,

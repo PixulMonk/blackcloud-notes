@@ -1,12 +1,13 @@
 import { create } from 'zustand';
 import axios from 'axios';
 import type {
+  DataActions,
   DataState,
+  DataStoreState,
   TreeNodeResponse,
   TreeResponse,
 } from '@/types/data.types';
 import { encryptAESGCM } from '@/lib/crypto/aes';
-import { toBase64 } from '@/lib/crypto/crypto-utils';
 import { useShallow } from 'zustand/react/shallow';
 import type { NoteResponse } from '@/types/note.types';
 
@@ -18,7 +19,7 @@ axios.defaults.withCredentials = true;
 // TODO: There seems to be some separation of concerns issue in these zustand actions
 // The zustand actions role should merely be to make a call to the backend to update the DB
 // Encryption and decryption happens outside of this actions to avoid debug nightmare
-export const useDataStore = create<DataState>((set) => ({
+const useDataStore = create<DataState>((set) => ({
   tree: [],
   isLoading: false,
   isFetchingContent: false,
@@ -269,7 +270,7 @@ export const useDataStore = create<DataState>((set) => ({
   },
 }));
 
-export const useData = () =>
+export const useData = (): DataStoreState =>
   useDataStore(
     useShallow((s) => ({
       tree: s.tree,
@@ -280,4 +281,4 @@ export const useData = () =>
     })),
   );
 
-export const useDataActions = () => useDataStore((s) => s.actions);
+export const useDataActions = (): DataActions => useDataStore((s) => s.actions);

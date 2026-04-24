@@ -17,18 +17,18 @@ import {
   SidebarMenu,
 } from '@/components/ui/sidebar';
 
-import { useDataStore } from '@/store/useDataStore';
-import { useTreeUIStore } from '@/store/useTreeUIStore';
+import { useData, useDataActions } from '@/store/useDataStore';
+import { useTreeUIActions } from '@/store/useTreeUIStore';
 import { useDataEncryptionKey } from '@/store/useVaultStore';
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const navigate = useNavigate();
-  const tree = useDataStore((state) => state.tree);
-  const fetchTree = useDataStore((state) => state.fetchTree);
-  const addNode = useDataStore((state) => state.addNode);
+  const { tree } = useData();
+  const { fetchTree, addNode } = useDataActions();
+
   const dataEncryptionKey = useDataEncryptionKey();
 
-  const setRenamingNodeId = useTreeUIStore((state) => state.setRenamingNodeId);
+  const { setRenamingNodeId } = useTreeUIActions();
 
   useEffect(() => {
     fetchTree();

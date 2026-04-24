@@ -31,3 +31,19 @@ export interface NodeLabelProps {
   handleRenameSubmit: () => void;
   className?: string;
 }
+
+export interface TreeUIActions {
+  setRenamingNodeId: (id: string | null) => void;
+  selectNode: (node: TreeNode) => void;
+  setFileTitle: (newTitle: string) => void;
+}
+
+export interface TreeUIState {
+  renamingNodeId: string | null;
+  selectedNodeId: string | null;
+  selectedFileId: string | null;
+  selectedFileTitle: string | null;
+  actions: TreeUIActions;
+}
+
+export type TreeUIStoreState = Omit<TreeUIState, 'actions'>;

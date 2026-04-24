@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 
-import { useDataStore } from '@/store/useDataStore';
+import { useData, useDataActions } from '@/store/useDataStore';
 import { useDataEncryptionKey } from '@/store/useVaultStore';
 import { type Editor } from '@tiptap/react';
 import { encryptTipTapContent } from '@/lib/crypto/tiptapEncryption';
@@ -10,9 +10,9 @@ const useEditorSync = (
   editor: Editor | null,
   selectedFileId: string | null,
 ) => {
-  const isSyncing = useDataStore((state) => state.isSyncing);
-  const setSyncing = useDataStore((state) => state.setSyncing);
-  const updateNote = useDataStore((state) => state.updateNote);
+  const { isSyncing } = useData();
+  const { setSyncing, updateNote } = useDataActions();
+
   const dataEncryptionKey = useDataEncryptionKey();
 
   useEffect(() => {

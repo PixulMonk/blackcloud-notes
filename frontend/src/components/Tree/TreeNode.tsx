@@ -10,11 +10,11 @@ import {
 import NodeActions from './node-components/NodeActions';
 import NodeLabel from './node-components/NodeLabel';
 import { type TreeNodeComponentProps } from '../../types/tree.types';
-import { useDataStore } from '@/store/useDataStore';
+import { useDataActions } from '@/store/useDataStore';
 import { confirm } from '../ConfirmDialogue';
 
-import { useTreeUIStore } from '@/store/useTreeUIStore';
-// import { useVaultStore } from '@/store/useVaultStore';
+import { useTreeUI, useTreeUIActions } from '@/store/useTreeUIStore';
+import { useKeyEncryptionKey } from '@/store/useVaultStore';
 
 // Renders individual node components
 const TreeNodeComponent = ({ node }: TreeNodeComponentProps) => {
@@ -23,22 +23,16 @@ const TreeNodeComponent = ({ node }: TreeNodeComponentProps) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [treeData, setTreeData] = useState(node);
 
-  const renamingNodeId = useTreeUIStore((state) => state.renamingNodeId);
-  const setRenamingNodeId = useTreeUIStore((state) => state.setRenamingNodeId);
-  const setFileTitle = useTreeUIStore((state) => state.setFileTitle);
+  const { renamingNodeId, selectedNodeId } = useTreeUI();
+  const { setRenamingNodeId, setFileTitle, selectNode } = useTreeUIActions();
 
   const isRenaming = node._id === renamingNodeId;
-
-  const selectedNodeId = useTreeUIStore((state) => state.selectedNodeId);
-  const selectNode = useTreeUIStore((state) => state.selectNode);
   const isSelected = node._id === selectedNodeId;
-
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const updateNode = useDataStore((state) => state.updateNode);
-  const softDeleteNode = useDataStore((state) => state.softDeleteNode);
-  const archiveNode = useDataStore((state) => state.archiveNode);
-  const dataEncryptionKey = useVaultStore((state) => state.dataEncryptionKey);
+  const { updateNode, softDeleteNode, archiveNode } = useDataActions();
+
+  const dataEncryptionKey = useKeyEncryptionKey();
 
   const handleRenameSubmit = () => {
     if (!dataEncryptionKey) return;

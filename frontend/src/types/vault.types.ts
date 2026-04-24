@@ -4,7 +4,7 @@ export interface VaultActions {
 }
 
 export interface VaultState {
-  keyEncryptionKey?: Uint8Array | undefined;
-  dataEncryptionKey?: Uint8Array | undefined;
+  keyEncryptionKey: Uint8Array | undefined;
+  dataEncryptionKey: Uint8Array | undefined;
   actions: VaultActions;
 }

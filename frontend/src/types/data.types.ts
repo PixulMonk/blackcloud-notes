@@ -43,6 +43,8 @@ export interface DataState {
   actions: DataActions;
 }
 
+export type DataStoreState = Omit<DataState, 'actions'>;
+
 export interface TreeNodeResponse {
   success: boolean;
   data: TreeNode; //| TreeNode[] | null;
