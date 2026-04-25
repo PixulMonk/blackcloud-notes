@@ -1,9 +1,8 @@
 import type { RefObject } from 'react';
 
-export interface TreeNode {
+interface BaseTreeNode {
   _id: string;
   userId: string;
-  title: string;
   type: 'folder' | 'file';
   position: number;
   isArchived?: boolean;
@@ -11,6 +10,15 @@ export interface TreeNode {
   icon?: string;
   parentId?: string | null;
   fileId?: string;
+}
+
+export interface TreeNodeDTO extends BaseTreeNode {
+  encryptedTitle: string;
+  children?: TreeNodeDTO[];
+}
+
+export interface TreeNode extends BaseTreeNode {
+  title: string;
   children?: TreeNode[];
 }
 

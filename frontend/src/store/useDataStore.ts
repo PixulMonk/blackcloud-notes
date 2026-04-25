@@ -7,9 +7,13 @@ import type {
   TreeNodeResponse,
   TreeResponse,
 } from '@/types/data.types';
-import { encryptAESGCM } from '@/lib/crypto/aes';
 import { useShallow } from 'zustand/react/shallow';
+
 import type { NoteResponse } from '@/types/note.types';
+import type { TreeNode } from '@/types/tree.types';
+import { encryptAESGCM } from '@/lib/crypto/aes';
+import { decryptTree } from '@/lib/tree/treeEncryption';
+import { updateRecursive } from '@/lib/tree/treeHelpers';
 
 const BASE_URL = 'http://localhost:3000/api';
 axios.defaults.withCredentials = true;
@@ -20,19 +24,29 @@ axios.defaults.withCredentials = true;
 // The zustand actions role should merely be to make a call to the backend to update the DB
 // Encryption and decryption happens outside of this actions to avoid debug nightmare
 const useDataStore = create<DataState>((set) => ({
-  tree: [],
+  tree: [], // Should be decrypted
   isLoading: false,
   isFetchingContent: false,
   isSyncing: false,
   error: null,
   actions: {
-    fetchTree: async () => {
+    fetchTree: async (dataEncryptionKey) => {
       set({ isLoading: true, error: null });
       try {
         const response = await axios.get<TreeResponse>(
           `${BASE_URL}/tree/build`,
         );
-        set({ tree: response.data.tree, isLoading: false });
+        // TODO: you forgot to decrypt the tree
+        console.log(
+          'DEK length passed to decryptTree:',
+          dataEncryptionKey.length,
+        ); // must be 32
+        console.log('DEK first bytes:', dataEncryptionKey.slice(0, 4));
+        const decryptedTree = await decryptTree(
+          response.data.tree,
+          dataEncryptionKey,
+        );
+        set({ tree: decryptedTree, isLoading: false });
       } catch (err: any) {
         set({ error: err.message || 'Failed to fetch tree', isLoading: false });
       }
@@ -53,9 +67,16 @@ const useDataStore = create<DataState>((set) => ({
       if (!title) {
         title = 'Untitled document';
       }
+      // TODO: very important: DELETE THIS LOG:
+      console.log(
+        'DEK used for encryption (first 4 bytes):',
+        dataEncryptionKey?.slice(0, 4),
+      );
       const encryptedTitle = await encryptAESGCM(title, dataEncryptionKey!);
 
       try {
+        console.log('Sending encryptedTitle:', encryptedTitle);
+
         const response = await axios.post<TreeNodeResponse>(
           `${BASE_URL}/treeNodes/create`,
           {
@@ -68,14 +89,23 @@ const useDataStore = create<DataState>((set) => ({
           },
         );
 
-        const newNode = response.data.data;
+        const newNodeDTO = response.data.data;
+        console.log(
+          'Stored encryptedTitle from response:',
+          newNodeDTO.encryptedTitle,
+        );
+        const newNode: TreeNode = {
+          ...newNodeDTO,
+          title: title,
+          children: [],
+        };
 
         set((state) => ({
           tree: [...state.tree, newNode],
           isLoading: false,
         }));
 
-        return newNode;
+        return newNodeDTO;
       } catch (error: unknown) {
         if (axios.isAxiosError(error)) {
           set({
@@ -89,6 +119,7 @@ const useDataStore = create<DataState>((set) => ({
       }
     },
 
+    // TODO: maybe change this action to accept updates as objects for cleaner code
     updateNode: async (
       nodeId,
       dataEncryptionKey,
@@ -104,42 +135,47 @@ const useDataStore = create<DataState>((set) => ({
       set({ isLoading: true, error: null });
 
       try {
+        const payload: any = {};
+        if (type !== undefined) payload.type = type;
+        if (position !== undefined) payload.position = position;
+        if (isArchived !== undefined) payload.isArchived = isArchived;
+        if (isDeleted !== undefined) payload.isDeleted = isDeleted;
+        if (icon !== undefined) payload.icon = icon;
+        if (parentId !== undefined) payload.parentId = parentId;
+        if (fileId !== undefined) payload.fileId = fileId;
+
         // 1. Encrypt title
-        const titlePlainText = new TextEncoder().encode(title);
-        const encryptedTitle = await encryptAESGCM(
-          titlePlainText,
-          dataEncryptionKey,
-        );
+        if (title !== undefined) {
+          payload.encryptedTitle = await encryptAESGCM(
+            title,
+            dataEncryptionKey,
+          );
+        }
 
         const response = await axios.patch<TreeNodeResponse>(
           `${BASE_URL}/treeNodes/${nodeId}`,
-          {
-            encryptedTitle,
-            type,
-            position,
-            isArchived,
-            isDeleted,
-            icon,
-            parentId,
-            fileId,
-          },
+          payload,
         );
 
-        const updatedNode = response.data.data;
+        const updatedNodeDTO = response.data.data;
 
-        if (!updatedNode) {
+        if (!updatedNodeDTO) {
           throw new Error('Invalid server response when updating node');
         }
 
         set((state) => ({
-          tree: state.tree.map((n) =>
-            n._id === nodeId ? { ...n, ...updatedNode } : n,
-          ),
+          tree: updateRecursive(state.tree, nodeId, {
+            ...updatedNodeDTO,
+            title: title !== undefined ? title : undefined,
+            children: undefined,
+          }).map((n) => {
+            return n;
+          }),
           isLoading: false,
         }));
         // TODO: This line below is questionable. Come back to it later
-        await useDataStore.getState().actions.fetchTree();
-        return updatedNode;
+        // await useDataStore.getState().actions.fetchTree();
+        return updatedNodeDTO;
       } catch (error: unknown) {
         if (axios.isAxiosError(error)) {
           set({
@@ -164,17 +200,22 @@ const useDataStore = create<DataState>((set) => ({
           `${BASE_URL}/treeNodes/${nodeId}/soft-delete`,
         );
 
-        const updatedNode = response.data.data;
+        const updatedNodeDTO = response.data.data;
 
         set((state) => ({
-          tree: state.tree.map((n) =>
-            n._id === nodeId ? { ...n, ...updatedNode } : n,
-          ),
+          tree: updateRecursive(state.tree, nodeId, {
+            ...updatedNodeDTO,
+            title: undefined,
+            children: undefined,
+          }).map((n) => {
+            return n;
+          }),
           isLoading: false,
         }));
+
         // TODO: again, this way of updating the backend needs to be reconsidered
-        await useDataStore.getState().actions.fetchTree();
-        return updatedNode;
+        // await useDataStore.getState().actions.fetchTree();
+        return updatedNodeDTO;
       } catch (error) {
         if (axios.isAxiosError(error)) {
           set({
@@ -196,17 +237,22 @@ const useDataStore = create<DataState>((set) => ({
           `${BASE_URL}/treeNodes/${nodeId}/archive`,
         );
 
-        const updatedNode = response.data.data;
+        const updatedNodeDTO = response.data.data;
 
         set((state) => ({
-          tree: state.tree.map((n) =>
-            n._id === nodeId ? { ...n, ...updatedNode } : n,
-          ),
+          tree: updateRecursive(state.tree, nodeId, {
+            ...updatedNodeDTO,
+            title: undefined,
+            children: undefined,
+          }).map((n) => {
+            return n;
+          }),
           isLoading: false,
         }));
+
         // TODO: check
-        await useDataStore.getState().actions.fetchTree();
-        return updatedNode;
+        // await useDataStore.getState().actions.fetchTree();
+        return updatedNodeDTO;
       } catch (error) {
         if (axios.isAxiosError(error)) {
           set({

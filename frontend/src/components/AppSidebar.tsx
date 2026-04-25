@@ -31,7 +31,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { setRenamingNodeId } = useTreeUIActions();
 
   useEffect(() => {
-    fetchTree();
+    fetchTree(dataEncryptionKey!);
   }, [fetchTree]);
 
   const handleCreate = async (type: 'folder' | 'file') => {

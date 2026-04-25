@@ -1,6 +1,6 @@
 import type { TreeNode, TreeNodeDTO } from '@/types/tree.types';
-import { fromBase64 } from '../crypto/crypto-utils';
-import { decryptToString } from '../crypto/stringEncryption';
+
+import { decryptAESGCM } from '@/lib/crypto/aes';
 
 export const decryptTree = async (
   nodes: TreeNodeDTO[],
@@ -8,13 +8,11 @@ export const decryptTree = async (
 ): Promise<TreeNode[]> => {
   return Promise.all(
     nodes.map(async (node: TreeNodeDTO) => {
-      const payload = {
-        ciphertext: fromBase64(node.encryptedTitle.ciphertext),
-        iv: fromBase64(node.encryptedTitle.iv),
-        authTag: fromBase64(node.encryptedTitle.authTag),
-      };
-
-      const decryptedTitle = await decryptToString(payload, key);
+      console.log('Encrypted Title:', node.encryptedTitle);
+      console.log('Raw node from API:', JSON.stringify(node));
+      console.log('encryptedTitle type:', typeof node.encryptedTitle);
+      console.log('encryptedTitle value:', node.encryptedTitle);
+      const decryptedTitle = await decryptAESGCM(node.encryptedTitle, key);
 
       const decryptedChildren = node.children
         ? await decryptTree(node.children, key)
@@ -24,7 +22,7 @@ export const decryptTree = async (
         ...node,
         title: decryptedTitle,
         children: decryptedChildren,
-      } as TreeNode; // Cast to your UI interface
+      } as TreeNode;
     }),
   );
 };

@@ -14,7 +14,7 @@ import { useDataActions } from '@/store/useDataStore';
 import { confirm } from '../ConfirmDialogue';
 
 import { useTreeUI, useTreeUIActions } from '@/store/useTreeUIStore';
-import { useKeyEncryptionKey } from '@/store/useVaultStore';
+import { useDataEncryptionKey } from '@/store/useVaultStore';
 
 // Renders individual node components
 const TreeNodeComponent = ({ node }: TreeNodeComponentProps) => {
@@ -32,15 +32,25 @@ const TreeNodeComponent = ({ node }: TreeNodeComponentProps) => {
 
   const { updateNode, softDeleteNode, archiveNode } = useDataActions();
 
-  const dataEncryptionKey = useKeyEncryptionKey();
+  const dataEncryptionKey = useDataEncryptionKey();
 
   const handleRenameSubmit = () => {
-    if (!dataEncryptionKey) return;
+    console.log(
+      'Rename submit DEK first bytes:',
+      dataEncryptionKey?.slice(0, 4),
+    );
 
-    if (renamingNodeId) {
-      updateNode(renamingNodeId, dataEncryptionKey, treeData.title);
-      setFileTitle(treeData.title);
+    if (!dataEncryptionKey) return;
+    if (!renamingNodeId) return;
+
+    // Don't re-encrypt if title hasn't changed
+    if (treeData.title === node.title) {
+      setRenamingNodeId(null);
+      return;
     }
+
+    updateNode(renamingNodeId, dataEncryptionKey, treeData.title);
+    setFileTitle(treeData.title);
     setRenamingNodeId(null);
   };
 

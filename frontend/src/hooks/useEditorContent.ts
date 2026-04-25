@@ -3,7 +3,6 @@ import { type Editor } from '@tiptap/react';
 
 import { useData, useDataActions } from '@/store/useDataStore';
 import { useDataEncryptionKey } from '@/store/useVaultStore';
-import { decryptTipTapContent } from '@/lib/crypto/tiptapEncryption';
 import { fromBase64 } from '@/lib/crypto/crypto-utils';
 
 const useEditorContent = (

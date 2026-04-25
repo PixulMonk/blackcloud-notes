@@ -3,8 +3,7 @@ import { useEffect } from 'react';
 import { useData, useDataActions } from '@/store/useDataStore';
 import { useDataEncryptionKey } from '@/store/useVaultStore';
 import { type Editor } from '@tiptap/react';
-import { encryptTipTapContent } from '@/lib/crypto/tiptapEncryption';
-import { toBase64 } from '@/lib/crypto/crypto-utils';
+import { encryptAESGCM } from '@/lib/crypto/aes';
 
 const useEditorSync = (
   editor: Editor | null,
@@ -42,18 +41,10 @@ const useEditorSync = (
         if (!dataEncryptionKey) return;
 
         // Encrypt the content
-        const encrypted = await encryptTipTapContent(
-          contentJSON,
+        const encryptedContent = await encryptAESGCM(
+          JSON.stringify(contentJSON),
           dataEncryptionKey,
         );
-
-        // Convert to base64
-        const encryptedContent = {
-          ciphertext: toBase64(encrypted.ciphertext),
-          authTag: toBase64(encrypted.authTag),
-          iv: toBase64(encrypted.iv),
-        };
-
         //
         updateNote(encryptedContent, selectedFileId!);
       }, 1000);

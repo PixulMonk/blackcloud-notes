@@ -1,8 +1,8 @@
-import type { TreeNode } from '../types/tree.types';
+import type { TreeNode, TreeNodeDTO } from '../types/tree.types';
 import type { NoteDTO, NoteResponse } from '@/types/note.types';
 
 export interface DataActions {
-  fetchTree: () => Promise<void>;
+  fetchTree: (dataEncryptionKey: Uint8Array) => Promise<void>;
   setSyncing: (value: boolean) => void;
   addNode: (
     type: 'folder' | 'file',
@@ -12,7 +12,7 @@ export interface DataActions {
     isDeleted?: boolean,
     icon?: string | undefined,
     parentId?: string | null,
-  ) => Promise<TreeNode | null>;
+  ) => Promise<TreeNodeDTO | null>;
   updateNode: (
     id: string,
     dataEncryptionKey: Uint8Array,
@@ -24,9 +24,9 @@ export interface DataActions {
     icon?: string | undefined,
     parentId?: string | null,
     fileId?: string,
-  ) => Promise<TreeNode | null>;
-  softDeleteNode: (nodeId: string) => Promise<TreeNode | null>;
-  archiveNode: (nodeId: string) => Promise<TreeNode | null>;
+  ) => Promise<TreeNodeDTO | null>;
+  softDeleteNode: (nodeId: string) => Promise<TreeNodeDTO | null>;
+  archiveNode: (nodeId: string) => Promise<TreeNodeDTO | null>;
   fetchNodeContent: (fileId: string) => Promise<NoteDTO | null>;
   updateNote: (
     encryptedContent: string,
@@ -47,10 +47,10 @@ export type DataStoreState = Omit<DataState, 'actions'>;
 
 export interface TreeNodeResponse {
   success: boolean;
-  data: TreeNode; //| TreeNode[] | null;
+  data: TreeNodeDTO;
 }
 
 export interface TreeResponse {
   success: boolean;
-  tree: TreeNode[];
+  tree: TreeNodeDTO[];
 }
