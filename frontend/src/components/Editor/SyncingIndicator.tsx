@@ -1,7 +1,7 @@
-import { useDataStore } from '@/store/useDataStore';
+import { useData } from '@/store/useDataStore';
 
 const SyncingIndicator = () => {
-  const isSyncing = useDataStore((state) => state.isSyncing);
+  const { isSyncing } = useData();
   return (
     <div className="mx-4 my-0 text-right">
       <p

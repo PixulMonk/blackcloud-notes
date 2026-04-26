@@ -1,1 +1,12 @@
-{}
+{
+  "name": "blackcloud-notes",
+  "private": true,
+  "workspaces": [
+    "backend",
+    "frontend",
+    "shared"
+  ],
+  "dependencies": {
+    "argon2": "^0.44.0"
+  }
+}

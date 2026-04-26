@@ -1,14 +1,18 @@
 import { useState, useEffect } from 'react';
-import { useDataStore } from '@/store/useDataStore';
 import { type Editor } from '@tiptap/react';
+
+import { useData, useDataActions } from '@/store/useDataStore';
+import { useDataEncryptionKey } from '@/store/useVaultStore';
+import { decryptAESGCM } from '@/lib/crypto/aes';
 
 const useEditorContent = (
   editor: Editor | null,
   selectedFileId: string | null,
 ) => {
   const [showSkeleton, setShowSkeleton] = useState(false);
-  const fetchNodeContent = useDataStore((state) => state.fetchNodeContent);
-  const isFetchingContent = useDataStore((state) => state.isFetchingContent);
+  const { isFetchingContent } = useData();
+  const { fetchNodeContent } = useDataActions();
+  const dataEncryptionKey = useDataEncryptionKey();
 
   useEffect(() => {
     if (!isFetchingContent) {
@@ -23,12 +27,19 @@ const useEditorContent = (
 
     editor?.commands.clearContent();
 
-    fetchNodeContent(selectedFileId).then((content) => {
-      if (!content) return;
-      const raw = content.encryptedContent;
-      if (!raw) return;
-      const contentJSON = JSON.parse(raw);
-      editor?.commands.setContent(contentJSON);
+    fetchNodeContent(selectedFileId).then(async (content) => {
+      if (!content || !content.encryptedContent || !dataEncryptionKey) return;
+
+      // Decrypt
+      const decryptedDataString = await decryptAESGCM(
+        content.encryptedContent,
+        dataEncryptionKey,
+      );
+
+      const jsonContent = JSON.parse(decryptedDataString);
+
+      // Set editor content
+      editor?.commands.setContent(jsonContent);
     });
   }, [selectedFileId, editor]);
 

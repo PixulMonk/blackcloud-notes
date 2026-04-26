@@ -1,14 +1,21 @@
 import mongoose, { Schema } from 'mongoose';
 
-// TODO: maybe add a profile pic field later?
-
 export interface IUser {
   _id: mongoose.Types.ObjectId;
   name: string;
   email: string;
-  password: string;
+  hashedAuthToken: string;
+  protectedDEK: string; // base64 — IV ‖ ciphertext ‖ tag
+  argon2Salt: string; // base64
+  argon2Params: {
+    memoryCost: number;
+    timeCost: number;
+    parallelism: number;
+    hashLength: number;
+    type: 'argon2id';
+  };
+  schemaVersion: number;
   subscription: string;
-  kdfSalt: string;
   lastLogin: Date;
   isVerified: boolean;
   resetPasswordToken?: string;
@@ -21,9 +28,18 @@ const userSchema = new Schema<IUser>(
   {
     name: { type: String },
     email: { type: String, required: true, unique: true },
-    password: { type: String, required: true },
+    hashedAuthToken: { type: String, required: true },
+    protectedDEK: { type: String, required: true },
+    argon2Salt: { type: String, required: true },
+    argon2Params: {
+      memoryCost: { type: Number, required: true },
+      timeCost: { type: Number, required: true },
+      parallelism: { type: Number, required: true },
+      hashLength: { type: Number, required: true },
+      type: { type: String, required: true },
+    },
+    schemaVersion: { type: Number, required: true, default: 1 },
     subscription: { type: String },
-    kdfSalt: { type: String, required: true },
     lastLogin: { type: Date, default: Date.now },
     isVerified: { type: Boolean, default: false },
     resetPasswordToken: String,
@@ -31,7 +47,7 @@ const userSchema = new Schema<IUser>(
     verificationToken: String,
     verificationTokenExpiresAt: Date,
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 export const User = mongoose.model<IUser>('User', userSchema);

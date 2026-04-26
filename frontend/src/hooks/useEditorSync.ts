@@ -1,15 +1,18 @@
 import { useEffect } from 'react';
 
-import { useDataStore } from '@/store/useDataStore';
+import { useData, useDataActions } from '@/store/useDataStore';
+import { useDataEncryptionKey } from '@/store/useVaultStore';
 import { type Editor } from '@tiptap/react';
+import { encryptAESGCM } from '@/lib/crypto/aes';
 
 const useEditorSync = (
   editor: Editor | null,
   selectedFileId: string | null,
 ) => {
-  const isSyncing = useDataStore((state) => state.isSyncing);
-  const setSyncing = useDataStore((state) => state.setSyncing);
-  const updateNote = useDataStore((state) => state.updateNote);
+  const { isSyncing } = useData();
+  const { setSyncing, updateNote } = useDataActions();
+
+  const dataEncryptionKey = useDataEncryptionKey();
 
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
@@ -23,24 +26,29 @@ const useEditorSync = (
   }, [isSyncing]);
 
   useEffect(() => {
-    if (!editor) return;
+    if (!editor || !selectedFileId || !dataEncryptionKey) return;
 
     let timeout: ReturnType<typeof setTimeout>;
 
-    const handleUpdate = () => {
-      setSyncing(true);
-      clearTimeout(timeout);
-      timeout = setTimeout(() => {
-        const contentJSON = editor.getJSON();
-        const isEmpty = editor.isEmpty;
-        if (isEmpty) return;
+    const handleUpdate = async () => {
+      console.log('change detected');
+      console.log('Syncing state:', isSyncing);
 
-        updateNote(
-          undefined,
+      clearTimeout(timeout);
+      timeout = setTimeout(async () => {
+        const contentJSON = editor.getJSON();
+        console.log('encrypting...');
+
+        setSyncing(true);
+
+        const encryptedContent = await encryptAESGCM(
           JSON.stringify(contentJSON),
-          undefined,
-          selectedFileId!,
+          dataEncryptionKey,
         );
+        console.log('finished encrypting');
+        console.log('sending update to backend...');
+        await updateNote(encryptedContent, selectedFileId);
+        console.log('update sent to backend');
       }, 1000);
     };
 
@@ -50,7 +58,7 @@ const useEditorSync = (
       editor.off('update', handleUpdate);
       clearTimeout(timeout);
     };
-  }, [editor, selectedFileId]);
+  }, [editor, selectedFileId, dataEncryptionKey]);
 };
 
 export default useEditorSync;

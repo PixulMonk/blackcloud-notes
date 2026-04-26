@@ -1,8 +1,8 @@
 import VerifyEmailCard from '@/components/VerifyEmailCard';
-import { useThemeStore } from '@/store/useThemeStore';
+import { useIsDark } from '@/store/useThemeStore';
 
 function VerifyEmailPage() {
-  const isDark = useThemeStore((state) => state.isDark);
+  const isDark = useIsDark();
 
   return (
     <div className="flex flex-col items-center justify-center h-screen">

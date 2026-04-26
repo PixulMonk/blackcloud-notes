@@ -2,10 +2,10 @@ import Editor from '@/components/Editor/Editor';
 
 import { DocumentTitle } from '@/components/Editor/DocumentTitle';
 import SyncingIndicator from '@/components/Editor/SyncingIndicator';
-import { useTreeUIStore } from '@/store/useTreeUIStore';
+import { useTreeUI } from '@/store/useTreeUIStore';
 
 function HomePage() {
-  const selectedNodeId = useTreeUIStore((state) => state.selectedNodeId);
+  const { selectedNodeId } = useTreeUI();
 
   return (
     <div className="flex flex-col w-full max-h-screen items-center p-2">

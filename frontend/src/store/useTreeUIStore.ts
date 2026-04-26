@@ -1,35 +1,43 @@
-import type { TreeNode } from '@/types/tree';
 import { create } from 'zustand';
+import type {
+  TreeUIActions,
+  TreeUIState,
+  TreeUIStoreState,
+} from '@/types/tree.types';
+import { useShallow } from 'zustand/react/shallow';
 
-interface TreeUIState {
-  renamingNodeId: string | null;
-  selectedNodeId: string | null;
-  selectedFileId: string | null;
-  selectedFileTitle: string | null;
-
-  setRenamingNodeId: (id: string | null) => void;
-  selectNode: (node: TreeNode) => void;
-  setFileTitle: (newTitle: string) => void;
-}
-
-export const useTreeUIStore = create<TreeUIState>((set) => ({
+const useTreeUIStore = create<TreeUIState>((set) => ({
   renamingNodeId: null,
   selectedNodeId: null,
   selectedFileId: null,
   selectedFileTitle: null,
+  actions: {
+    setRenamingNodeId: (id) => {
+      set({ renamingNodeId: id });
+    },
 
-  setRenamingNodeId: (id) => {
-    set({ renamingNodeId: id });
+    selectNode: (node) => {
+      if (node.type === 'folder') return;
+
+      set({
+        selectedNodeId: node._id,
+        selectedFileId: node.type === 'file' ? (node.fileId ?? null) : null,
+        selectedFileTitle: node.type === 'file' ? (node.title ?? null) : null,
+      });
+    },
+    setFileTitle: (newTitle) => set({ selectedFileTitle: newTitle }),
   },
-
-  selectNode: (node) => {
-    if (node.type === 'folder') return;
-
-    set({
-      selectedNodeId: node._id,
-      selectedFileId: node.type === 'file' ? (node.fileId ?? null) : null,
-      selectedFileTitle: node.type === 'file' ? (node.title ?? null) : null,
-    });
-  },
-  setFileTitle: (newTitle) => set({ selectedFileTitle: newTitle }),
 }));
+
+export const useTreeUI = (): TreeUIStoreState =>
+  useTreeUIStore(
+    useShallow((s) => ({
+      renamingNodeId: s.renamingNodeId,
+      selectedNodeId: s.selectedFileId,
+      selectedFileId: s.selectedFileId,
+      selectedFileTitle: s.selectedFileTitle,
+    })),
+  );
+
+export const useTreeUIActions = (): TreeUIActions =>
+  useTreeUIStore((s) => s.actions);
