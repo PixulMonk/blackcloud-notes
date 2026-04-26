@@ -2,11 +2,7 @@ export interface NoteDTO {
   _id: string;
   userId: string;
   title?: string;
-  encryptedContent?: {
-    ciphertext: string;
-    iv: string;
-    authTag: string;
-  };
+  encryptedContent?: string;
   tags?: string[];
 }
 
@@ -20,5 +16,5 @@ export interface NoteContentDTO {
 export interface NoteResponse {
   success: boolean;
   message: string;
-  data: NoteDTO;
+  note: NoteDTO;
 }

@@ -36,12 +36,6 @@ const useDataStore = create<DataState>((set) => ({
         const response = await axios.get<TreeResponse>(
           `${BASE_URL}/tree/build`,
         );
-        // TODO: you forgot to decrypt the tree
-        console.log(
-          'DEK length passed to decryptTree:',
-          dataEncryptionKey.length,
-        ); // must be 32
-        console.log('DEK first bytes:', dataEncryptionKey.slice(0, 4));
         const decryptedTree = await decryptTree(
           response.data.tree,
           dataEncryptionKey,
@@ -67,11 +61,6 @@ const useDataStore = create<DataState>((set) => ({
       if (!title) {
         title = 'Untitled document';
       }
-      // TODO: very important: DELETE THIS LOG:
-      console.log(
-        'DEK used for encryption (first 4 bytes):',
-        dataEncryptionKey?.slice(0, 4),
-      );
       const encryptedTitle = await encryptAESGCM(title, dataEncryptionKey!);
 
       try {
@@ -90,10 +79,6 @@ const useDataStore = create<DataState>((set) => ({
         );
 
         const newNodeDTO = response.data.data;
-        console.log(
-          'Stored encryptedTitle from response:',
-          newNodeDTO.encryptedTitle,
-        );
         const newNode: TreeNode = {
           ...newNodeDTO,
           title: title,
@@ -173,8 +158,6 @@ const useDataStore = create<DataState>((set) => ({
           }),
           isLoading: false,
         }));
-        // TODO: This line below is questionable. Come back to it later
-        // await useDataStore.getState().actions.fetchTree();
         return updatedNodeDTO;
       } catch (error: unknown) {
         if (axios.isAxiosError(error)) {
@@ -213,8 +196,6 @@ const useDataStore = create<DataState>((set) => ({
           isLoading: false,
         }));
 
-        // TODO: again, this way of updating the backend needs to be reconsidered
-        // await useDataStore.getState().actions.fetchTree();
         return updatedNodeDTO;
       } catch (error) {
         if (axios.isAxiosError(error)) {
@@ -250,8 +231,6 @@ const useDataStore = create<DataState>((set) => ({
           isLoading: false,
         }));
 
-        // TODO: check
-        // await useDataStore.getState().actions.fetchTree();
         return updatedNodeDTO;
       } catch (error) {
         if (axios.isAxiosError(error)) {
@@ -270,9 +249,11 @@ const useDataStore = create<DataState>((set) => ({
       set({ isFetchingContent: true, error: null });
 
       try {
-        const response = await axios.get(`${BASE_URL}/notes/${fileId}`);
+        const response = await axios.get<NoteResponse>(
+          `${BASE_URL}/notes/${fileId}`,
+        );
         set({ isFetchingContent: false });
-        return response.data;
+        return response.data.note;
       } catch (error) {
         if (axios.isAxiosError(error)) {
           set({
@@ -322,7 +303,7 @@ export const useData = (): DataStoreState =>
       tree: s.tree,
       isLoading: s.isLoading,
       isFetchingContent: s.isFetchingContent,
-      isSyncing: s.isFetchingContent,
+      isSyncing: s.isSyncing,
       error: s.error,
     })),
   );

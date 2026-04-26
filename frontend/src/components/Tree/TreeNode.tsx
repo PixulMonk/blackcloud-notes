@@ -35,11 +35,6 @@ const TreeNodeComponent = ({ node }: TreeNodeComponentProps) => {
   const dataEncryptionKey = useDataEncryptionKey();
 
   const handleRenameSubmit = () => {
-    console.log(
-      'Rename submit DEK first bytes:',
-      dataEncryptionKey?.slice(0, 4),
-    );
-
     if (!dataEncryptionKey) return;
     if (!renamingNodeId) return;
 

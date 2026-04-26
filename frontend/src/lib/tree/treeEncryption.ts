@@ -8,10 +8,6 @@ export const decryptTree = async (
 ): Promise<TreeNode[]> => {
   return Promise.all(
     nodes.map(async (node: TreeNodeDTO) => {
-      console.log('Encrypted Title:', node.encryptedTitle);
-      console.log('Raw node from API:', JSON.stringify(node));
-      console.log('encryptedTitle type:', typeof node.encryptedTitle);
-      console.log('encryptedTitle value:', node.encryptedTitle);
       const decryptedTitle = await decryptAESGCM(node.encryptedTitle, key);
 
       const decryptedChildren = node.children

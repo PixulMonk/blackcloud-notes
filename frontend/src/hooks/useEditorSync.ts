@@ -26,27 +26,29 @@ const useEditorSync = (
   }, [isSyncing]);
 
   useEffect(() => {
-    if (!editor) return;
+    if (!editor || !selectedFileId || !dataEncryptionKey) return;
 
     let timeout: ReturnType<typeof setTimeout>;
 
     const handleUpdate = async () => {
-      setSyncing(true);
+      console.log('change detected');
+      console.log('Syncing state:', isSyncing);
+
       clearTimeout(timeout);
       timeout = setTimeout(async () => {
         const contentJSON = editor.getJSON();
-        const isEmpty = editor.isEmpty;
-        if (isEmpty) return;
+        console.log('encrypting...');
 
-        if (!dataEncryptionKey) return;
+        setSyncing(true);
 
-        // Encrypt the content
         const encryptedContent = await encryptAESGCM(
           JSON.stringify(contentJSON),
           dataEncryptionKey,
         );
-        //
-        updateNote(encryptedContent, selectedFileId!);
+        console.log('finished encrypting');
+        console.log('sending update to backend...');
+        await updateNote(encryptedContent, selectedFileId);
+        console.log('update sent to backend');
       }, 1000);
     };
 
@@ -56,7 +58,7 @@ const useEditorSync = (
       editor.off('update', handleUpdate);
       clearTimeout(timeout);
     };
-  }, [editor, selectedFileId]);
+  }, [editor, selectedFileId, dataEncryptionKey]);
 };
 
 export default useEditorSync;

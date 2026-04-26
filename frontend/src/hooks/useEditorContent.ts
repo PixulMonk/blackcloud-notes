@@ -3,7 +3,7 @@ import { type Editor } from '@tiptap/react';
 
 import { useData, useDataActions } from '@/store/useDataStore';
 import { useDataEncryptionKey } from '@/store/useVaultStore';
-import { fromBase64 } from '@/lib/crypto/crypto-utils';
+import { decryptAESGCM } from '@/lib/crypto/aes';
 
 const useEditorContent = (
   editor: Editor | null,
@@ -30,21 +30,16 @@ const useEditorContent = (
     fetchNodeContent(selectedFileId).then(async (content) => {
       if (!content || !content.encryptedContent || !dataEncryptionKey) return;
 
-      // Convert base64 to Uint8Array
-      const payload = {
-        ciphertext: fromBase64(content.encryptedContent.ciphertext),
-        authTag: fromBase64(content.encryptedContent.authTag),
-        iv: fromBase64(content.encryptedContent.iv),
-      };
-
       // Decrypt
-      const decryptedTipTapJSON = await decryptTipTapContent(
-        payload,
+      const decryptedDataString = await decryptAESGCM(
+        content.encryptedContent,
         dataEncryptionKey,
       );
 
+      const jsonContent = JSON.parse(decryptedDataString);
+
       // Set editor content
-      editor?.commands.setContent(decryptedTipTapJSON);
+      editor?.commands.setContent(jsonContent);
     });
   }, [selectedFileId, editor]);
 
