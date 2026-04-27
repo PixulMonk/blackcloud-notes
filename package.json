@@ -8,5 +8,10 @@
   ],
   "dependencies": {
     "argon2": "^0.44.0"
+  },
+  "scripts": {
+    "dev": "concurrently \"npm run dev --prefix backend\" \"npm run dev --prefix frontend\" \"maildev\"",
+    "build": "npm run build --prefix shared && npm run build --prefix backend && npm run build --prefix frontend",
+    "start": "npm run start --prefix backend"
   }
 }
