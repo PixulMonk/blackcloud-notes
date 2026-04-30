@@ -1,7 +1,5 @@
 import { fromBase64, toBase64 } from './crypto-utils';
 
-const TAG_LENGTH = 16;
-
 export const encryptAESGCM = async (
   plaintext: string | Uint8Array,
   keyBytes: Uint8Array,
