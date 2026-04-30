@@ -8,7 +8,7 @@ dotenv.config();
 
 import express, { Express, Request, Response } from 'express';
 
-import { connectDB } from '../db/connectDB';
+import { connectDB } from './db/connectDB';
 import authRoutes from './routes/auth.route';
 import notesRoutes from './routes/notes.route';
 import treeNodeRoutes from './routes/treeNode.route';

@@ -15,7 +15,7 @@ import {
   sendVerificationEmail,
   sendWelcomeEmail,
   sendPasswordResetSuccessEmail,
-} from '../../mailer/emails';
+} from '../mailer/emails';
 import {
   AuthResponse,
   ForgotPasswordRequest,
