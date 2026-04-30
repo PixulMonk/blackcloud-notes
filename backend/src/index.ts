@@ -16,7 +16,6 @@ import treeRoutes from './routes/tree.route';
 
 const app: Express = express();
 const PORT: number = parseInt(process.env.PORT || '3000', 10);
-const __dirname = path.resolve();
 
 app.use(cors({ origin: 'http://localhost:5173', credentials: true }));
 
