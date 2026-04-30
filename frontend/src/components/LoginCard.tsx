@@ -26,7 +26,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useAuth, useAuthActions } from '@/store/useAuthStore';
 import { deriveKeysForLogin } from '@/lib/crypto/kdf';
 import { fromBase64 } from '@/lib/crypto/crypto-utils';
-import { decryptAESGCM, decryptAESGCMBytes } from '@/lib/crypto/aes';
+import { decryptAESGCMBytes } from '@/lib/crypto/aes';
 import { useVaultActions } from '@/store/useVaultStore';
 
 export default function LoginCard() {
