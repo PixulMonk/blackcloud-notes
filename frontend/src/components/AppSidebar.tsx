@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import { Tree } from './Tree/Tree';
 
@@ -16,22 +17,29 @@ import {
   SidebarMenu,
 } from '@/components/ui/sidebar';
 
-import { useDataStore } from '@/store/useDataStore';
-import { useTreeUIStore } from '@/store/useTreeUIStore';
+import { useData, useDataActions } from '@/store/useDataStore';
+import { useTreeUIActions } from '@/store/useTreeUIStore';
+import { useDataEncryptionKey } from '@/store/useVaultStore';
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const tree = useDataStore((state) => state.tree);
-  const fetchTree = useDataStore((state) => state.fetchTree);
-  const addNode = useDataStore((state) => state.addNode);
+  const navigate = useNavigate();
+  const { tree } = useData();
+  const { fetchTree, addNode } = useDataActions();
 
-  const setRenamingNodeId = useTreeUIStore((state) => state.setRenamingNodeId);
+  const dataEncryptionKey = useDataEncryptionKey();
+
+  const { setRenamingNodeId } = useTreeUIActions();
 
   useEffect(() => {
-    fetchTree();
+    fetchTree(dataEncryptionKey!);
   }, [fetchTree]);
 
   const handleCreate = async (type: 'folder' | 'file') => {
-    const newNode = await addNode(type);
+    if (!dataEncryptionKey) {
+      navigate('/unlock-vault', { state: { from: location.pathname } });
+      return;
+    }
+    const newNode = await addNode(type, dataEncryptionKey);
     if (newNode?._id) {
       setRenamingNodeId(newNode._id);
     }

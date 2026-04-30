@@ -1,19 +1,53 @@
+import { Resend } from 'resend';
+import dotenv from 'dotenv';
 import { transporter } from './nodemailer.config';
-import { mailtrapClient, sender } from './mailtrap.config';
 
-const isProd = process.env.NODE_ENV === 'production';
+dotenv.config();
+
+const RESEND_API_KEY = process.env.RESEND_API_KEY;
+const isResend = process.env.EMAIL_PROVIDER === 'resend';
+
+const sender = {
+  name: 'BlackCloud',
+  address: process.env.RESEND_SENDER!,
+};
+
+const resend = new Resend(RESEND_API_KEY);
+
+type EmailOptions = {
+  to: string;
+  subject: string;
+  html: string;
+};
 
 export const emailClient = {
-  send: async (options: any) => {
-    if (isProd) {
-      return mailtrapClient.send({
-        from: sender,
-        to: options.to.map((to: any) => ({ email: to.address || to.email })),
-        subject: options.subject,
-        html: options.html,
+  send: async ({ to, subject, html }: EmailOptions) => {
+    if (isResend) {
+      if (!RESEND_API_KEY) {
+        throw new Error('Resend API key not provided.');
+      }
+
+      if (!sender) {
+        throw new Error('Resend sender not provided.');
+      }
+
+      if (!to || !to.includes('@')) {
+        throw new Error('Invalid recipient email');
+      }
+
+      return resend.emails.send({
+        from: `${sender.name} <${sender.address}>`,
+        to: [to],
+        subject,
+        html,
       });
-    } else {
-      return transporter.sendMail(options);
     }
+
+    return transporter.sendMail({
+      from: sender,
+      to,
+      subject,
+      html,
+    });
   },
 };

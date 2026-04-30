@@ -9,11 +9,12 @@ import {
 
 import NodeActions from './node-components/NodeActions';
 import NodeLabel from './node-components/NodeLabel';
-import { type TreeNodeComponentProps } from '../../types/tree';
-import { useDataStore } from '@/store/useDataStore';
+import { type TreeNodeComponentProps } from '../../types/tree.types';
+import { useDataActions } from '@/store/useDataStore';
 import { confirm } from '../ConfirmDialogue';
 
-import { useTreeUIStore } from '@/store/useTreeUIStore';
+import { useTreeUI, useTreeUIActions } from '@/store/useTreeUIStore';
+import { useDataEncryptionKey } from '@/store/useVaultStore';
 
 // Renders individual node components
 const TreeNodeComponent = ({ node }: TreeNodeComponentProps) => {
@@ -22,27 +23,29 @@ const TreeNodeComponent = ({ node }: TreeNodeComponentProps) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [treeData, setTreeData] = useState(node);
 
-  const renamingNodeId = useTreeUIStore((state) => state.renamingNodeId);
-  const setRenamingNodeId = useTreeUIStore((state) => state.setRenamingNodeId);
-  const setFileTitle = useTreeUIStore((state) => state.setFileTitle);
+  const { renamingNodeId, selectedNodeId } = useTreeUI();
+  const { setRenamingNodeId, setFileTitle, selectNode } = useTreeUIActions();
 
   const isRenaming = node._id === renamingNodeId;
-
-  const selectedNodeId = useTreeUIStore((state) => state.selectedNodeId);
-  const selectNode = useTreeUIStore((state) => state.selectNode);
   const isSelected = node._id === selectedNodeId;
-
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const updateNode = useDataStore((state) => state.updateNode);
-  const softDeleteNode = useDataStore((state) => state.softDeleteNode);
-  const archiveNode = useDataStore((state) => state.archiveNode);
+  const { updateNode, softDeleteNode, archiveNode } = useDataActions();
+
+  const dataEncryptionKey = useDataEncryptionKey();
 
   const handleRenameSubmit = () => {
-    if (renamingNodeId) {
-      updateNode(renamingNodeId, treeData.title);
-      setFileTitle(treeData.title);
+    if (!dataEncryptionKey) return;
+    if (!renamingNodeId) return;
+
+    // Don't re-encrypt if title hasn't changed
+    if (treeData.title === node.title) {
+      setRenamingNodeId(null);
+      return;
     }
+
+    updateNode(renamingNodeId, dataEncryptionKey, treeData.title);
+    setFileTitle(treeData.title);
     setRenamingNodeId(null);
   };
 
@@ -61,6 +64,7 @@ const TreeNodeComponent = ({ node }: TreeNodeComponentProps) => {
 
   const handleSoftDelete = async (id: string) => {
     const ok = await confirm({
+      title: 'Archive',
       message: 'Are you sure you want to delete this item?',
       yesText: 'Delete',
       noText: 'Cancel',
@@ -70,6 +74,7 @@ const TreeNodeComponent = ({ node }: TreeNodeComponentProps) => {
 
   const handleArchive = async (id: string) => {
     const ok = await confirm({
+      title: 'Archive',
       message: 'Are you sure you want to archive this item?',
       yesText: 'Archive',
       noText: 'Cancel',

@@ -1,5 +1,13 @@
+import { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { FcGoogle } from 'react-icons/fc';
+
+import {
+  Eye,
+  EyeOff,
+  AlertCircleIcon,
+  CheckCircle2Icon,
+  Loader,
+} from 'lucide-react';
 
 import {
   Card,
@@ -15,15 +23,11 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
-import {
-  Eye,
-  EyeOff,
-  AlertCircleIcon,
-  CheckCircle2Icon,
-  Loader,
-} from 'lucide-react';
-import { useState } from 'react';
-import { useAuthStore } from '@/store/useAuthStore';
+import { useAuth, useAuthActions } from '@/store/useAuthStore';
+import { deriveKeysForLogin } from '@/lib/crypto/kdf';
+import { fromBase64 } from '@/lib/crypto/crypto-utils';
+import { decryptAESGCMBytes } from '@/lib/crypto/aes';
+import { useVaultActions } from '@/store/useVaultStore';
 
 export default function LoginCard() {
   const location = useLocation();
@@ -33,14 +37,41 @@ export default function LoginCard() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const { login, error, isLoading } = useAuthStore();
+  const { error, isLoading } = useAuth();
+  const { login, getLoginMetadata } = useAuthActions();
+  const { setKeys, clearKeys } = useVaultActions();
 
-  const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleLogin = async (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
+
     try {
-      const success = await login(email, password);
+      const loginMetaData = await getLoginMetadata(email);
+      if (!loginMetaData) {
+        throw new Error('Failed to fetch login metadata from the database');
+      }
+
+      const { argon2Salt, protectedDEK, argon2Params } = loginMetaData;
+
+      const { authToken, keyEncryptionKey } = await deriveKeysForLogin(
+        password,
+        fromBase64(argon2Salt),
+        argon2Params,
+      );
+
+      const success = await login(email, authToken);
+
       if (success) {
+        const dataEncryptionKey = await decryptAESGCMBytes(
+          protectedDEK,
+          keyEncryptionKey,
+        );
+
+        setKeys(keyEncryptionKey, dataEncryptionKey);
         navigate('/');
+      }
+
+      if (!success) {
+        clearKeys();
       }
     } catch (error: unknown) {
       if (error instanceof Error) {
@@ -58,17 +89,6 @@ export default function LoginCard() {
           <CardTitle className="text-2xl text-center">Welcome back</CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
-          <Button className="w-full" variant="outline">
-            <FcGoogle className="h-4 w-4 mr-2" />
-            Sign in with Google
-          </Button>
-
-          <div className="flex items-center gap-4">
-            <hr className="flex-grow border-gray-300" />
-            <span className="text-xs text-gray-500 uppercase">or</span>
-            <hr className="flex-grow border-gray-300" />
-          </div>
-
           <CardDescription>Sign in with your email</CardDescription>
 
           <form onSubmit={handleLogin}>

@@ -1,5 +1,10 @@
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { FcGoogle } from 'react-icons/fc';
+
+import { Eye, EyeOff, AlertCircleIcon, Loader } from 'lucide-react';
+
+import { initializeUserVault } from '@/lib/crypto/vault';
+import { deriveKeysForNewUser } from '@/lib/crypto/kdf';
 
 import {
   Card,
@@ -9,31 +14,30 @@ import {
   CardContent,
   CardFooter,
 } from '@/components/ui/card';
-
-import { cn } from '@/lib/utils';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import PasswordStrengthBar from './PasswordStrengthBar';
 
-import { Eye, EyeOff, AlertCircleIcon, Loader } from 'lucide-react';
-import { useState } from 'react';
-import { useAuthStore } from '@/store/useAuthStore';
+import { useAuth, useAuthActions } from '@/store/useAuthStore';
+import PasswordRequirements from './PasswordRequirements';
+import { arePasswordRequirementsMet } from '@/utils/passwordRules';
 
 export default function SignupCard() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-
   const [hasAgreedToTerms, setHasAgreedToTerms] = useState(false);
+
+  const { error, isLoading } = useAuth();
+  const { signup, setError } = useAuthActions();
 
   const navigate = useNavigate();
 
-  const { signup, error, setError, isLoading } = useAuthStore();
-
-  const handleSignUp = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSignUp = async (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     if (!arePasswordRequirementsMet(password)) {
@@ -42,62 +46,47 @@ export default function SignupCard() {
     }
     if (!hasAgreedToTerms) {
       setError(
-        'Please agree to the Terms of Service and Conditions before signing up.'
+        'Please agree to the Terms of Service and Conditions before signing up.',
       );
       return;
     }
 
     try {
-      const success = await signup(name, email, password);
+      // Derive keys
+      const { argon2Salt, keyEncryptionKey, authToken, argon2Params } =
+        await deriveKeysForNewUser(password);
+
+      if (!argon2Salt || !keyEncryptionKey || !authToken || !argon2Params) {
+        throw new Error('Key derivation failed: missing required values.');
+      }
+
+      const { protectedDEK } = await initializeUserVault(keyEncryptionKey);
+
+      if (!protectedDEK) {
+        throw new Error('Vault initialization failed.');
+      }
+
+      const success = await signup(
+        name,
+        email,
+        authToken,
+        protectedDEK,
+        argon2Salt,
+        argon2Params,
+      );
       if (success) {
         navigate('/verify-email');
       }
     } catch (error: unknown) {
       if (error instanceof Error) {
         console.error('Error:', error.message);
+        setError(error.message);
       } else {
         console.error('Unknown error:', error);
+        setError('Something went wrong. Please try again.');
       }
     }
   };
-
-  // PASSWORD REQUIREMENTS AND STRENGTH INDICATOR
-  const arePasswordRequirementsMet = (password: string): boolean => {
-    return passwordRequirements.every((req) => req.test(password));
-  };
-
-  const passwordRequirements = [
-    { label: 'At least 8 characters', test: (pwd: string) => pwd.length >= 8 },
-    {
-      label: 'At least 1 uppercase letter',
-      test: (pwd: string) => /[A-Z]/.test(pwd),
-    },
-    { label: 'At least 1 number', test: (pwd: string) => /\d/.test(pwd) },
-    {
-      label: 'At least 1 special character',
-      test: (pwd: string) => /[^A-Za-z0-9]/.test(pwd),
-    },
-  ];
-
-  // TODO: move to utils?
-  const getStrength = (pwd: string): number => {
-    if (!pwd) return 0;
-    let score = 0;
-    if (pwd.length >= 8) score++;
-    if (/[A-Z]/.test(pwd)) score++;
-    if (/[0-9]/.test(pwd)) score++;
-    if (/[^A-Za-z0-9]/.test(pwd)) score++;
-    return score; // 0 to 4
-  };
-
-  const strength: number = getStrength(password);
-  const colors = [
-    'bg-red-500', // Too Weak
-    'bg-yellow-500', // Weak
-    'bg-lime-400', // Strong
-    'bg-green-600', // Very Strong
-  ];
-  const labels = ['Too Weak', 'Weak', 'Strong', 'Very Strong'];
 
   return (
     <div className="flex flex-col w-full items-center justify-center">
@@ -106,17 +95,6 @@ export default function SignupCard() {
           <CardTitle className="text-2xl text-center">Create account</CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
-          <Button className="w-full" variant="outline">
-            <FcGoogle className="h-4 w-4 mr-2" />
-            Sign up with Google
-          </Button>
-
-          <div className="flex items-center gap-4">
-            <hr className="flex-grow border-gray-300" />
-            <span className="text-xs text-gray-500 uppercase">or</span>
-            <hr className="flex-grow border-gray-300" />
-          </div>
-
           <CardDescription>Use your email for registration</CardDescription>
 
           <form onSubmit={handleSignUp}>
@@ -178,59 +156,8 @@ export default function SignupCard() {
                       )}
                     </Button>
                   </div>
-                  {/* Strength bar */}
-                  {password && (
-                    <div className="flex gap-1 mt-2">
-                      {Array.from({ length: 4 }).map((_, i) => (
-                        <div
-                          key={i}
-                          className={cn(
-                            'h-1 flex-1 rounded transition-colors',
-                            i < strength
-                              ? colors[Math.max(strength - 1, 0)]
-                              : 'bg-gray-200'
-                          )}
-                        />
-                      ))}
-                    </div>
-                  )}
-                  {password && strength > 0 && (
-                    <p
-                      className={cn(
-                        'text-sm mt-1',
-                        colors[Math.max(strength - 1, 0)].replace(
-                          'bg-',
-                          'text-'
-                        )
-                      )}
-                    >
-                      {labels[Math.max(strength - 1, 0)]}
-                    </p>
-                  )}
-                  {/* Password Requirements */}
-                  <div className="mt-2 space-y-1 text-xs">
-                    {passwordRequirements.map((req, idx) => {
-                      const valid = req.test(password);
-                      return (
-                        <div key={idx} className="flex items-center gap-2">
-                          <div
-                            className={cn(
-                              'w-2 h-2 rounded-full transition-colors',
-                              valid ? 'bg-green-500' : 'bg-gray-300'
-                            )}
-                          />
-                          <span
-                            className={cn(
-                              'transition-colors',
-                              valid ? 'text-green-600' : 'text-gray-500'
-                            )}
-                          >
-                            {req.label}
-                          </span>
-                        </div>
-                      );
-                    })}
-                  </div>
+                  <PasswordStrengthBar password={password} />
+                  <PasswordRequirements password={password} />
                 </div>
                 {/* Alerts */}
                 {error && (

@@ -1,31 +1,38 @@
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
-import { AppSidebar } from '@/components/app-sidebar';
+import { AppSidebar } from './components/AppSidebar';
 import HomePage from './pages/HomePage';
 import SignupPage from './pages/SignupPage';
 import LoginPage from './pages/LoginPage';
 import SettingsPage from './pages/SettingsPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import { useEffect } from 'react';
-import { useThemeStore } from './store/useThemeStore';
+import { useIsDark } from './store/useThemeStore';
 import { updateFavicon } from './lib/utils';
 import VerifyEmailPage from './pages/VerifyEmailPage';
-import { useAuthStore } from './store/useAuthStore';
+import { useAuth, useAuthActions } from './store/useAuthStore';
 import { Loader } from 'lucide-react';
 import ResetPasswordPage from './pages/ResetPasswordPage';
+import UnlockVaultPage from './pages/UnlockVaultPage';
+import { useDataEncryptionKey } from './store/useVaultStore';
 
 function App() {
-  const { isCheckingAuth, checkAuth, isAuthenticated, user } = useAuthStore();
-  const isDark = useThemeStore((state) => state.isDark);
+  const { user, isCheckingAuth, isAuthenticated } = useAuth();
+  const { checkAuth } = useAuthActions();
+  const dataEncryptionKey = useDataEncryptionKey();
+  const isDark = useIsDark();
   const location = useLocation();
+
+  const authRoutes = [
+    '/login',
+    '/signup',
+    '/verify-email',
+    '/forgot-password',
+    '/unlock-vault',
+  ];
+
   const hideSidebar =
-    [
-      '/login',
-      '/signup',
-      '/verify-email',
-      '/forgot-password',
-      '/reset-password/:token',
-    ].includes(location.pathname) ||
+    authRoutes.includes(location.pathname) ||
     location.pathname.startsWith('/reset-password/');
 
   useEffect(() => {
@@ -36,8 +43,6 @@ function App() {
   useEffect(() => {
     checkAuth();
   }, []);
-  console.log('isAuthenticated', isAuthenticated);
-  console.log('user', user);
 
   useEffect(() => {
     updateFavicon(isDark);
@@ -51,12 +56,19 @@ function App() {
     );
   }
 
+  // vault lock guard — authenticated but DEK is missing
+  const vaultLocked =
+    isAuthenticated && user?.isVerified && !dataEncryptionKey && !hideSidebar;
+
+  if (vaultLocked) {
+    return <UnlockVaultPage />;
+  }
+
   return (
     <SidebarProvider>
       {!hideSidebar && <AppSidebar />}
       <main className="flex-1 h-screen">
         {!hideSidebar && <SidebarTrigger />}
-        {/* TODO: Nagivate home page and settings page to login if not authenticated */}
         <Routes>
           <Route
             path="/"
@@ -111,6 +123,12 @@ function App() {
           <Route
             path="/reset-password/:token"
             element={<ResetPasswordPage />}
+          />
+          <Route
+            path="/unlock-vault"
+            element={
+              isAuthenticated ? <UnlockVaultPage /> : <Navigate to="/login" />
+            }
           />
         </Routes>
       </main>

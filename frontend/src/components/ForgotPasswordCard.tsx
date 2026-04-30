@@ -12,14 +12,15 @@ import {
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { useAuthStore } from '@/store/useAuthStore';
+import { useAuth, useAuthActions } from '@/store/useAuthStore';
 import { AlertCircleIcon, Loader, ChevronLeft } from 'lucide-react';
 
 function ForgotPasswordCard() {
   const [email, setEmail] = useState('');
   const [isSubmitted, setIsSubmitted] = useState(false);
 
-  const { forgotPassword, error, setError, isLoading } = useAuthStore();
+  const { error, isLoading } = useAuth();
+  const { forgotPassword, setError } = useAuthActions();
 
   const sendRecoveryEmail = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();

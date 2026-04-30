@@ -1,17 +1,19 @@
 import { useState, useEffect, useRef } from 'react';
-import { useTreeUIStore } from '@/store/useTreeUIStore';
+import { useTreeUI, useTreeUIActions } from '@/store/useTreeUIStore';
+import { useDataEncryptionKey } from '@/store/useVaultStore';
 import { Input } from '../ui/input';
-import { useDataStore } from '@/store/useDataStore';
+import { useDataActions } from '@/store/useDataStore';
 
 export const DocumentTitle = () => {
   const [isRenaming, setIsRenaming] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const selectedNodeId = useTreeUIStore((state) => state.selectedNodeId);
-  const selectedFileTitle = useTreeUIStore((state) => state.selectedFileTitle);
+  const { selectedNodeId, selectedFileTitle } = useTreeUI();
+  const { setFileTitle } = useTreeUIActions();
   const [previousTitle, setPreviousTitle] = useState(selectedFileTitle);
-  const setFileTitle = useTreeUIStore((state) => state.setFileTitle);
-  const updateNode = useDataStore((state) => state.updateNode);
+
+  const dataEncryptionKey = useDataEncryptionKey();
+  const { updateNode } = useDataActions();
 
   useEffect(() => {
     setPreviousTitle(selectedFileTitle || '');
@@ -29,8 +31,8 @@ export const DocumentTitle = () => {
   const handleUpdate = () => {
     if (!selectedNodeId || selectedFileTitle === null) return;
 
-    if (selectedFileTitle !== previousTitle) {
-      updateNode(selectedNodeId, selectedFileTitle);
+    if (selectedFileTitle !== previousTitle && dataEncryptionKey) {
+      updateNode(selectedNodeId, dataEncryptionKey, selectedFileTitle);
       setPreviousTitle(selectedFileTitle);
       console.log('update sent to db');
     }
