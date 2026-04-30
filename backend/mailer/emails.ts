@@ -5,31 +5,20 @@ import {
   WELCOME_EMAIL_TEMPLATE,
 } from './emailTemplates';
 
-import { sender } from './mailtrap.config';
 import { emailClient } from './emailClient';
 
 const logoUrl = `${process.env.APP_DOMAIN}/logo/logo-horiz.svg`;
 
-type EmailSender =
-  | { name: string; address: string } // Nodemailer format
-  | { name: string; email: string }; // Mailtrap format
-
-const emailSender: EmailSender =
-  process.env.NODE_ENV === 'production'
-    ? sender
-    : { name: 'BlackCloud', address: 'noreply@blackcloud.com' };
-
 export const sendEmailTemplate = async (
   to: string,
   subject: string,
-  htmlTemplate: string
+  html: string,
 ) => {
   try {
     await emailClient.send({
-      from: emailSender,
-      to,
-      subject,
-      html: htmlTemplate,
+      to: to,
+      subject: subject,
+      html: html,
     });
     console.log(`Email sent successfully: To: ${to} Subject: ${subject}`);
   } catch (error) {
@@ -42,7 +31,7 @@ export const sendEmailTemplate = async (
 export const sendVerificationEmail = async (
   name: string,
   email: string,
-  verificationToken: string
+  verificationToken: string,
 ) => {
   const template = VERIFY_EMAIL_TEMPLATE.replace('{name}', name)
     .replace('{verificationToken}', verificationToken)
@@ -53,7 +42,7 @@ export const sendVerificationEmail = async (
 export const sendWelcomeEmail = async (name: string, email: string) => {
   const template = WELCOME_EMAIL_TEMPLATE.replace('{name}', name).replace(
     'logoUrl',
-    logoUrl
+    logoUrl,
   );
   await sendEmailTemplate(email, 'Welcome to BlackCloud', template);
 };
@@ -61,7 +50,7 @@ export const sendWelcomeEmail = async (name: string, email: string) => {
 export const sendPasswordResetEmail = async (
   name: string,
   email: string,
-  resetLink: string
+  resetLink: string,
 ) => {
   const template = FORGOT_PASSWORD_TEMPLATE.replace('{name}', name)
     .replace('{resetLink}', resetLink)
@@ -71,11 +60,11 @@ export const sendPasswordResetEmail = async (
 
 export const sendPasswordResetSuccessEmail = async (
   name: string,
-  email: string
+  email: string,
 ) => {
   const template = PASSWORD_RESET_SUCCESS_TEMPLATE.replace(
     '{name}',
-    name
+    name,
   ).replace('logoUrl', logoUrl);
   await sendEmailTemplate(email, 'Your Password Has Been Reset', template);
 };

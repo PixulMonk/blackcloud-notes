@@ -15,7 +15,9 @@ import { encryptAESGCM } from '@/lib/crypto/aes';
 import { decryptTree } from '@/lib/tree/treeEncryption';
 import { updateRecursive } from '@/lib/tree/treeHelpers';
 
-const BASE_URL = 'http://localhost:3000/api';
+const BASE_URL =
+  import.meta.env.MODE === 'development' ? 'http://localhost:3000/api' : '/api';
+
 axios.defaults.withCredentials = true;
 
 // TODO: error toast?
