@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { useShallow } from 'zustand/react/shallow';
 import axios from 'axios';
+import { axiosInstance } from '@/lib/axios';
 
 import type {
   AuthState,
@@ -9,12 +10,6 @@ import type {
 } from '@/types/auth.types';
 import type { LoginMetaDetaResponse } from '@/types/encryption.types';
 import { toBase64 } from '@/lib/crypto/crypto-utils';
-
-const BASE_URL =
-  import.meta.env.MODE === 'development'
-    ? 'http://localhost:3000/api/auth'
-    : '/';
-axios.defaults.withCredentials = true;
 
 const useAuthStore = create<AuthState>((set) => ({
   user: null,
@@ -45,7 +40,7 @@ const useAuthStore = create<AuthState>((set) => ({
           argon2Params,
         };
 
-        const response = await axios.post(`${BASE_URL}/signup`, payload);
+        const response = await axiosInstance.post(`auth/signup`, payload);
 
         set({
           user: response.data.user,
@@ -72,7 +67,7 @@ const useAuthStore = create<AuthState>((set) => ({
           email,
           authToken: toBase64(authToken),
         };
-        const response = await axios.post(`${BASE_URL}/login`, payload);
+        const response = await axiosInstance.post(`auth/login`, payload);
         set({
           user: response.data.user,
           isAuthenticated: true,
@@ -95,8 +90,8 @@ const useAuthStore = create<AuthState>((set) => ({
     getLoginMetadata: async (email) => {
       set({ isLoading: true, error: null });
       try {
-        const response = await axios.post<LoginMetaDetaResponse>(
-          `${BASE_URL}/getLoginMetadata`,
+        const response = await axiosInstance.post<LoginMetaDetaResponse>(
+          `auth/getLoginMetadata`,
           {
             email,
           },
@@ -125,7 +120,7 @@ const useAuthStore = create<AuthState>((set) => ({
     verifyEmail: async (verificationCode) => {
       set({ isLoading: true, error: null });
       try {
-        const response = await axios.post(`${BASE_URL}/verify-email`, {
+        const response = await axiosInstance.post(`auth/verify-email`, {
           code: verificationCode,
         });
         set({
@@ -151,7 +146,7 @@ const useAuthStore = create<AuthState>((set) => ({
       if (state.isAuthenticated) return;
       set({ isCheckingAuth: true, error: null });
       try {
-        const response = await axios.get(`${BASE_URL}/check-auth`);
+        const response = await axiosInstance.get(`auth/check-auth`);
         set({
           user: response.data.user,
           isAuthenticated: true,
@@ -165,7 +160,7 @@ const useAuthStore = create<AuthState>((set) => ({
       set({ isLoading: true, error: null });
 
       try {
-        await axios.post(`${BASE_URL}/logout`);
+        await axiosInstance.post(`auth/logout`);
         set({
           user: null,
           isAuthenticated: false,
@@ -187,7 +182,7 @@ const useAuthStore = create<AuthState>((set) => ({
     forgotPassword: async (email) => {
       set({ isLoading: true, error: null, message: null });
       try {
-        const response = await axios.post(`${BASE_URL}/forgot-password`, {
+        const response = await axiosInstance.post(`auth/forgot-password`, {
           email,
         });
         set({
@@ -218,7 +213,7 @@ const useAuthStore = create<AuthState>((set) => ({
     ) => {
       set({ isLoading: true, error: null });
       try {
-        await axios.post(`${BASE_URL}/reset-password/${token}`, {
+        await axiosInstance.post(`auth/reset-password/${token}`, {
           newAuthToken,
           newProtectedDEK,
           newArgon2Salt,

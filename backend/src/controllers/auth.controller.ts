@@ -307,13 +307,12 @@ export const forgotPassword = asyncHandler(
 
     await user?.save();
 
-    const APP_BASE_URL: string =
-      process.env.APP_DOMAIN || 'http://localhost:5173';
+    const BASE_URL: string = process.env.CLIENT_URL || 'http://localhost:5173';
 
     await sendPasswordResetEmail(
       user!.name,
       user!.email,
-      `${APP_BASE_URL}/reset-password/${resetToken}`,
+      `${BASE_URL}/reset-password/${resetToken}`,
     );
 
     res.status(200).json({

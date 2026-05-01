@@ -7,6 +7,8 @@ import type {
   TreeNodeResponse,
   TreeResponse,
 } from '@/types/data.types';
+import { axiosInstance } from '@/lib/axios';
+
 import { useShallow } from 'zustand/react/shallow';
 
 import type { NoteResponse } from '@/types/note.types';
@@ -14,11 +16,6 @@ import type { TreeNode } from '@/types/tree.types';
 import { encryptAESGCM } from '@/lib/crypto/aes';
 import { decryptTree } from '@/lib/tree/treeEncryption';
 import { updateRecursive } from '@/lib/tree/treeHelpers';
-
-const BASE_URL =
-  import.meta.env.MODE === 'development' ? 'http://localhost:3000/api' : '/api';
-
-axios.defaults.withCredentials = true;
 
 // TODO: error toast?
 
@@ -35,9 +32,7 @@ const useDataStore = create<DataState>((set) => ({
     fetchTree: async (dataEncryptionKey) => {
       set({ isLoading: true, error: null });
       try {
-        const response = await axios.get<TreeResponse>(
-          `${BASE_URL}/tree/build`,
-        );
+        const response = await axiosInstance.get<TreeResponse>(`tree/build`);
         const decryptedTree = await decryptTree(
           response.data.tree,
           dataEncryptionKey,
@@ -68,8 +63,8 @@ const useDataStore = create<DataState>((set) => ({
       try {
         console.log('Sending encryptedTitle:', encryptedTitle);
 
-        const response = await axios.post<TreeNodeResponse>(
-          `${BASE_URL}/treeNodes/create`,
+        const response = await axiosInstance.post<TreeNodeResponse>(
+          `treeNodes/create`,
           {
             encryptedTitle,
             type,
@@ -139,8 +134,8 @@ const useDataStore = create<DataState>((set) => ({
           );
         }
 
-        const response = await axios.patch<TreeNodeResponse>(
-          `${BASE_URL}/treeNodes/${nodeId}`,
+        const response = await axiosInstance.patch<TreeNodeResponse>(
+          `treeNodes/${nodeId}`,
           payload,
         );
 
@@ -181,8 +176,8 @@ const useDataStore = create<DataState>((set) => ({
       set({ isLoading: true, error: null });
 
       try {
-        const response = await axios.patch<TreeNodeResponse>(
-          `${BASE_URL}/treeNodes/${nodeId}/soft-delete`,
+        const response = await axiosInstance.patch<TreeNodeResponse>(
+          `treeNodes/${nodeId}/soft-delete`,
         );
 
         const updatedNodeDTO = response.data.data;
@@ -216,8 +211,8 @@ const useDataStore = create<DataState>((set) => ({
       set({ isLoading: true, error: null });
 
       try {
-        const response = await axios.patch<TreeNodeResponse>(
-          `${BASE_URL}/treeNodes/${nodeId}/archive`,
+        const response = await axiosInstance.patch<TreeNodeResponse>(
+          `treeNodes/${nodeId}/archive`,
         );
 
         const updatedNodeDTO = response.data.data;
@@ -251,8 +246,8 @@ const useDataStore = create<DataState>((set) => ({
       set({ isFetchingContent: true, error: null });
 
       try {
-        const response = await axios.get<NoteResponse>(
-          `${BASE_URL}/notes/${fileId}`,
+        const response = await axiosInstance.get<NoteResponse>(
+          `notes/${fileId}`,
         );
         set({ isFetchingContent: false });
         return response.data.note;
@@ -275,8 +270,8 @@ const useDataStore = create<DataState>((set) => ({
     updateNote: async (encryptedContent, fileId) => {
       set({ error: null });
       try {
-        const response = await axios.patch<NoteResponse>(
-          `${BASE_URL}/notes/${fileId}`,
+        const response = await axiosInstance.patch<NoteResponse>(
+          `notes/${fileId}`,
           {
             encryptedContent,
           },
