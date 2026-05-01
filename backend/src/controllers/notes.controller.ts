@@ -3,7 +3,7 @@ import { ParamsDictionary } from 'express-serve-static-core';
 
 import { ENCRYPTION_CONFIG } from '@blackcloud/shared';
 import asyncHandler from '../utils/asyncHandler';
-import { Note, type INote } from '../models/note.model';
+import { Note } from '../models/note.model';
 import {
   CreateNoteRequest,
   DeleteNoteParams,
