@@ -1,4 +1,4 @@
-import type { Argon2Params } from '@blackcloud/shared/src';
+import type { Argon2Params } from '@blackcloud/shared';
 
 export interface VaultInitializationResult {
   protectedDEK: string;
