@@ -35,7 +35,7 @@ export const emailClient = {
         throw new Error('Invalid recipient email');
       }
 
-      return resend.emails.send({
+      return await resend.emails.send({
         from: `${sender.name} <${sender.address}>`,
         to: [to],
         subject,

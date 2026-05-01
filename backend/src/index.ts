@@ -20,7 +20,7 @@ app.use(
     origin:
       process.env.NODE_ENV === 'production'
         ? process.env.CLIENT_URL
-        : 'http://localhost:5173',
+        : 'http://localhost:5174',
     credentials: true,
   }),
 );

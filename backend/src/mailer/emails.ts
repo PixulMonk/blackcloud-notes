@@ -7,7 +7,7 @@ import {
 
 import { emailClient } from './emailClient';
 
-const logoUrl = `${process.env.APP_DOMAIN}/logo/logo-horiz.svg`;
+const logoUrl = `${process.env.APP_DOMAIN}/logo/logo-horiz.svg`; // TODO: need to be replaced
 
 export const sendEmailTemplate = async (
   to: string,
