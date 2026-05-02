@@ -24,6 +24,7 @@ import { toBase64 } from './../lib/crypto/crypto-utils';
 import PasswordStrengthBar from './PasswordStrengthBar';
 import PasswordRequirements from './PasswordRequirements';
 import { arePasswordRequirementsMet } from '@/utils/passwordRules';
+import { initializeUserVault } from '@/lib/crypto/vault';
 
 function ResetPasswordCard() {
   const [password, setPassword] = useState('');
@@ -81,25 +82,14 @@ function ResetPasswordCard() {
       } = await deriveKeysForNewUser(password);
 
       // Step 3 - Since user is not logged in, generate new DEK
-      const dataEncryptionKey = crypto.getRandomValues(new Uint8Array(32));
-      if (!dataEncryptionKey) {
-        throw new Error('Failed to generate new data encryption key');
+      const { protectedDEK: newProtectedDEK } =
+        await initializeUserVault(newKeyEncryptionKey);
+
+      if (!newProtectedDEK) {
+        throw new Error('Vault initialization failed.');
       }
 
-      const {
-        ciphertext,
-        authTag: newAuthTag,
-        iv: newIV,
-      } = await encryptAESGCM(dataEncryptionKey, newKeyEncryptionKey);
-
-      // Step 4 - prepare new DEK payload
-      const newProtectedDEK = {
-        ciphertext: toBase64(ciphertext),
-        iv: toBase64(newIV),
-        authTag: toBase64(newAuthTag),
-      };
-
-      // Step 5 - send to database (make API call)
+      // Step 4 - send to database (make API call)
       const success = await resetPassword(
         token,
         toBase64(newAuthToken),
@@ -107,6 +97,7 @@ function ResetPasswordCard() {
         toBase64(newArgon2Salt),
         argon2Params,
       );
+
       if (success) {
         navigate('/login', {
           state: {

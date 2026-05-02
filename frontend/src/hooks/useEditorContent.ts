@@ -16,6 +16,7 @@ const useEditorContent = (
 
   useEffect(() => {
     if (!isFetchingContent) {
+      setShowSkeleton(false);
       return;
     }
     const timeout = setTimeout(() => setShowSkeleton(true), 200);

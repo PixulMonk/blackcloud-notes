@@ -7,7 +7,7 @@ import {
 
 import { emailClient } from './emailClient';
 
-const logoUrl = `${process.env.APP_DOMAIN}/logo/logo-horiz.svg`;
+const logoUrl = `${process.env.CLIENT_URL}/logo/logo-horiz.png`;
 
 export const sendEmailTemplate = async (
   to: string,
@@ -35,13 +35,13 @@ export const sendVerificationEmail = async (
 ) => {
   const template = VERIFY_EMAIL_TEMPLATE.replace('{name}', name)
     .replace('{verificationToken}', verificationToken)
-    .replace('logoUrl', logoUrl);
+    .replace('{logoUrl}', logoUrl);
   await sendEmailTemplate(email, 'Verify Your Email', template);
 };
 
 export const sendWelcomeEmail = async (name: string, email: string) => {
   const template = WELCOME_EMAIL_TEMPLATE.replace('{name}', name).replace(
-    'logoUrl',
+    '{logoUrl}',
     logoUrl,
   );
   await sendEmailTemplate(email, 'Welcome to BlackCloud', template);
@@ -54,7 +54,7 @@ export const sendPasswordResetEmail = async (
 ) => {
   const template = FORGOT_PASSWORD_TEMPLATE.replace('{name}', name)
     .replace('{resetLink}', resetLink)
-    .replace('logoUrl', logoUrl);
+    .replace('{logoUrl}', logoUrl);
   await sendEmailTemplate(email, 'Password Reset', template);
 };
 
@@ -65,6 +65,6 @@ export const sendPasswordResetSuccessEmail = async (
   const template = PASSWORD_RESET_SUCCESS_TEMPLATE.replace(
     '{name}',
     name,
-  ).replace('logoUrl', logoUrl);
+  ).replace('{logoUrl}', logoUrl);
   await sendEmailTemplate(email, 'Your Password Has Been Reset', template);
 };

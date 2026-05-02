@@ -56,7 +56,7 @@ export default function UnlockVaultCard() {
       const { argon2Salt, protectedDEK, argon2Params } = loginMetaData;
 
       // re-derive KEK from password + salt
-      const { authToken, keyEncryptionKey } = await deriveKeysForLogin(
+      const { keyEncryptionKey } = await deriveKeysForLogin(
         password,
         fromBase64(argon2Salt),
         argon2Params,

@@ -20,7 +20,7 @@ import { argon2id } from 'hash-wasm';
 import { User } from '../models/user.model';
 import { TreeNode } from '../models/treeNode.model';
 import { Note } from '../models/note.model';
-import { connectDB } from '../../db/connectDB';
+import { connectDB } from '../db/connectDB';
 
 dotenv.config();
 

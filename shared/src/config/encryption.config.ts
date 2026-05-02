@@ -1,4 +1,4 @@
-import { Argon2Params } from '../types/encryption.types';
+import type { Argon2Params } from '../types/encryption.types';
 
 export const ENCRYPTION_CONFIG = {
   schemaVersion: 1,
