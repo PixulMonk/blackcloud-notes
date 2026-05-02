@@ -15,12 +15,25 @@ import treeRoutes from './routes/tree.route';
 const app: Express = express();
 const PORT: number = parseInt(process.env.PORT || '3000', 10);
 
+const allowedOrigins = [
+  'http://localhost:5173',
+  process.env.CLIENT_URL, // prod Vercel URL
+  process.env.CLIENT_URL_DEV, // preview Vercel URL or pattern
+].filter(Boolean);
+
 app.use(
   cors({
-    origin:
-      process.env.NODE_ENV === 'production'
-        ? process.env.CLIENT_URL
-        : 'http://localhost:5173',
+    origin: (origin, callback) => {
+      if (
+        !origin ||
+        allowedOrigins.includes(origin) ||
+        origin.endsWith('.vercel.app')
+      ) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
     credentials: true,
   }),
 );
