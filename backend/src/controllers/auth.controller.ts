@@ -8,6 +8,7 @@ import dotenv from 'dotenv';
 import { ENCRYPTION_CONFIG } from '@blackcloud/shared';
 import asyncHandler from '../utils/asyncHandler';
 import { generateSixDigitCode } from '../utils/generateVerificationCode';
+import deleteUserData from '../utils/deleteUserData';
 import { User } from '../models/user.model';
 import { generateTokenAndSetCookie } from '../utils/generateTokenAndSetCookie';
 import {
@@ -323,6 +324,8 @@ export const forgotPassword = asyncHandler(
   },
 );
 
+// resetPassword is the DESTRUCTIVE VERSION of password change
+// (this is when the user forgets their password)
 export const resetPassword = asyncHandler(
   async (
     req: Request<ResetPasswordParams, SimpleResponse, ResetPasswordRequest>,
@@ -350,6 +353,9 @@ export const resetPassword = asyncHandler(
     }
 
     const hashedAuthToken = await bcrypt.hash(newAuthToken, 12);
+
+    // Old data is wiped from the DB to remove corrupt nodes before updating credentials
+    await deleteUserData(user._id.toString());
 
     // atomic update — all fields change together or not at all
     user.hashedAuthToken = hashedAuthToken;
