@@ -9,6 +9,7 @@ import {
   CardTitle,
   CardDescription,
   CardContent,
+  CardFooter,
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -31,7 +32,7 @@ export default function UnlockVaultCard() {
   const [isLoading, setIsLoading] = useState(false);
 
   const { user } = useAuth();
-  const { getLoginMetadata } = useAuthActions();
+  const { getLoginMetadata, logout } = useAuthActions();
   const { setKeys, clearKeys } = useVaultActions();
 
   // redirect back to where they came from, or home
@@ -145,6 +146,18 @@ export default function UnlockVaultCard() {
             </div>
           </form>
         </CardContent>
+        <CardFooter className="flex flex-col gap-4">
+          <div className="flex flex-row items-center">
+            <CardDescription>Not you?</CardDescription>
+            <Button variant="link" disabled={isLoading} onClick={logout}>
+              {isLoading ? (
+                <Loader className="animate-spin mx-auto" size={24} />
+              ) : (
+                'Switch account'
+              )}
+            </Button>
+          </div>
+        </CardFooter>
       </Card>
     </div>
   );
