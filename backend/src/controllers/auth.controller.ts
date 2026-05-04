@@ -23,12 +23,20 @@ import {
   LoginMetadataRequest,
   LoginMetaDataResponse,
   LoginRequest,
+  ResendVerificationEmailRequest,
+  ResendEmailResponse,
   ResetPasswordParams,
   ResetPasswordRequest,
   SignupRequest,
   VerifyEmailRequest,
 } from '../types';
 import { SimpleResponse } from '../types/common.types';
+import {
+  checkCooldown,
+  getProgressiveCooldown,
+  shouldResetAttempts,
+  getFakeAttempts,
+} from '../utils/cooldownHelpers';
 
 dotenv.config();
 
@@ -286,40 +294,75 @@ export const verifyEmail = asyncHandler(
 
 export const forgotPassword = asyncHandler(
   async (
-    req: Request<{}, SimpleResponse, ForgotPasswordRequest>,
-    res: Response<SimpleResponse>,
+    req: Request<{}, ResendEmailResponse, ForgotPasswordRequest>,
+    res: Response<ResendEmailResponse>,
   ): Promise<void> => {
     const { email } = req.body;
+
     const user = await User.findOne({ email });
 
+    const genericResponse = {
+      success: true,
+      message:
+        'If an account with that email exists, you will receive further instructions shortly.',
+    };
+
     if (!user) {
+      const fakeAttempts = getFakeAttempts(email);
+      const fakeCooldown = getProgressiveCooldown(fakeAttempts);
       res.status(200).json({
-        success: true,
-        message:
-          'If an account with that email exists, you will receive further instructions shortly.',
+        ...genericResponse,
+        retryAfter: fakeCooldown / 1000,
       });
+      return;
+    }
+
+    let attempts = user.resendCooldowns.passwordResetResendAttempts ?? 0;
+    let cooldown = getProgressiveCooldown(attempts);
+
+    const lastSent = user.resendCooldowns.passwordReset;
+    const RESET_WINDOW = 60 * 60 * 1000;
+
+    if (lastSent) {
+      const elapsed = Date.now() - new Date(lastSent).getTime();
+
+      if (elapsed > RESET_WINDOW) {
+        attempts = 0;
+        cooldown = getProgressiveCooldown(0);
+        user.resendCooldowns.passwordResetResendAttempts = 0;
+      }
+
+      if (elapsed < cooldown) {
+        const retryAfter = Math.ceil((cooldown - elapsed) / 1000);
+        res.status(429).json({
+          success: false,
+          message: `Please wait ${retryAfter}s before retrying`,
+          retryAfter,
+        });
+        return;
+      }
     }
 
     const resetToken = crypto.randomBytes(20).toString('hex');
-    const resetTokenExpiresAt = new Date(Date.now() + 60 * 60 * 1000); // expires in 1 hour
 
-    user!.resetPasswordToken = resetToken;
-    user!.resetPasswordExpiresAt = resetTokenExpiresAt;
+    user.resetPasswordToken = resetToken;
+    user.resetPasswordExpiresAt = new Date(Date.now() + 60 * 60 * 1000);
+    user.resendCooldowns.passwordReset = new Date();
+    user.resendCooldowns.passwordResetResendAttempts = attempts + 1;
 
-    await user?.save();
+    await user.save();
 
-    const BASE_URL: string = process.env.CLIENT_URL || 'http://localhost:5173';
+    const BASE_URL = process.env.CLIENT_URL || 'http://localhost:5173';
 
     await sendPasswordResetEmail(
-      user!.name,
-      user!.email,
+      user.name,
+      user.email,
       `${BASE_URL}/reset-password/${resetToken}`,
     );
 
     res.status(200).json({
-      success: true,
-      message:
-        'If an account with that email exists, you will receive further instructions shortly.',
+      ...genericResponse,
+      retryAfter: cooldown / 1000,
     });
   },
 );
@@ -371,6 +414,68 @@ export const resetPassword = asyncHandler(
     res.status(200).json({
       success: true,
       message: 'Your password has been reset successfully',
+    });
+  },
+);
+
+// TODO: Change password controller and route (non-destructive password change; DEK is present)
+
+export const resendVerificationEmail = asyncHandler(
+  async (
+    req: Request<{}, ResendEmailResponse, ResendVerificationEmailRequest>,
+    res: Response<ResendEmailResponse>,
+  ): Promise<void> => {
+    const { email } = req.body;
+
+    if (!email) {
+      throw new Error('Email is required');
+    }
+
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    if (user.isVerified) {
+      throw new Error('User already verified');
+    }
+
+    const lastSent = user.resendCooldowns.verification;
+
+    let attempts = user.resendCooldowns.verificationResendAttempts ?? 0;
+
+    if (shouldResetAttempts(lastSent, 60 * 60 * 1000)) {
+      attempts = 0;
+      user.resendCooldowns.verificationResendAttempts = 0;
+    }
+
+    let cooldown = getProgressiveCooldown(attempts);
+
+    const cooldownCheck = checkCooldown(lastSent, cooldown);
+
+    if (!cooldownCheck.allowed) {
+      res.status(429).json({
+        success: false,
+        message: `Please wait ${cooldownCheck.retryAfter}s`,
+        retryAfter: cooldownCheck.retryAfter!,
+      });
+      return;
+    }
+
+    user.verificationToken = generateSixDigitCode().toString();
+    user.verificationTokenExpiresAt = new Date(Date.now() + 5 * 60 * 1000);
+    user.resendCooldowns.verification = new Date();
+    user.resendCooldowns.verificationResendAttempts = attempts + 1;
+
+    await user.save();
+
+    await sendVerificationEmail(user.name, user.email, user.verificationToken);
+
+    res.status(200).json({
+      success: true,
+      message: 'Verification email resent successfully',
+      retryAfter: cooldown / 1000,
     });
   },
 );

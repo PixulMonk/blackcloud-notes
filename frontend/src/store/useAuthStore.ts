@@ -141,6 +141,48 @@ const useAuthStore = create<AuthState>((set) => ({
         return false;
       }
     },
+    resendVerificationEmail: async (email) => {
+      set({ isLoading: true, error: null });
+
+      try {
+        const response = await axiosInstance.post('auth/resend-verification', {
+          email,
+        });
+
+        set({
+          message: response.data.message,
+          isLoading: false,
+        });
+
+        return {
+          success: true,
+          retryAfter: response.data.retryAfter,
+        };
+      } catch (error) {
+        if (axios.isAxiosError(error)) {
+          const retryAfter = error.response?.data?.retryAfter;
+
+          set({
+            error:
+              error.response?.data?.message ||
+              'Error sending verification email',
+            isLoading: false,
+          });
+
+          return {
+            success: false,
+            retryAfter: retryAfter,
+          };
+        } else {
+          set({
+            error: 'An unexpected error occurred',
+            isLoading: false,
+          });
+
+          return { success: false };
+        }
+      }
+    },
     checkAuth: async () => {
       const state = useAuthStore.getState();
       if (state.isAuthenticated) return;
@@ -181,27 +223,47 @@ const useAuthStore = create<AuthState>((set) => ({
     },
     forgotPassword: async (email) => {
       set({ isLoading: true, error: null, message: null });
+
       try {
-        const response = await axiosInstance.post(`auth/forgot-password`, {
+        const response = await axiosInstance.post('auth/forgot-password', {
           email,
         });
+
         set({
           message: response.data.message,
           isLoading: false,
         });
-        return true;
+
+        return {
+          success: true,
+          retryAfter: response.data.retryAfter, // may be undefined
+        };
       } catch (error) {
         if (axios.isAxiosError(error)) {
+          const retryAfter = error.response?.data?.retryAfter;
+
           set({
             error:
               error.response?.data?.message ||
               'Error sending password reset email',
             isLoading: false,
           });
+
+          return {
+            success: false,
+            retryAfter,
+          };
         } else {
-          set({ error: 'An unexpected error occurred', isLoading: false });
+          set({
+            error: 'An unexpected error occurred',
+            isLoading: false,
+          });
+
+          return {
+            success: false,
+            retryAfter: undefined,
+          };
         }
-        return false;
       }
     },
     resetPassword: async (
