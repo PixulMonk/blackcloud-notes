@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { useAuth, useAuthActions } from '@/store/useAuthStore';
-import { Sun, Moon } from 'lucide-react';
+import { Sun, Moon, Bell } from 'lucide-react';
 import { useIsDark, useThemeStoreActions } from '@/store/useThemeStore';
 import { DocumentTitle } from './Editor/DocumentTitle';
 import {
@@ -29,7 +29,14 @@ export default function Header() {
         className="mx-2 data-[orientation=vertical]:h-4"
       />
       <DocumentTitle />
-      <div className="ml-auto flex items-center gap-4">
+      <div className="ml-auto flex items-center gap-2">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="rounded-full border border-border/40"
+        >
+          <Bell />
+        </Button>
         <Button
           variant="ghost"
           size="icon"
