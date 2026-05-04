@@ -23,6 +23,7 @@ import {
   LoginMetadataRequest,
   LoginMetaDataResponse,
   LoginRequest,
+  ResendVerificationEmailRequest,
   ResetPasswordParams,
   ResetPasswordRequest,
   SignupRequest,
@@ -371,6 +372,41 @@ export const resetPassword = asyncHandler(
     res.status(200).json({
       success: true,
       message: 'Your password has been reset successfully',
+    });
+  },
+);
+
+export const resendVerificationEmail = asyncHandler(
+  async (
+    req: Request<{}, SimpleResponse, ResendVerificationEmailRequest>,
+    res: Response<SimpleResponse>,
+  ): Promise<void> => {
+    const { email } = req.body;
+
+    if (!email) {
+      throw new Error('Email is required');
+    }
+
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    if (user.isVerified) {
+      throw new Error('User already verified');
+    }
+
+    user.verificationToken = generateSixDigitCode().toString();
+    user.verificationTokenExpiresAt = new Date(Date.now() + 5 * 60 * 1000);
+
+    await user.save();
+
+    await sendVerificationEmail(user.name, user.email, user.verificationToken);
+
+    res.status(200).json({
+      success: true,
+      message: 'Verification email resent successfully',
     });
   },
 );

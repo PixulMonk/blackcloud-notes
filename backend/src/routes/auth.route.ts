@@ -8,6 +8,7 @@ import {
   forgotPassword,
   resetPassword,
   checkAuth,
+  resendVerificationEmail,
 } from '../controllers/auth.controller';
 import { protectRoute } from '../middleware/auth.middleware';
 
@@ -21,5 +22,6 @@ router.post('/logout', logout);
 router.post('/verify-email', verifyEmail);
 router.post('/forgot-password', forgotPassword);
 router.post('/reset-password/:token', resetPassword);
+router.post('/resend-verification', resendVerificationEmail);
 
 export default router;
