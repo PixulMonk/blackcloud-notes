@@ -24,7 +24,7 @@ function VerifyEmailCard() {
   const inputRefs = useRef<HTMLInputElement[]>([]);
   const navigate = useNavigate();
   const { user, error, isLoading } = useAuth();
-  const { verifyEmail, resendVerificationEmail, setMessage, setError } =
+  const { logout, verifyEmail, resendVerificationEmail, setMessage, setError } =
     useAuthActions();
 
   const { displayTime, displaySeconds, startCountdown } = useCountdown(
@@ -182,6 +182,15 @@ function VerifyEmailCard() {
               {isCoolingDown ? `Resend in ${displayTime}` : 'Resend'}
             </Button>
           </div>
+          <Button
+            variant="link"
+            onClick={() => {
+              logout();
+              navigate('/signup');
+            }}
+          >
+            Use a different email
+          </Button>
         </CardFooter>
       </Card>
     </div>
