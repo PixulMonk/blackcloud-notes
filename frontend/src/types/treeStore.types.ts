@@ -5,6 +5,7 @@ interface BaseTreeNode {
   userId: string;
   type: 'folder' | 'file';
   position: number;
+  createdAt?: string; // add here so both TreeNode and TreeNodeDTO get it
   isArchived?: boolean;
   isDeleted?: boolean;
   icon?: string;
@@ -51,6 +52,7 @@ export interface TreeUIState {
   selectedNodeId: string | null;
   selectedFileId: string | null;
   selectedFileTitle: string | null;
+  selectedNode: TreeNode | null;
   actions: TreeUIActions;
 }
 

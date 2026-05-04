@@ -1,4 +1,4 @@
-import type { TreeNode } from '@/types/tree.types';
+import type { TreeNode } from '@/types/treeStore.types';
 
 export const updateRecursive = (
   nodes: TreeNode[],

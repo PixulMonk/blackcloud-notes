@@ -12,7 +12,7 @@ import { axiosInstance } from '@/lib/axios';
 import { useShallow } from 'zustand/react/shallow';
 
 import type { NoteResponse } from '@/types/note.types';
-import type { TreeNode } from '@/types/tree.types';
+import type { TreeNode } from '@/types/treeStore.types';
 import { encryptAESGCM } from '@/lib/crypto/aes';
 import { decryptTree } from '@/lib/tree/treeEncryption';
 import { updateRecursive } from '@/lib/tree/treeHelpers';

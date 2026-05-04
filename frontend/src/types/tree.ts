@@ -6,6 +6,7 @@ export interface TreeNode {
   title: string;
   type: 'folder' | 'file';
   position: number;
+  createdAt?: string;
   isArchived?: boolean;
   isDeleted?: boolean;
   icon?: string;

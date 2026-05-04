@@ -9,7 +9,7 @@ import {
 
 import NodeActions from './node-components/NodeActions';
 import NodeLabel from './node-components/NodeLabel';
-import { type TreeNodeComponentProps } from '../../types/tree.types';
+import { type TreeNodeComponentProps } from '../../types/treeStore.types';
 import { useDataActions } from '@/store/useDataStore';
 import { confirm } from '../ConfirmDialogue';
 

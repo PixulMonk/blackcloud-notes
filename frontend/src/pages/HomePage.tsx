@@ -12,7 +12,6 @@ function HomePage() {
     <div className="flex flex-col w-full max-h-screen items-center p-2">
       {selectedNodeId ? (
         <div className="w-full max-w-5xl">
-          <DocumentTitle />
           <SyncingIndicator />
           <Editor />
         </div>

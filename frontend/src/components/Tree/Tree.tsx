@@ -1,6 +1,6 @@
 import { TreeNodeComponent } from './TreeNode';
 import { useData } from '@/store/useDataStore';
-import { type TreeProps } from '@/types/tree.types';
+import { type TreeProps } from '@/types/treeStore.types';
 
 // TODO: eliminate prop drilling. Just pass the zustand tree data here
 // Handles an array of nodes and passes it to TreeNodeCompoent to be individually rendered
