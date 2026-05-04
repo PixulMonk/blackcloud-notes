@@ -14,34 +14,38 @@ import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useAuth, useAuthActions } from '@/store/useAuthStore';
 import { AlertCircleIcon, Loader, ChevronLeft } from 'lucide-react';
+import useCountdown from '@/hooks/useCountdown';
+import { COOLDOWN_KEYS } from '@/utils/cooldownKeys';
 
 function ForgotPasswordCard() {
   const [email, setEmail] = useState('');
   const [isSubmitted, setIsSubmitted] = useState(false);
 
-  const { error, isLoading } = useAuth();
-  const { forgotPassword, setError } = useAuthActions();
+  const { isLoading, error } = useAuth();
+  const { forgotPassword, setMessage, setError } = useAuthActions();
+
+  const { displayTime, displaySeconds, startCountdown } = useCountdown(
+    COOLDOWN_KEYS.forgotPassword,
+  );
+  const isCoolingDown = displaySeconds > 0;
 
   const sendRecoveryEmail = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
     if (!email) {
       setError('Email field cannot be empty.');
       return;
     }
 
-    try {
-      const success = await forgotPassword(email);
+    const { success, retryAfter } = await forgotPassword(email);
 
-      if (success) {
-        setIsSubmitted(true);
-        // Change message
-      }
-    } catch (error: unknown) {
-      if (error instanceof Error) {
-        console.error('Error:', error.message);
-      } else {
-        console.error('Unknown error:', error);
-      }
+    if (retryAfter !== undefined) {
+      startCountdown(Number(retryAfter));
+    }
+
+    if (success) {
+      setMessage('Email sent');
+      setIsSubmitted(true);
     }
   };
 
@@ -67,11 +71,8 @@ function ForgotPasswordCard() {
                   id="email"
                   value={email}
                   placeholder="Email"
-                  onChange={(e) => {
-                    setEmail(e.target.value);
-                  }}
+                  onChange={(e) => setEmail(e.target.value)}
                 />
-                {/* Alerts */}
                 <div>
                   {error && (
                     <Alert variant="destructive">
@@ -81,9 +82,15 @@ function ForgotPasswordCard() {
                     </Alert>
                   )}
                 </div>
-                <Button className="w-full" type="submit">
+                <Button
+                  className="w-full"
+                  disabled={isLoading || isCoolingDown}
+                  type="submit"
+                >
                   {isLoading ? (
                     <Loader className="animate-spin mx-auto" size={24} />
+                  ) : isCoolingDown ? (
+                    `Send reset link in ${displayTime}`
                   ) : (
                     'Send reset link'
                   )}

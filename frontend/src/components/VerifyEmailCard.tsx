@@ -6,6 +6,7 @@ import {
   CardTitle,
   CardDescription,
   CardContent,
+  CardFooter,
 } from '@/components/ui/card';
 
 import { Input } from '@/components/ui/input';
@@ -14,22 +15,48 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { AlertCircleIcon } from 'lucide-react';
 
 import { useAuth, useAuthActions } from '@/store/useAuthStore';
+import useCountdown from '@/hooks/useCountdown';
+import { COOLDOWN_KEYS } from '@/utils/cooldownKeys';
 
 function VerifyEmailCard() {
   const [code, setCode] = useState(['', '', '', '', '', '']);
   const [isButtonDisabled, setIsButtonDisabled] = useState(true);
   const inputRefs = useRef<HTMLInputElement[]>([]);
   const navigate = useNavigate();
+  const { user, error, isLoading } = useAuth();
+  const { verifyEmail, resendVerificationEmail, setMessage, setError } =
+    useAuthActions();
 
-  const { error, isLoading } = useAuth();
-  const { verifyEmail } = useAuthActions();
+  const { displayTime, displaySeconds, startCountdown } = useCountdown(
+    COOLDOWN_KEYS.verification,
+  );
+
+  const isCoolingDown = displaySeconds > 0;
+
+  const handleVerificationResend = async () => {
+    if (!user) return;
+
+    if (user.isVerified) {
+      setError('Account already verified');
+      return;
+    }
+
+    const { success, retryAfter } = await resendVerificationEmail(user.email);
+
+    if (retryAfter !== undefined) {
+      startCountdown(Number(retryAfter));
+    }
+
+    if (success) {
+      setMessage('Email sent');
+    }
+  };
 
   const handleChange = (value: string, index: number) => {
     const newCode = [...code];
-    newCode[index] = value.slice(-1); // only keep last char
+    newCode[index] = value.slice(-1);
     setCode(newCode);
 
-    // Move focus to next
     if (value && index < 5) {
       inputRefs.current[index + 1]?.focus();
     }
@@ -144,6 +171,18 @@ function VerifyEmailCard() {
             </Button>
           </form>
         </CardContent>
+        <CardFooter className="flex flex-col gap-4">
+          <div className="flex flex-row items-center">
+            <CardDescription>Did not get an email?</CardDescription>
+            <Button
+              variant="link"
+              disabled={isLoading || isCoolingDown}
+              onClick={handleVerificationResend}
+            >
+              {isCoolingDown ? `Resend in ${displayTime}` : 'Resend'}
+            </Button>
+          </div>
+        </CardFooter>
       </Card>
     </div>
   );

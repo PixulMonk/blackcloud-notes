@@ -22,6 +22,12 @@ export interface IUser {
   resetPasswordExpiresAt?: Date;
   verificationToken?: string;
   verificationTokenExpiresAt?: Date;
+  resendCooldowns: {
+    verification?: Date;
+    verificationResendAttempts?: number;
+    passwordReset?: Date;
+    passwordResetResendAttempts?: number;
+  };
 }
 
 const userSchema = new Schema<IUser>(
@@ -46,6 +52,12 @@ const userSchema = new Schema<IUser>(
     resetPasswordExpiresAt: Date,
     verificationToken: String,
     verificationTokenExpiresAt: Date,
+    resendCooldowns: {
+      verification: { type: Date },
+      verificationResendAttempts: { type: Number },
+      passwordReset: { type: Date },
+      passwordResetResendAttempts: { type: Number },
+    },
   },
   { timestamps: true },
 );

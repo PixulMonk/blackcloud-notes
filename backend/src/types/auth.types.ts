@@ -3,6 +3,8 @@ import { ParamsDictionary, Query } from 'express-serve-static-core';
 import { Argon2Params } from '@blackcloud/shared';
 import { IUser } from '../models/user.model';
 import { SimpleResponse } from './common.types';
+import { Resend } from 'resend';
+import { resendVerificationEmail } from './../controllers/auth.controller';
 
 export type SanitizedUser = Omit<
   IUser,
@@ -61,4 +63,12 @@ export interface ResetPasswordRequest {
   newProtectedDEK: string; // base64 — IV ‖ ciphertext ‖ tag
   newArgon2Salt: string;
   argon2Params: Argon2Params;
+}
+
+export interface ResendEmailResponse extends SimpleResponse {
+  retryAfter?: number;
+}
+
+export interface ResendVerificationEmailRequest {
+  email: string;
 }
