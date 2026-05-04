@@ -22,7 +22,7 @@ function VerifyEmailCard() {
   const [isButtonDisabled, setIsButtonDisabled] = useState(true);
   const inputRefs = useRef<HTMLInputElement[]>([]);
   const navigate = useNavigate();
-  const { displaySeconds, startCountdown, isReady } = useCountdown();
+  const { displayTime, startCountdown, isReady } = useCountdown();
 
   const { user, error, isLoading } = useAuth();
   const { verifyEmail, resendVerificationEmail, setError } = useAuthActions();
@@ -170,7 +170,7 @@ function VerifyEmailCard() {
               disabled={isLoading || !isReady}
               onClick={handleVerificationResend}
             >
-              {isReady ? 'Resend' : `Resend in ${displaySeconds}s`}
+              {isReady ? 'Resend' : `Resend in ${displayTime}`}
             </Button>
           </div>
         </CardFooter>

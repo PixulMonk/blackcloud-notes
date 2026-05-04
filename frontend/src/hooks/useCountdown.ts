@@ -6,6 +6,17 @@ const useCountdown = () => {
 
   const isReady = displaySeconds === 0;
 
+  const formatTime = (seconds: number) => {
+    if (seconds < 60) return `${seconds}s`;
+
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+
+    return `${m}:${s.toString().padStart(2, '0')}`;
+  };
+
+  const displayTime = formatTime(displaySeconds);
+
   useEffect(() => {
     const expiry = localStorage.getItem('resendCooldown');
 
@@ -33,10 +44,8 @@ const useCountdown = () => {
     intervalRef.current = setInterval(() => {
       setDisplaySeconds((prev) => {
         if (prev <= 1) {
-          if (intervalRef.current) {
-            clearInterval(intervalRef.current);
-            intervalRef.current = null;
-          }
+          clearInterval(intervalRef.current!);
+          intervalRef.current = null;
           return 0;
         }
         return prev - 1;
@@ -52,7 +61,13 @@ const useCountdown = () => {
     intervalRef.current = null;
   };
 
-  return { displaySeconds, startCountdown, isReady, resetCountdown };
+  return {
+    displaySeconds,
+    displayTime,
+    startCountdown,
+    isReady,
+    resetCountdown,
+  };
 };
 
 export default useCountdown;
