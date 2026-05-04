@@ -26,6 +26,7 @@ export interface AuthStateActions {
     email: string,
   ) => Promise<LoginMetaDetaResponse | undefined>;
   verifyEmail: (verificationCode: string) => Promise<boolean>;
+  resendVerificationEmail: (email: string) => Promise<boolean>;
   checkAuth: () => Promise<void>;
   logout: () => Promise<void>;
   forgotPassword: (email: string) => Promise<boolean>;

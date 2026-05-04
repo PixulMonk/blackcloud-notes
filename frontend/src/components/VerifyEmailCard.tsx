@@ -6,6 +6,7 @@ import {
   CardTitle,
   CardDescription,
   CardContent,
+  CardFooter,
 } from '@/components/ui/card';
 
 import { Input } from '@/components/ui/input';
@@ -14,15 +15,32 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { AlertCircleIcon } from 'lucide-react';
 
 import { useAuth, useAuthActions } from '@/store/useAuthStore';
+import useCountdown from '@/hooks/useCountDown';
 
 function VerifyEmailCard() {
   const [code, setCode] = useState(['', '', '', '', '', '']);
   const [isButtonDisabled, setIsButtonDisabled] = useState(true);
   const inputRefs = useRef<HTMLInputElement[]>([]);
   const navigate = useNavigate();
+  const { displaySeconds, startCountdown, isReady } = useCountdown();
 
-  const { error, isLoading } = useAuth();
-  const { verifyEmail } = useAuthActions();
+  const { user, error, isLoading } = useAuth();
+  const { verifyEmail, resendVerificationEmail, setError } = useAuthActions();
+
+  const handleVerificationResend = async () => {
+    if (!user) return;
+
+    if (user.isVerified) {
+      setError('Account already verified');
+      return;
+    }
+
+    const success = await resendVerificationEmail(user.email);
+
+    if (success) {
+      startCountdown(30);
+    }
+  };
 
   const handleChange = (value: string, index: number) => {
     const newCode = [...code];
@@ -144,6 +162,18 @@ function VerifyEmailCard() {
             </Button>
           </form>
         </CardContent>
+        <CardFooter className="flex flex-col gap-4">
+          <div className="flex flex-row items-center">
+            <CardDescription>Did not get an email?</CardDescription>
+            <Button
+              variant="link"
+              disabled={isLoading || !isReady}
+              onClick={handleVerificationResend}
+            >
+              {isReady ? 'Resend' : `Resend in ${displaySeconds}s`}
+            </Button>
+          </div>
+        </CardFooter>
       </Card>
     </div>
   );

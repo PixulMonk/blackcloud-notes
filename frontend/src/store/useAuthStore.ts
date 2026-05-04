@@ -141,6 +141,30 @@ const useAuthStore = create<AuthState>((set) => ({
         return false;
       }
     },
+    resendVerificationEmail: async (email) => {
+      set({ isLoading: true, error: null });
+
+      try {
+        const response = await axiosInstance.post('auth/resend-verification', {
+          email,
+        });
+        set({
+          message: response.data.message,
+          isLoading: false,
+        });
+        return true;
+      } catch (error) {
+        if (axios.isAxiosError(error)) {
+          set({
+            error: error.response?.data?.message || 'Error verification email',
+            isLoading: false,
+          });
+        } else {
+          set({ error: 'An unexpected error occurred', isLoading: false });
+        }
+        return false;
+      }
+    },
     checkAuth: async () => {
       const state = useAuthStore.getState();
       if (state.isAuthenticated) return;
