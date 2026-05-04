@@ -6,7 +6,24 @@ const useCountdown = () => {
 
   const isReady = displaySeconds === 0;
 
+  useEffect(() => {
+    const expiry = localStorage.getItem('resendCooldown');
+
+    if (!expiry) return;
+
+    const remaining = Math.ceil((Number(expiry) - Date.now()) / 1000);
+
+    if (remaining > 0) {
+      startCountdown(remaining);
+    } else {
+      localStorage.removeItem('resendCooldown');
+    }
+  }, []);
+
   const startCountdown = (countFromSeconds: number) => {
+    const expiry = Date.now() + countFromSeconds * 1000;
+    localStorage.setItem('resendCooldown', expiry.toString());
+
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
     }

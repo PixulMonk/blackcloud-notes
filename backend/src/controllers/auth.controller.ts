@@ -312,7 +312,6 @@ export const forgotPassword = asyncHandler(
       return;
     }
 
-    // ---- cooldown logic (only if user exists) ----
     const attempts = user.resendCooldowns.passwordResetResendAttempts ?? 0;
 
     const cooldown = getProgressiveCooldown(attempts);
@@ -324,26 +323,23 @@ export const forgotPassword = asyncHandler(
     if (lastSent) {
       const elapsed = Date.now() - new Date(lastSent).getTime();
 
-      // decay
       if (elapsed > RESET_WINDOW) {
         user.resendCooldowns.passwordResetResendAttempts = 0;
       }
 
-      // block if still in cooldown
       if (elapsed < cooldown) {
         const retryAfter = Math.ceil((cooldown - elapsed) / 1000);
 
         res.status(429).json({
           success: false,
           message: `Please wait ${retryAfter}s before retrying`,
-          retryAfter: retryAfter.toString(),
+          retryAfter: retryAfter,
         });
 
         return;
       }
     }
 
-    // ---- reset token generation ----
     const resetToken = crypto.randomBytes(20).toString('hex');
     const resetTokenExpiresAt = new Date(Date.now() + 60 * 60 * 1000);
 
@@ -457,7 +453,7 @@ export const resendVerificationEmail = asyncHandler(
       res.status(429).json({
         success: false,
         message: `Please wait ${cooldownCheck.retryAfter}s`,
-        retryAfter: cooldownCheck.retryAfter!.toString(),
+        retryAfter: cooldownCheck.retryAfter!,
       });
 
       return;

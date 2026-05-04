@@ -9,6 +9,11 @@ export interface User {
   isVerified: boolean;
 }
 
+interface ResendEmailResponse {
+  success: boolean;
+  retryAfter?: number;
+}
+
 export interface AuthStateActions {
   setMessage: (message: string | null) => void;
   setError: (error: string | null) => void;
@@ -26,10 +31,10 @@ export interface AuthStateActions {
     email: string,
   ) => Promise<LoginMetaDetaResponse | undefined>;
   verifyEmail: (verificationCode: string) => Promise<boolean>;
-  resendVerificationEmail: (email: string) => Promise<boolean>;
+  resendVerificationEmail: (email: string) => Promise<ResendEmailResponse>;
   checkAuth: () => Promise<void>;
   logout: () => Promise<void>;
-  forgotPassword: (email: string) => Promise<boolean>;
+  forgotPassword: (email: string) => Promise<ResendEmailResponse>;
   resetPassword: (
     token: string,
     newAuthToken: string,

@@ -66,7 +66,7 @@ export interface ResetPasswordRequest {
 }
 
 export interface ResendEmailResponse extends SimpleResponse {
-  retryAfter?: string;
+  retryAfter?: number;
 }
 
 export interface ResendVerificationEmailRequest {

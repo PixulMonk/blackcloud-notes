@@ -15,7 +15,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { AlertCircleIcon } from 'lucide-react';
 
 import { useAuth, useAuthActions } from '@/store/useAuthStore';
-import useCountdown from '@/hooks/useCountDown';
+import useCountdown from '@/hooks/useCountdown';
 
 function VerifyEmailCard() {
   const [code, setCode] = useState(['', '', '', '', '', '']);
@@ -35,10 +35,10 @@ function VerifyEmailCard() {
       return;
     }
 
-    const success = await resendVerificationEmail(user.email);
+    const { success, retryAfter } = await resendVerificationEmail(user.email);
 
-    if (success) {
-      startCountdown(30);
+    if (retryAfter !== undefined) {
+      startCountdown(retryAfter);
     }
   };
 
