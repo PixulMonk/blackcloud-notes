@@ -1,10 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 
-const useCountdown = () => {
+const useCountdown = (key: string) => {
   const [displaySeconds, setDisplaySeconds] = useState(0);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-
-  const isReady = displaySeconds === 0;
 
   const formatTime = (seconds: number) => {
     if (seconds < 60) return `${seconds}s`;
@@ -18,7 +16,7 @@ const useCountdown = () => {
   const displayTime = formatTime(displaySeconds);
 
   useEffect(() => {
-    const expiry = localStorage.getItem('resendCooldown');
+    const expiry = localStorage.getItem(key);
 
     if (!expiry) return;
 
@@ -27,17 +25,16 @@ const useCountdown = () => {
     if (remaining > 0) {
       startCountdown(remaining);
     } else {
-      localStorage.removeItem('resendCooldown');
+      localStorage.removeItem(key);
     }
-  }, []);
+  }, [key]);
 
-  const startCountdown = (countFromSeconds: number) => {
+  const startCountdown = (countFromSeconds: number, overrideKey?: string) => {
+    const storageKey = overrideKey ?? key;
     const expiry = Date.now() + countFromSeconds * 1000;
-    localStorage.setItem('resendCooldown', expiry.toString());
+    localStorage.setItem(storageKey, expiry.toString());
 
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current);
-    }
+    if (intervalRef.current) clearInterval(intervalRef.current);
 
     setDisplaySeconds(countFromSeconds);
 
@@ -65,7 +62,6 @@ const useCountdown = () => {
     displaySeconds,
     displayTime,
     startCountdown,
-    isReady,
     resetCountdown,
   };
 };

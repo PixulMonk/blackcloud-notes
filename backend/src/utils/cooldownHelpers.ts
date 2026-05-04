@@ -1,3 +1,5 @@
+import crypto from 'crypto';
+
 export const checkCooldown = (
   lastSent: Date | undefined,
   cooldownMs: number,
@@ -32,4 +34,14 @@ export const shouldResetAttempts = (
   const elapsed = Date.now() - new Date(lastSent).getTime();
 
   return elapsed > windowMs;
+};
+
+export const getFakeAttempts = (email: string): number => {
+  const hash = crypto
+    .createHmac('sha256', process.env.SALT_HMAC_SECRET!)
+    .update(email)
+    .digest('hex');
+
+  // Use first byte to deterministically pick 0-3
+  return parseInt(hash[0], 16) % 4;
 };

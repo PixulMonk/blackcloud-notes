@@ -16,16 +16,22 @@ import { AlertCircleIcon } from 'lucide-react';
 
 import { useAuth, useAuthActions } from '@/store/useAuthStore';
 import useCountdown from '@/hooks/useCountdown';
+import { COOLDOWN_KEYS } from '@/utils/cooldownKeys';
 
 function VerifyEmailCard() {
   const [code, setCode] = useState(['', '', '', '', '', '']);
   const [isButtonDisabled, setIsButtonDisabled] = useState(true);
   const inputRefs = useRef<HTMLInputElement[]>([]);
   const navigate = useNavigate();
-  const { displayTime, startCountdown, isReady } = useCountdown();
-
   const { user, error, isLoading } = useAuth();
-  const { verifyEmail, resendVerificationEmail, setError } = useAuthActions();
+  const { verifyEmail, resendVerificationEmail, setMessage, setError } =
+    useAuthActions();
+
+  const { displayTime, displaySeconds, startCountdown } = useCountdown(
+    COOLDOWN_KEYS.verification(user?.email ?? ''),
+  );
+
+  const isCoolingDown = displaySeconds > 0;
 
   const handleVerificationResend = async () => {
     if (!user) return;
@@ -38,16 +44,22 @@ function VerifyEmailCard() {
     const { success, retryAfter } = await resendVerificationEmail(user.email);
 
     if (retryAfter !== undefined) {
-      startCountdown(retryAfter);
+      startCountdown(
+        Number(retryAfter),
+        COOLDOWN_KEYS.verification(user.email),
+      );
+    }
+
+    if (success) {
+      setMessage('Email sent');
     }
   };
 
   const handleChange = (value: string, index: number) => {
     const newCode = [...code];
-    newCode[index] = value.slice(-1); // only keep last char
+    newCode[index] = value.slice(-1);
     setCode(newCode);
 
-    // Move focus to next
     if (value && index < 5) {
       inputRefs.current[index + 1]?.focus();
     }
@@ -167,10 +179,10 @@ function VerifyEmailCard() {
             <CardDescription>Did not get an email?</CardDescription>
             <Button
               variant="link"
-              disabled={isLoading || !isReady}
+              disabled={isLoading || isCoolingDown}
               onClick={handleVerificationResend}
             >
-              {isReady ? 'Resend' : `Resend in ${displayTime}`}
+              {isCoolingDown ? `Resend in ${displayTime}` : 'Resend'}
             </Button>
           </div>
         </CardFooter>
