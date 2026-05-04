@@ -1,4 +1,4 @@
 export const COOLDOWN_KEYS = {
-  verification: (email: string) => `cooldown:verification:${email}`,
-  forgotPassword: (email: string) => `cooldown:forgotPassword:${email}`,
-};
+  verification: 'cooldown:verification',
+  forgotPassword: 'cooldown:forgotPassword',
+} as const;

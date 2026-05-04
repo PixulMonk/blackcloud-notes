@@ -24,7 +24,9 @@ function ForgotPasswordCard() {
   const { isLoading, error } = useAuth();
   const { forgotPassword, setMessage, setError } = useAuthActions();
 
-  const { displayTime, displaySeconds, startCountdown } = useCountdown('');
+  const { displayTime, displaySeconds, startCountdown } = useCountdown(
+    COOLDOWN_KEYS.forgotPassword,
+  );
   const isCoolingDown = displaySeconds > 0;
 
   const sendRecoveryEmail = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -38,7 +40,7 @@ function ForgotPasswordCard() {
     const { success, retryAfter } = await forgotPassword(email);
 
     if (retryAfter !== undefined) {
-      startCountdown(Number(retryAfter), COOLDOWN_KEYS.forgotPassword(email));
+      startCountdown(Number(retryAfter));
     }
 
     if (success) {

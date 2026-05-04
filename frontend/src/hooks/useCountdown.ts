@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, use } from 'react';
 
 const useCountdown = (key: string) => {
   const [displaySeconds, setDisplaySeconds] = useState(0);
@@ -29,10 +29,9 @@ const useCountdown = (key: string) => {
     }
   }, [key]);
 
-  const startCountdown = (countFromSeconds: number, overrideKey?: string) => {
-    const storageKey = overrideKey ?? key;
+  const startCountdown = (countFromSeconds: number) => {
     const expiry = Date.now() + countFromSeconds * 1000;
-    localStorage.setItem(storageKey, expiry.toString());
+    localStorage.setItem(key, expiry.toString());
 
     if (intervalRef.current) clearInterval(intervalRef.current);
 
@@ -56,6 +55,7 @@ const useCountdown = (key: string) => {
     }
     setDisplaySeconds(0);
     intervalRef.current = null;
+    localStorage.removeItem(key);
   };
 
   return {

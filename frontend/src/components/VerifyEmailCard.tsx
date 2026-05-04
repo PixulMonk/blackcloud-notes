@@ -28,7 +28,7 @@ function VerifyEmailCard() {
     useAuthActions();
 
   const { displayTime, displaySeconds, startCountdown } = useCountdown(
-    COOLDOWN_KEYS.verification(user?.email ?? ''),
+    COOLDOWN_KEYS.verification,
   );
 
   const isCoolingDown = displaySeconds > 0;
@@ -44,10 +44,7 @@ function VerifyEmailCard() {
     const { success, retryAfter } = await resendVerificationEmail(user.email);
 
     if (retryAfter !== undefined) {
-      startCountdown(
-        Number(retryAfter),
-        COOLDOWN_KEYS.verification(user.email),
-      );
+      startCountdown(Number(retryAfter));
     }
 
     if (success) {
