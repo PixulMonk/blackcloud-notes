@@ -65,6 +65,10 @@ export interface ResetPasswordRequest {
   argon2Params: Argon2Params;
 }
 
+export interface ResendEmailResponse extends SimpleResponse {
+  retryAfter?: string;
+}
+
 export interface ResendVerificationEmailRequest {
   email: string;
 }
