@@ -1,5 +1,6 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { EditorContent, EditorContext } from '@tiptap/react';
+import { PenLine } from 'lucide-react';
 
 import useEditorSetup from '@/hooks/useEditorSetup';
 import useEditorContent from '@/hooks/useEditorContent';
@@ -21,11 +22,15 @@ const formatDate = (iso?: string) => {
 const Editor = () => {
   const { selectedFileId, selectedNode } = useTreeUI(); // grab full node
   const editor = useEditorSetup();
-  const { showSkeleton, isFetchingContent } = useEditorContent(
+  const [isFocused, setIsFocused] = useState(false);
+  const { showSkeleton, isFetchingContent, isContentReady } = useEditorContent(
     editor,
     selectedFileId,
   );
+
   useEditorSync(editor, selectedFileId);
+
+  const isEmpty = !isFetchingContent && (editor?.isEmpty ?? true);
 
   const providerValue = useMemo(() => ({ editor }), [editor]);
 
@@ -60,10 +65,23 @@ const Editor = () => {
             {showSkeleton ? (
               <SkeletonText />
             ) : (
-              <EditorContent
-                editor={editor}
-                className="prose dark:prose-invert max-w-full"
-              />
+              <div
+                className="relative group cursor-text"
+                onClick={() => editor?.commands.focus()}
+              >
+                {isContentReady && isEmpty && !isFocused && (
+                  <div className="absolute top-0 left-0 flex items-center gap-2 text-muted-foreground/40 pointer-events-none transition-colors group-hover:text-muted-foreground/60">
+                    <PenLine size={13} />
+                    <span className="text-sm">Start writing…</span>
+                  </div>
+                )}
+                <EditorContent
+                  editor={editor}
+                  onFocus={() => setIsFocused(true)}
+                  onBlur={() => setIsFocused(false)}
+                  className="prose dark:prose-invert max-w-full"
+                />
+              </div>
             )}
           </div>
         </div>
