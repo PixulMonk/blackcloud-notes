@@ -1,4 +1,4 @@
-import type { TreeNode, TreeNodeDTO } from '../types/tree.types';
+import type { TreeNode, TreeNodeDTO } from './treeStore.types';
 import type { NoteDTO, NoteResponse } from '@/types/note.types';
 
 export interface DataActions {

@@ -1,6 +1,6 @@
 import { Input } from '@/components/ui/input';
 import { File, Folder } from 'lucide-react';
-import { type NodeLabelProps } from '@/types/tree.types';
+import { type NodeLabelProps } from '@/types/treeStore.types';
 
 function NodeLabel({
   node,
