@@ -10,7 +10,10 @@ const useEditorContent = (
   selectedFileId: string | null,
 ) => {
   const [showSkeleton, setShowSkeleton] = useState(false);
+  const [isContentReady, setIsContentReady] = useState(false);
+
   const { isFetchingContent } = useData();
+
   const { fetchNodeContent } = useDataActions();
   const dataEncryptionKey = useDataEncryptionKey();
 
@@ -26,25 +29,26 @@ const useEditorContent = (
   useEffect(() => {
     if (!selectedFileId) return;
 
+    setIsContentReady(false); // reset on note switch
     editor?.commands.clearContent();
 
     fetchNodeContent(selectedFileId).then(async (content) => {
-      if (!content || !content.encryptedContent || !dataEncryptionKey) return;
+      if (!content || !content.encryptedContent || !dataEncryptionKey) {
+        setIsContentReady(true); // genuinely empty note
+        return;
+      }
 
-      // Decrypt
       const decryptedDataString = await decryptAESGCM(
         content.encryptedContent,
         dataEncryptionKey,
       );
-
       const jsonContent = JSON.parse(decryptedDataString);
-
-      // Set editor content
       editor?.commands.setContent(jsonContent);
+      setIsContentReady(true); // content is set
     });
   }, [selectedFileId, editor]);
 
-  return { showSkeleton, isFetchingContent };
+  return { showSkeleton, isFetchingContent, isContentReady };
 };
 
 export default useEditorContent;

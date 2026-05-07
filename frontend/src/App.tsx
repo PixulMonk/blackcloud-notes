@@ -15,6 +15,7 @@ import { Loader } from 'lucide-react';
 import ResetPasswordPage from './pages/ResetPasswordPage';
 import UnlockVaultPage from './pages/UnlockVaultPage';
 import { useDataEncryptionKey } from './store/useVaultStore';
+import Header from './components/Header';
 
 function App() {
   const { user, isCheckingAuth, isAuthenticated } = useAuth();
@@ -68,7 +69,7 @@ function App() {
     <SidebarProvider>
       {!hideSidebar && <AppSidebar />}
       <main className="flex-1 h-screen">
-        {!hideSidebar && <SidebarTrigger />}
+        {!hideSidebar && <Header />}
         <Routes>
           <Route
             path="/"

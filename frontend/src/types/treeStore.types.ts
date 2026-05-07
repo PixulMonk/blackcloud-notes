@@ -5,6 +5,7 @@ interface BaseTreeNode {
   userId: string;
   type: 'folder' | 'file';
   position: number;
+  createdAt?: string;
   isArchived?: boolean;
   isDeleted?: boolean;
   icon?: string;
@@ -43,6 +44,7 @@ export interface NodeLabelProps {
 export interface TreeUIActions {
   setRenamingNodeId: (id: string | null) => void;
   selectNode: (node: TreeNode) => void;
+  clearSelection: () => void;
   setFileTitle: (newTitle: string) => void;
 }
 
@@ -51,6 +53,7 @@ export interface TreeUIState {
   selectedNodeId: string | null;
   selectedFileId: string | null;
   selectedFileTitle: string | null;
+  selectedNode: TreeNode | null;
   actions: TreeUIActions;
 }
 

@@ -1,12 +1,12 @@
 import type { MouseEvent } from 'react';
 import type { Editor } from '@tiptap/core';
-
 import {
   Heading1,
   Heading2,
   Heading3,
   Bold,
   Italic,
+  Underline,
   Strikethrough,
   Highlighter,
   AlignLeft,
@@ -15,193 +15,151 @@ import {
   AlignJustify,
   List,
   ListOrdered,
-  Underline,
 } from 'lucide-react';
-
-import { Button } from './ui/button';
-import { ButtonGroup } from './ui/button-group';
+import { cn } from '@/lib/utils';
 
 interface MenuBarProps {
   editor: Editor | null;
 }
 
-const MenuBar = ({ editor }: MenuBarProps) => {
-  if (!editor) {
-    return null;
-  }
+const ToolbarButton = ({
+  onClick,
+  isActive,
+  children,
+}: {
+  onClick: (e: MouseEvent<HTMLButtonElement>) => void;
+  isActive?: boolean;
+  children: React.ReactNode;
+}) => (
+  <button
+    onMouseDown={onClick}
+    className={cn(
+      'p-1.5 rounded-md transition-colors',
+      'text-muted-foreground hover:text-foreground hover:bg-muted',
+      isActive && 'text-foreground bg-muted',
+    )}
+  >
+    {children}
+  </button>
+);
 
-  // Helper to prevent focus loss
+const Divider = () => <div className="w-px h-5 bg-border self-center mx-1" />;
+
+const MenuBar = ({ editor }: MenuBarProps) => {
+  if (!editor) return null;
+
   const run = (command: () => void) => (e: MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     command();
   };
 
   return (
-    <div className="mt-2">
-      <div className="flex flex-row flex-wrap gap-2">
-        <ButtonGroup>
-          <Button
-            variant="outline"
-            onMouseDown={run(() =>
-              editor.chain().focus().toggleHeading({ level: 1 }).run(),
-            )}
-            className={
-              editor.isActive('heading', { level: 1 }) ? 'is-active' : ''
-            }
-          >
-            <Heading1 />
-          </Button>
+    <div className="flex items-center flex-wrap gap-0.5 px-4 py-1.5  border-border/50 bg-background">
+      {/* Headings */}
+      <ToolbarButton
+        onClick={run(() =>
+          editor.chain().focus().toggleHeading({ level: 1 }).run(),
+        )}
+        isActive={editor.isActive('heading', { level: 1 })}
+      >
+        <Heading1 size={15} />
+      </ToolbarButton>
+      <ToolbarButton
+        onClick={run(() =>
+          editor.chain().focus().toggleHeading({ level: 2 }).run(),
+        )}
+        isActive={editor.isActive('heading', { level: 2 })}
+      >
+        <Heading2 size={15} />
+      </ToolbarButton>
+      <ToolbarButton
+        onClick={run(() =>
+          editor.chain().focus().toggleHeading({ level: 3 }).run(),
+        )}
+        isActive={editor.isActive('heading', { level: 3 })}
+      >
+        <Heading3 size={15} />
+      </ToolbarButton>
 
-          <Button
-            variant="outline"
-            onMouseDown={run(() =>
-              editor.chain().focus().toggleHeading({ level: 2 }).run(),
-            )}
-            className={
-              editor.isActive('heading', { level: 2 }) ? 'is-active' : ''
-            }
-          >
-            <Heading2 />
-          </Button>
+      <Divider />
 
-          <Button
-            variant="outline"
-            onMouseDown={run(() =>
-              editor.chain().focus().toggleHeading({ level: 3 }).run(),
-            )}
-            className={
-              editor.isActive('heading', { level: 3 }) ? 'is-active' : ''
-            }
-          >
-            <Heading3 />
-          </Button>
-        </ButtonGroup>
+      {/* Formatting */}
+      <ToolbarButton
+        onClick={run(() => editor.chain().focus().toggleBold().run())}
+        isActive={editor.isActive('bold')}
+      >
+        <Bold size={15} />
+      </ToolbarButton>
+      <ToolbarButton
+        onClick={run(() => editor.chain().focus().toggleItalic().run())}
+        isActive={editor.isActive('italic')}
+      >
+        <Italic size={15} />
+      </ToolbarButton>
+      <ToolbarButton
+        onClick={run(() => editor.chain().focus().toggleUnderline().run())}
+        isActive={editor.isActive('underline')}
+      >
+        <Underline size={15} />
+      </ToolbarButton>
+      <ToolbarButton
+        onClick={run(() => editor.chain().focus().toggleStrike().run())}
+        isActive={editor.isActive('strike')}
+      >
+        <Strikethrough size={15} />
+      </ToolbarButton>
+      <ToolbarButton
+        onClick={run(() => editor.chain().focus().toggleHighlight().run())}
+        isActive={editor.isActive('highlight')}
+      >
+        <Highlighter size={15} />
+      </ToolbarButton>
 
-        <ButtonGroup>
-          <Button
-            variant="outline"
-            onMouseDown={run(() => editor.chain().focus().toggleBold().run())}
-            className={editor.isActive('bold') ? 'is-active' : ''}
-          >
-            <Bold />
-          </Button>
+      <Divider />
 
-          <Button
-            variant="outline"
-            onMouseDown={run(() => editor.chain().focus().toggleItalic().run())}
-            className={editor.isActive('italic') ? 'is-active' : ''}
-          >
-            <Italic />
-          </Button>
+      {/* Alignment */}
+      <ToolbarButton
+        onClick={run(() => editor.chain().focus().setTextAlign('left').run())}
+        isActive={editor.isActive({ textAlign: 'left' })}
+      >
+        <AlignLeft size={15} />
+      </ToolbarButton>
+      <ToolbarButton
+        onClick={run(() => editor.chain().focus().setTextAlign('center').run())}
+        isActive={editor.isActive({ textAlign: 'center' })}
+      >
+        <AlignCenter size={15} />
+      </ToolbarButton>
+      <ToolbarButton
+        onClick={run(() => editor.chain().focus().setTextAlign('right').run())}
+        isActive={editor.isActive({ textAlign: 'right' })}
+      >
+        <AlignRight size={15} />
+      </ToolbarButton>
+      <ToolbarButton
+        onClick={run(() =>
+          editor.chain().focus().setTextAlign('justify').run(),
+        )}
+        isActive={editor.isActive({ textAlign: 'justify' })}
+      >
+        <AlignJustify size={15} />
+      </ToolbarButton>
 
-          <Button
-            variant="outline"
-            onMouseDown={run(() =>
-              editor.chain().focus().toggleUnderline().run(),
-            )}
-            className={editor.isActive('underline') ? 'is-active' : ''}
-          >
-            <Underline />
-          </Button>
+      <Divider />
 
-          <Button
-            variant="outline"
-            onMouseDown={run(() => editor.chain().focus().toggleStrike().run())}
-            className={editor.isActive('strike') ? 'is-active' : ''}
-          >
-            <Strikethrough />
-          </Button>
-
-          <Button
-            variant="outline"
-            onMouseDown={run(() =>
-              editor.chain().focus().toggleHighlight().run(),
-            )}
-            className={editor.isActive('highlight') ? 'is-active' : ''}
-          >
-            <Highlighter />
-          </Button>
-        </ButtonGroup>
-        <Button
-          variant="outline"
-          onMouseDown={run(() => editor.chain().focus().setParagraph().run())}
-          className={editor.isActive('paragraph') ? 'is-active' : ''}
-        >
-          Paragraph
-        </Button>
-
-        <ButtonGroup>
-          <Button
-            variant="outline"
-            onMouseDown={run(() =>
-              editor.chain().focus().setTextAlign('left').run(),
-            )}
-            className={
-              editor.isActive({ textAlign: 'left' }) ? 'is-active' : ''
-            }
-          >
-            <AlignLeft />
-          </Button>
-
-          <Button
-            variant="outline"
-            onMouseDown={run(() =>
-              editor.chain().focus().setTextAlign('center').run(),
-            )}
-            className={
-              editor.isActive({ textAlign: 'center' }) ? 'is-active' : ''
-            }
-          >
-            <AlignCenter />
-          </Button>
-
-          <Button
-            variant="outline"
-            onMouseDown={run(() =>
-              editor.chain().focus().setTextAlign('right').run(),
-            )}
-            className={
-              editor.isActive({ textAlign: 'right' }) ? 'is-active' : ''
-            }
-          >
-            <AlignRight />
-          </Button>
-
-          <Button
-            variant="outline"
-            onMouseDown={run(() =>
-              editor.chain().focus().setTextAlign('justify').run(),
-            )}
-            className={
-              editor.isActive({ textAlign: 'justify' }) ? 'is-active' : ''
-            }
-          >
-            <AlignJustify />
-          </Button>
-        </ButtonGroup>
-
-        <ButtonGroup>
-          <Button
-            variant="outline"
-            onMouseDown={run(() =>
-              editor.chain().focus().toggleBulletList().run(),
-            )}
-            className={editor.isActive('bulletList') ? 'is-active' : ''}
-          >
-            <List />
-          </Button>
-
-          <Button
-            variant="outline"
-            onMouseDown={run(() =>
-              editor.chain().focus().toggleOrderedList().run(),
-            )}
-            className={editor.isActive('orderedList') ? 'is-active' : ''}
-          >
-            <ListOrdered />
-          </Button>
-        </ButtonGroup>
-      </div>
+      {/* Lists */}
+      <ToolbarButton
+        onClick={run(() => editor.chain().focus().toggleBulletList().run())}
+        isActive={editor.isActive('bulletList')}
+      >
+        <List size={15} />
+      </ToolbarButton>
+      <ToolbarButton
+        onClick={run(() => editor.chain().focus().toggleOrderedList().run())}
+        isActive={editor.isActive('orderedList')}
+      >
+        <ListOrdered size={15} />
+      </ToolbarButton>
     </div>
   );
 };

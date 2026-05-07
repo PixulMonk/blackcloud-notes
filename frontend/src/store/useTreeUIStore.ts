@@ -3,7 +3,7 @@ import type {
   TreeUIActions,
   TreeUIState,
   TreeUIStoreState,
-} from '@/types/tree.types';
+} from '@/types/treeStore.types';
 import { useShallow } from 'zustand/react/shallow';
 
 const useTreeUIStore = create<TreeUIState>((set) => ({
@@ -11,6 +11,7 @@ const useTreeUIStore = create<TreeUIState>((set) => ({
   selectedNodeId: null,
   selectedFileId: null,
   selectedFileTitle: null,
+  selectedNode: null, // add this
   actions: {
     setRenamingNodeId: (id) => {
       set({ renamingNodeId: id });
@@ -23,8 +24,18 @@ const useTreeUIStore = create<TreeUIState>((set) => ({
         selectedNodeId: node._id,
         selectedFileId: node.type === 'file' ? (node.fileId ?? null) : null,
         selectedFileTitle: node.type === 'file' ? (node.title ?? null) : null,
+        selectedNode: node,
       });
     },
+
+    clearSelection: () =>
+      set({
+        selectedNodeId: null,
+        selectedFileId: null,
+        selectedFileTitle: null,
+        selectedNode: null,
+      }),
+
     setFileTitle: (newTitle) => set({ selectedFileTitle: newTitle }),
   },
 }));
@@ -36,6 +47,7 @@ export const useTreeUI = (): TreeUIStoreState =>
       selectedNodeId: s.selectedFileId,
       selectedFileId: s.selectedFileId,
       selectedFileTitle: s.selectedFileTitle,
+      selectedNode: s.selectedNode, // add this
     })),
   );
 
