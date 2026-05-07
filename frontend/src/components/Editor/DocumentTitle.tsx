@@ -9,7 +9,7 @@ export const DocumentTitle = () => {
   const [isRenaming, setIsRenaming] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const { selectedNodeId, selectedFileTitle } = useTreeUI();
+  const { selectedNodeId, selectedFileTitle, selectedNode } = useTreeUI();
   const { setFileTitle } = useTreeUIActions();
   const [previousTitle, setPreviousTitle] = useState(selectedFileTitle);
 
@@ -30,10 +30,10 @@ export const DocumentTitle = () => {
   if (!selectedNodeId) return null;
 
   const handleUpdate = () => {
-    if (!selectedNodeId || selectedFileTitle === null) return;
+    if (!selectedNode?._id || selectedFileTitle === null) return;
 
     if (selectedFileTitle !== previousTitle && dataEncryptionKey) {
-      updateNode(selectedNodeId, dataEncryptionKey, selectedFileTitle);
+      updateNode(selectedNode._id, dataEncryptionKey, selectedFileTitle); // use _id, not selectedNodeId
       setPreviousTitle(selectedFileTitle);
       console.log('update sent to db');
     }
