@@ -27,6 +27,15 @@ const useTreeUIStore = create<TreeUIState>((set) => ({
         selectedNode: node,
       });
     },
+
+    clearSelection: () =>
+      set({
+        selectedNodeId: null,
+        selectedFileId: null,
+        selectedFileTitle: null,
+        selectedNode: null,
+      }),
+
     setFileTitle: (newTitle) => set({ selectedFileTitle: newTitle }),
   },
 }));

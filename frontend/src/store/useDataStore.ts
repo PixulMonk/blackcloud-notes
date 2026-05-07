@@ -15,7 +15,7 @@ import type { NoteResponse } from '@/types/note.types';
 import type { TreeNode } from '@/types/treeStore.types';
 import { encryptAESGCM } from '@/lib/crypto/aes';
 import { decryptTree } from '@/lib/tree/treeEncryption';
-import { updateRecursive } from '@/lib/tree/treeHelpers';
+import { removeRecursive, updateRecursive } from '@/lib/tree/treeHelpers';
 
 // TODO: error toast?
 
@@ -155,6 +155,7 @@ const useDataStore = create<DataState>((set) => ({
           }),
           isLoading: false,
         }));
+
         return updatedNodeDTO;
       } catch (error: unknown) {
         if (axios.isAxiosError(error)) {
@@ -172,24 +173,18 @@ const useDataStore = create<DataState>((set) => ({
     // TODO: soft delete and archive have some repetitive code
     // TODO: Drink a gallon of coffee and combine into recursive update instead
 
-    softDeleteNode: async (nodeId) => {
+    softDeleteNode: async (nodeIdToDelete) => {
       set({ isLoading: true, error: null });
 
       try {
         const response = await axiosInstance.patch<TreeNodeResponse>(
-          `treeNodes/${nodeId}/soft-delete`,
+          `treeNodes/${nodeIdToDelete}/soft-delete`,
         );
 
         const updatedNodeDTO = response.data.data;
 
         set((state) => ({
-          tree: updateRecursive(state.tree, nodeId, {
-            ...updatedNodeDTO,
-            title: undefined,
-            children: undefined,
-          }).map((n) => {
-            return n;
-          }),
+          tree: removeRecursive(state.tree, nodeIdToDelete),
           isLoading: false,
         }));
 
@@ -207,18 +202,18 @@ const useDataStore = create<DataState>((set) => ({
       }
     },
 
-    archiveNode: async (nodeId) => {
+    archiveNode: async (nodeIdToArchive) => {
       set({ isLoading: true, error: null });
 
       try {
         const response = await axiosInstance.patch<TreeNodeResponse>(
-          `treeNodes/${nodeId}/archive`,
+          `treeNodes/${nodeIdToArchive}/archive`,
         );
 
         const updatedNodeDTO = response.data.data;
 
         set((state) => ({
-          tree: updateRecursive(state.tree, nodeId, {
+          tree: updateRecursive(state.tree, nodeIdToArchive, {
             ...updatedNodeDTO,
             title: undefined,
             children: undefined,

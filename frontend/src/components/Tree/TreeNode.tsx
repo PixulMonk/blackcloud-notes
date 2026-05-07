@@ -23,8 +23,9 @@ const TreeNodeComponent = ({ node }: TreeNodeComponentProps) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [treeData, setTreeData] = useState(node);
 
-  const { renamingNodeId, selectedNodeId } = useTreeUI();
-  const { setRenamingNodeId, setFileTitle, selectNode } = useTreeUIActions();
+  const { renamingNodeId, selectedNodeId, selectedNode } = useTreeUI();
+  const { setRenamingNodeId, setFileTitle, selectNode, clearSelection } =
+    useTreeUIActions();
 
   const isRenaming = node._id === renamingNodeId;
   const isSelected = node._id === selectedNodeId;
@@ -64,12 +65,17 @@ const TreeNodeComponent = ({ node }: TreeNodeComponentProps) => {
 
   const handleSoftDelete = async (id: string) => {
     const ok = await confirm({
-      title: 'Archive',
+      title: 'Delete',
       message: 'Are you sure you want to delete this item?',
       yesText: 'Delete',
       noText: 'Cancel',
     });
-    if (ok) softDeleteNode(id);
+    if (ok) {
+      softDeleteNode(id);
+      if (selectedNode?._id === id) {
+        clearSelection();
+      }
+    }
   };
 
   const handleArchive = async (id: string) => {

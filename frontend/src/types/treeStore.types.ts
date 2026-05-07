@@ -5,7 +5,7 @@ interface BaseTreeNode {
   userId: string;
   type: 'folder' | 'file';
   position: number;
-  createdAt?: string; // add here so both TreeNode and TreeNodeDTO get it
+  createdAt?: string;
   isArchived?: boolean;
   isDeleted?: boolean;
   icon?: string;
@@ -44,6 +44,7 @@ export interface NodeLabelProps {
 export interface TreeUIActions {
   setRenamingNodeId: (id: string | null) => void;
   selectNode: (node: TreeNode) => void;
+  clearSelection: () => void;
   setFileTitle: (newTitle: string) => void;
 }
 
