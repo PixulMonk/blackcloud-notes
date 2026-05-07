@@ -31,12 +31,12 @@ import { useTreeUIActions } from '@/store/useTreeUIStore';
 import { useDataEncryptionKey, useVaultActions } from '@/store/useVaultStore';
 import { useIsDark } from '@/store/useThemeStore';
 import { Separator } from '@/components/ui/separator';
+import SkeletonFileTree from './SkeletonFileTree';
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const navigate = useNavigate();
-  const { tree } = useData();
+  const { tree, isLoading } = useData();
   const { fetchTree, addNode } = useDataActions();
-
   const dataEncryptionKey = useDataEncryptionKey();
   const { clearKeys } = useVaultActions();
 
@@ -107,7 +107,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <SidebarGroupLabel>Notes</SidebarGroupLabel>
         <SidebarGroupContent>
           <SidebarMenu></SidebarMenu>
-          <Tree data={tree} />
+          {isLoading ? <SkeletonFileTree /> : <Tree data={tree} />}
         </SidebarGroupContent>
         <SidebarGroup />
       </SidebarContent>
