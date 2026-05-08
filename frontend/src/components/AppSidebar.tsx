@@ -12,15 +12,6 @@ import {
   HelpCircle,
   Lock,
 } from 'lucide-react';
-import {
-  FilePlus2,
-  FolderPlus,
-  Search,
-  Archive,
-  Trash2,
-  HelpCircle,
-  Lock,
-} from 'lucide-react';
 
 import { Button } from './ui/button';
 
@@ -33,7 +24,6 @@ import {
   SidebarHeader,
   SidebarMenu,
   SidebarFooter,
-  SidebarFooter,
 } from '@/components/ui/sidebar';
 
 import { useData, useDataActions } from '@/store/useDataStore';
@@ -43,27 +33,16 @@ import { useDataEncryptionKey, useVaultActions } from '@/store/useVaultStore';
 import { useIsDark } from '@/store/useThemeStore';
 import { Separator } from '@/components/ui/separator';
 import SkeletonFileTree from './SkeletonFileTree';
-import { useDataEncryptionKey, useVaultActions } from '@/store/useVaultStore';
-import { useIsDark } from '@/store/useThemeStore';
-import { Separator } from '@/components/ui/separator';
-import SkeletonFileTree from './SkeletonFileTree';
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const navigate = useNavigate();
   const { tree, isLoading } = useData();
-  const { tree, isLoading } = useData();
   const { fetchTree, addNode } = useDataActions();
   const dataEncryptionKey = useDataEncryptionKey();
-  const { clearKeys } = useVaultActions();
   const { clearKeys } = useVaultActions();
 
   const { setActiveView } = useAppStoreActions();
   const { setRenamingNodeId } = useTreeUIActions();
-
-  const isDark = useIsDark();
-  const logoUrl = isDark
-    ? ' /logo/logo-horiz-dark.svg'
-    : '/logo/logo-horiz.svg';
 
   const isDark = useIsDark();
   const logoUrl = isDark
@@ -125,50 +104,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             <Search className="size-4" />
           </Button>
         </div>
-      <SidebarHeader className="pt-4 px-2">
-        {/* Logo Container */}
-        <div className="flex items-center justify-center h-8 mb-4">
-          <img
-            src={logoUrl} // Removed "public"
-            alt="BlackCloud Logo"
-            className="h-6 w-auto transition-all group-data-[collapsible=icon]:hidden"
-          />
-        </div>
-
-        {/* Action Buttons */}
-        <div className="flex flex-row mx-auto justify-start gap-1 px-2 group-data-[collapsible=icon]:flex-col group-data-[collapsible=icon]:items-center group-data-[collapsible=icon]:gap-2">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="size-8"
-            onClick={(e) => {
-              e.stopPropagation();
-              handleCreate('folder');
-            }}
-          >
-            <FolderPlus className="size-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="size-8"
-            onClick={(e) => {
-              e.stopPropagation();
-              handleCreate('file');
-            }}
-          >
-            <FilePlus2 className="size-4" />
-          </Button>
-          <Button variant="ghost" size="icon" className="size-8">
-            <Search className="size-4" />
-          </Button>
-        </div>
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroupLabel>Notes</SidebarGroupLabel>
         <SidebarGroupContent>
           <SidebarMenu></SidebarMenu>
-          {isLoading ? <SkeletonFileTree /> : <Tree data={tree} />}
           {isLoading ? <SkeletonFileTree /> : <Tree data={tree} />}
         </SidebarGroupContent>
         <SidebarGroup />
