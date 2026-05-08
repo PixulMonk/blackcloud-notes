@@ -29,20 +29,21 @@ import {
 // Encryption and decryption happens outside of this actions to avoid debug nightmare
 const useDataStore = create<DataState>((set) => ({
   tree: [], // Should be decrypted
+  isInitialLoading: false,
   isLoading: false,
   isFetchingContent: false,
   isSyncing: false,
   error: null,
   actions: {
     fetchTree: async (dataEncryptionKey) => {
-      set({ isLoading: true, error: null });
+      set({ isInitialLoading: true, error: null });
       try {
         const response = await axiosInstance.get<TreeResponse>(`tree/build`);
         const decryptedTree = await decryptTree(
           response.data.tree,
           dataEncryptionKey,
         );
-        set({ tree: decryptedTree, isLoading: false });
+        set({ tree: decryptedTree, isInitialLoading: false });
       } catch (err: any) {
         set({ error: err.message || 'Failed to fetch tree', isLoading: false });
       }
@@ -301,6 +302,7 @@ export const useData = (): DataStoreState =>
   useDataStore(
     useShallow((s) => ({
       tree: s.tree,
+      isInitialLoading: s.isInitialLoading,
       isLoading: s.isLoading,
       isFetchingContent: s.isFetchingContent,
       isSyncing: s.isSyncing,

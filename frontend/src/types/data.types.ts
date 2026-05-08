@@ -28,6 +28,7 @@ export interface DataActions {
 
 export interface DataState {
   tree: TreeNode[];
+  isInitialLoading: boolean;
   isLoading: boolean;
   isFetchingContent: boolean;
   isSyncing: boolean;

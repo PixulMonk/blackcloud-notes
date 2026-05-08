@@ -34,7 +34,7 @@ import SkeletonFileTree from './SkeletonFileTree';
 import useCreateNode from '@/hooks/useCreateNode';
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const { tree, isLoading } = useData();
+  const { tree, isInitialLoading } = useData();
   const { fetchTree } = useDataActions();
   const dataEncryptionKey = useDataEncryptionKey();
   const { clearKeys } = useVaultActions();
@@ -49,7 +49,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
   useEffect(() => {
     fetchTree(dataEncryptionKey!);
-  }, [fetchTree]);
+  }, []);
 
   return (
     <Sidebar {...props}>
@@ -96,7 +96,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <SidebarGroupLabel>Notes</SidebarGroupLabel>
         <SidebarGroupContent>
           <SidebarMenu></SidebarMenu>
-          {isLoading ? <SkeletonFileTree /> : <Tree data={tree} />}
+          {isInitialLoading ? <SkeletonFileTree /> : <Tree data={tree} />}
         </SidebarGroupContent>
         <SidebarGroup />
       </SidebarContent>
