@@ -50,7 +50,6 @@ const Editor = () => {
         <div className="flex-1 overflow-y-auto">
           <div className="max-w-3xl mx-auto px-8 py-10">
             {/* Metadata row */}
-
             {selectedNode?.createdAt && (
               <div className="flex items-center gap-4 mb-6 text-xs text-muted-foreground">
                 <span>
@@ -61,6 +60,7 @@ const Editor = () => {
                 </span>
               </div>
             )}
+
             {/* Content */}
             {showSkeleton ? (
               <SkeletonText />
