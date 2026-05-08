@@ -9,7 +9,6 @@ import { Ellipsis, Plus } from 'lucide-react';
 import { confirm } from '../../ConfirmDialogue';
 import { useTreeUIActions, useTreeUI } from '@/store/useTreeUIStore';
 import { useDataActions } from '@/store/useDataStore';
-import { useDataEncryptionKey } from '@/store/useVaultStore';
 import type { TreeNode } from '@/types/treeStore.types';
 
 function NodeActions({
