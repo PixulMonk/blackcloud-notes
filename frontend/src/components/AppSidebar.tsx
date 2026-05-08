@@ -27,6 +27,7 @@ import {
 } from '@/components/ui/sidebar';
 
 import { useData, useDataActions } from '@/store/useDataStore';
+import { useAppStoreActions } from '@/store/useAppStore';
 import { useTreeUIActions } from '@/store/useTreeUIStore';
 import { useDataEncryptionKey, useVaultActions } from '@/store/useVaultStore';
 import { useIsDark } from '@/store/useThemeStore';
@@ -40,6 +41,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const dataEncryptionKey = useDataEncryptionKey();
   const { clearKeys } = useVaultActions();
 
+  const { setActiveView } = useAppStoreActions();
   const { setRenamingNodeId } = useTreeUIActions();
 
   const isDark = useIsDark();
@@ -116,6 +118,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <Button
           variant="ghost"
           className="w-full justify-start gap-2 h-9 px-2 text-sm font-normal"
+          onClick={() => setActiveView({ type: 'archived' })}
         >
           <Archive className="size-4 opacity-70" />
           <span>Archived</span>
@@ -124,6 +127,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <Button
           variant="ghost"
           className="w-full justify-start gap-2 h-9 px-2 text-sm font-normal"
+          onClick={() => setActiveView({ type: 'trash' })}
         >
           <Trash2 className="size-4 opacity-70" />
           <span>Trash</span>

@@ -15,6 +15,7 @@ import { confirm } from '../ConfirmDialogue';
 
 import { useTreeUI, useTreeUIActions } from '@/store/useTreeUIStore';
 import { useDataEncryptionKey } from '@/store/useVaultStore';
+import { useAppStoreActions } from '@/store/useAppStore';
 
 // Renders individual node components
 const TreeNodeComponent = ({ node }: TreeNodeComponentProps) => {
@@ -23,6 +24,7 @@ const TreeNodeComponent = ({ node }: TreeNodeComponentProps) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [treeData, setTreeData] = useState(node);
 
+  const { setActiveView } = useAppStoreActions();
   const { renamingNodeId, selectedNodeId, selectedNode } = useTreeUI();
   const { setRenamingNodeId, setFileTitle, selectNode, clearSelection } =
     useTreeUIActions();
@@ -123,7 +125,10 @@ const TreeNodeComponent = ({ node }: TreeNodeComponentProps) => {
               `}
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
-            onClick={() => selectNode(node)}
+            onClick={() => {
+              selectNode(node);
+              setActiveView({ type: 'editor' });
+            }}
           >
             <CollapsibleTrigger asChild>
               <div className="flex items-center">
@@ -157,7 +162,10 @@ const TreeNodeComponent = ({ node }: TreeNodeComponentProps) => {
               ${!isSelected && isHovered ? 'bg-accent/30' : ''}`}
           onMouseEnter={() => setIsHovered(true)}
           onMouseLeave={() => setIsHovered(false)}
-          onClick={() => selectNode(node)}
+          onClick={() => {
+            selectNode(node);
+            setActiveView({ type: 'editor' });
+          }}
         >
           {Label}
           <div
