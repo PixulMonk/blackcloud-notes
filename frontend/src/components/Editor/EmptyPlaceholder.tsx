@@ -1,25 +1,9 @@
-import { useNavigate } from 'react-router-dom';
-import { useDataActions } from '@/store/useDataStore';
-import { useTreeUIActions } from '@/store/useTreeUIStore';
-import { useDataEncryptionKey } from '@/store/useVaultStore';
 import { getGreeting } from '@/lib/utils';
+import useCreateNode from '@/hooks/useCreateNode';
 
 export default function EmptyPlaceholder() {
-  const navigate = useNavigate();
-  const { addNode } = useDataActions();
-  const { setRenamingNodeId } = useTreeUIActions();
-  const dataEncryptionKey = useDataEncryptionKey();
+  const { createNode } = useCreateNode();
 
-  const handleCreateNote = async () => {
-    if (!dataEncryptionKey) {
-      navigate('/unlock-vault', { state: { from: location.pathname } });
-      return;
-    }
-    const newNode = await addNode('file', dataEncryptionKey);
-    if (newNode?._id) {
-      setRenamingNodeId(newNode._id);
-    }
-  };
   return (
     <div className="flex flex-col items-center justify-center h-full gap-0 py-20 px-4 select-none">
       {/* Logo mark */}
@@ -70,7 +54,7 @@ export default function EmptyPlaceholder() {
       </p>
 
       <button
-        onClick={handleCreateNote}
+        onClick={() => createNode('file')}
         className="inline-flex items-center gap-2 bg-foreground text-background rounded-lg px-5 py-2.5 text-sm font-medium hover:opacity-85 active:scale-95 transition-all"
       >
         <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
