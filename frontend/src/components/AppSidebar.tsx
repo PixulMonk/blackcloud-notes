@@ -71,7 +71,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             className="size-8"
             onClick={(e) => {
               e.stopPropagation();
-              createNode('folder');
+              createNode('folder', undefined);
             }}
           >
             <FolderPlus className="size-4" />
@@ -82,7 +82,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             className="size-8"
             onClick={(e) => {
               e.stopPropagation();
-              createNode('file');
+              createNode('file', undefined);
             }}
           >
             <FilePlus2 className="size-4" />

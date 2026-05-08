@@ -54,7 +54,7 @@ export default function EmptyPlaceholder() {
       </p>
 
       <button
-        onClick={() => createNode('file')}
+        onClick={() => createNode('file', undefined)}
         className="inline-flex items-center gap-2 bg-foreground text-background rounded-lg px-5 py-2.5 text-sm font-medium hover:opacity-85 active:scale-95 transition-all"
       >
         <svg width="13" height="13" viewBox="0 0 13 13" fill="none">

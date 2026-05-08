@@ -9,12 +9,16 @@ const useCreateNode = () => {
   const { setRenamingNodeId } = useTreeUIActions();
   const dataEncryptionKey = useDataEncryptionKey();
 
-  const createNode = async (type: 'folder' | 'file') => {
+  const createNode = async (
+    type: 'folder' | 'file',
+    parentId: string | undefined,
+  ) => {
     if (!dataEncryptionKey) {
       navigate('/unlock-vault', { state: { from: location.pathname } });
       return;
     }
-    const newNode = await addNode(type, dataEncryptionKey);
+    console.log('createNode called with parentId:', parentId);
+    const newNode = await addNode({ type, dataEncryptionKey, parentId });
     if (newNode?._id) {
       setRenamingNodeId(newNode._id);
     }

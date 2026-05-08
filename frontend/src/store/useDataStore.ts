@@ -6,6 +6,7 @@ import type {
   DataStoreState,
   TreeNodeResponse,
   TreeResponse,
+  AddNodeOptions,
 } from '@/types/data.types';
 import { axiosInstance } from '@/lib/axios';
 
@@ -15,7 +16,11 @@ import type { NoteResponse } from '@/types/note.types';
 import type { TreeNode } from '@/types/treeStore.types';
 import { encryptAESGCM } from '@/lib/crypto/aes';
 import { decryptTree } from '@/lib/tree/treeEncryption';
-import { removeRecursive, updateRecursive } from '@/lib/tree/treeHelpers';
+import {
+  removeRecursive,
+  updateRecursive,
+  insertNode,
+} from '@/lib/tree/treeHelpers';
 
 // TODO: error toast?
 
@@ -45,7 +50,7 @@ const useDataStore = create<DataState>((set) => ({
 
     setSyncing: (value) => set({ isSyncing: value }),
 
-    addNode: async (
+    addNode: async ({
       type,
       dataEncryptionKey,
       title = undefined,
@@ -53,8 +58,9 @@ const useDataStore = create<DataState>((set) => ({
       isDeleted = false,
       icon = undefined,
       parentId = null,
-    ) => {
+    }: AddNodeOptions) => {
       set({ isLoading: true, error: null });
+      console.log('addNode called with parentId:', parentId);
       if (!title) {
         title = 'Untitled document';
       }
@@ -83,7 +89,9 @@ const useDataStore = create<DataState>((set) => ({
         };
 
         set((state) => ({
-          tree: [...state.tree, newNode],
+          tree: parentId
+            ? insertNode(state.tree, parentId, newNode)
+            : [...state.tree, newNode],
           isLoading: false,
         }));
 

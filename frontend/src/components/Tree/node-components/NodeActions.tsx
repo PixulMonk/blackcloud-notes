@@ -10,6 +10,7 @@ import { confirm } from '../../ConfirmDialogue';
 import { useTreeUIActions, useTreeUI } from '@/store/useTreeUIStore';
 import { useDataActions } from '@/store/useDataStore';
 import type { TreeNode } from '@/types/treeStore.types';
+import useCreateNode from '@/hooks/useCreateNode';
 
 function NodeActions({
   node,
@@ -23,6 +24,7 @@ function NodeActions({
   const { setRenamingNodeId, clearSelection } = useTreeUIActions();
   const { selectedNode } = useTreeUI();
   const { softDeleteNode, archiveNode } = useDataActions();
+  const { createNode } = useCreateNode();
 
   const handleSoftDelete = async (id: string) => {
     const ok = await confirm({
@@ -56,7 +58,7 @@ function NodeActions({
           aria-label="Add"
           onClick={(e) => {
             e.stopPropagation();
-            // TODO: dropdown add button handler
+            createNode('file', node._id);
           }}
         >
           <Plus className="h-4 w-4" />
