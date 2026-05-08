@@ -6,21 +6,48 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Ellipsis, Plus } from 'lucide-react';
+import { confirm } from '../../ConfirmDialogue';
+import { useTreeUIActions, useTreeUI } from '@/store/useTreeUIStore';
+import { useDataActions } from '@/store/useDataStore';
+import { useDataEncryptionKey } from '@/store/useVaultStore';
+import type { TreeNode } from '@/types/treeStore.types';
 
 function NodeActions({
   node,
   hasChildren,
   setIsMenuOpen,
-  setRenamingNodeId,
-  handleSoftDelete,
 }: {
-  node: any;
+  node: TreeNode;
   hasChildren: boolean;
-  isMenuOpen: boolean;
   setIsMenuOpen: (open: boolean) => void;
-  setRenamingNodeId: (id: string) => void;
-  handleSoftDelete: (id: string) => void;
 }) {
+  const { setRenamingNodeId, clearSelection } = useTreeUIActions();
+  const { selectedNode } = useTreeUI();
+  const { softDeleteNode, archiveNode } = useDataActions();
+
+  const handleSoftDelete = async (id: string) => {
+    const ok = await confirm({
+      title: 'Delete',
+      message: 'Are you sure you want to delete this item?',
+      yesText: 'Delete',
+      noText: 'Cancel',
+    });
+    if (ok) {
+      softDeleteNode(id);
+      if (selectedNode?._id === id) clearSelection();
+    }
+  };
+
+  const handleArchive = async (id: string) => {
+    const ok = await confirm({
+      title: 'Archive',
+      message: 'Are you sure you want to archive this item?',
+      yesText: 'Archive',
+      noText: 'Cancel',
+    });
+    if (ok) archiveNode(id);
+  };
+
   return (
     <div className="flex items-center ">
       {hasChildren && (

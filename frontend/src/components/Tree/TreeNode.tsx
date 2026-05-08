@@ -6,13 +6,10 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from '@/components/ui/collapsible';
-
 import NodeActions from './node-components/NodeActions';
 import NodeLabel from './node-components/NodeLabel';
 import { type TreeNodeComponentProps } from '../../types/treeStore.types';
 import { useDataActions } from '@/store/useDataStore';
-import { confirm } from '../ConfirmDialogue';
-
 import { useTreeUI, useTreeUIActions } from '@/store/useTreeUIStore';
 import { useDataEncryptionKey } from '@/store/useVaultStore';
 import { useAppStoreActions } from '@/store/useAppStore';
@@ -25,15 +22,14 @@ const TreeNodeComponent = ({ node }: TreeNodeComponentProps) => {
   const [treeData, setTreeData] = useState(node);
 
   const { setActiveView } = useAppStoreActions();
-  const { renamingNodeId, selectedNodeId, selectedNode } = useTreeUI();
-  const { setRenamingNodeId, setFileTitle, selectNode, clearSelection } =
-    useTreeUIActions();
+  const { renamingNodeId, selectedNodeId } = useTreeUI();
+  const { setRenamingNodeId, setFileTitle, selectNode } = useTreeUIActions();
 
   const isRenaming = node._id === renamingNodeId;
   const isSelected = node._id === selectedNodeId;
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const { updateNode, softDeleteNode, archiveNode } = useDataActions();
+  const { updateNode } = useDataActions();
 
   const dataEncryptionKey = useDataEncryptionKey();
 
@@ -65,31 +61,6 @@ const TreeNodeComponent = ({ node }: TreeNodeComponentProps) => {
     }
   }, [isRenaming]);
 
-  const handleSoftDelete = async (id: string) => {
-    const ok = await confirm({
-      title: 'Delete',
-      message: 'Are you sure you want to delete this item?',
-      yesText: 'Delete',
-      noText: 'Cancel',
-    });
-    if (ok) {
-      softDeleteNode(id);
-      if (selectedNode?._id === id) {
-        clearSelection();
-      }
-    }
-  };
-
-  const handleArchive = async (id: string) => {
-    const ok = await confirm({
-      title: 'Archive',
-      message: 'Are you sure you want to archive this item?',
-      yesText: 'Archive',
-      noText: 'Cancel',
-    });
-    if (ok) archiveNode(id);
-  };
-
   const Label = (
     <NodeLabel
       className="group"
@@ -106,10 +77,7 @@ const TreeNodeComponent = ({ node }: TreeNodeComponentProps) => {
     <NodeActions
       node={node}
       hasChildren={hasChildren}
-      isMenuOpen={isMenuOpen}
       setIsMenuOpen={setIsMenuOpen}
-      setRenamingNodeId={setRenamingNodeId}
-      handleSoftDelete={handleSoftDelete}
     />
   );
 
