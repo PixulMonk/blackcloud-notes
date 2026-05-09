@@ -25,24 +25,22 @@ import {
   SidebarMenu,
   SidebarFooter,
 } from '@/components/ui/sidebar';
-
 import { useData, useDataActions } from '@/store/useDataStore';
 import { useAppStoreActions } from '@/store/useAppStore';
-import { useTreeUIActions } from '@/store/useTreeUIStore';
 import { useDataEncryptionKey, useVaultActions } from '@/store/useVaultStore';
 import { useIsDark } from '@/store/useThemeStore';
 import { Separator } from '@/components/ui/separator';
 import SkeletonFileTree from './SkeletonFileTree';
+import useCreateNode from '@/hooks/useCreateNode';
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const navigate = useNavigate();
-  const { tree, isLoading } = useData();
-  const { fetchTree, addNode } = useDataActions();
+  const { tree, isInitialLoading } = useData();
+  const { fetchTree } = useDataActions();
   const dataEncryptionKey = useDataEncryptionKey();
   const { clearKeys } = useVaultActions();
 
   const { setActiveView } = useAppStoreActions();
-  const { setRenamingNodeId } = useTreeUIActions();
+  const { createNode } = useCreateNode();
 
   const isDark = useIsDark();
   const logoUrl = isDark
@@ -51,18 +49,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
   useEffect(() => {
     fetchTree(dataEncryptionKey!);
-  }, [fetchTree]);
-
-  const handleCreate = async (type: 'folder' | 'file') => {
-    if (!dataEncryptionKey) {
-      navigate('/unlock-vault', { state: { from: location.pathname } });
-      return;
-    }
-    const newNode = await addNode(type, dataEncryptionKey);
-    if (newNode?._id) {
-      setRenamingNodeId(newNode._id);
-    }
-  };
+  }, []);
 
   return (
     <Sidebar {...props}>
@@ -84,7 +71,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             className="size-8"
             onClick={(e) => {
               e.stopPropagation();
-              handleCreate('folder');
+              createNode('folder', undefined);
             }}
           >
             <FolderPlus className="size-4" />
@@ -95,7 +82,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             className="size-8"
             onClick={(e) => {
               e.stopPropagation();
-              handleCreate('file');
+              createNode('file', undefined);
             }}
           >
             <FilePlus2 className="size-4" />
@@ -109,7 +96,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <SidebarGroupLabel>Notes</SidebarGroupLabel>
         <SidebarGroupContent>
           <SidebarMenu></SidebarMenu>
-          {isLoading ? <SkeletonFileTree /> : <Tree data={tree} />}
+          {isInitialLoading ? <SkeletonFileTree /> : <Tree data={tree} />}
         </SidebarGroupContent>
         <SidebarGroup />
       </SidebarContent>

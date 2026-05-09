@@ -6,6 +6,7 @@ import type {
   DataStoreState,
   TreeNodeResponse,
   TreeResponse,
+  AddNodeOptions,
 } from '@/types/data.types';
 import { axiosInstance } from '@/lib/axios';
 
@@ -15,7 +16,11 @@ import type { NoteResponse } from '@/types/note.types';
 import type { TreeNode } from '@/types/treeStore.types';
 import { encryptAESGCM } from '@/lib/crypto/aes';
 import { decryptTree } from '@/lib/tree/treeEncryption';
-import { removeRecursive, updateRecursive } from '@/lib/tree/treeHelpers';
+import {
+  removeRecursive,
+  updateRecursive,
+  insertNode,
+} from '@/lib/tree/treeHelpers';
 
 // TODO: error toast?
 
@@ -24,20 +29,21 @@ import { removeRecursive, updateRecursive } from '@/lib/tree/treeHelpers';
 // Encryption and decryption happens outside of this actions to avoid debug nightmare
 const useDataStore = create<DataState>((set) => ({
   tree: [], // Should be decrypted
+  isInitialLoading: false,
   isLoading: false,
   isFetchingContent: false,
   isSyncing: false,
   error: null,
   actions: {
     fetchTree: async (dataEncryptionKey) => {
-      set({ isLoading: true, error: null });
+      set({ isInitialLoading: true, error: null });
       try {
         const response = await axiosInstance.get<TreeResponse>(`tree/build`);
         const decryptedTree = await decryptTree(
           response.data.tree,
           dataEncryptionKey,
         );
-        set({ tree: decryptedTree, isLoading: false });
+        set({ tree: decryptedTree, isInitialLoading: false });
       } catch (err: any) {
         set({ error: err.message || 'Failed to fetch tree', isLoading: false });
       }
@@ -45,7 +51,7 @@ const useDataStore = create<DataState>((set) => ({
 
     setSyncing: (value) => set({ isSyncing: value }),
 
-    addNode: async (
+    addNode: async ({
       type,
       dataEncryptionKey,
       title = undefined,
@@ -53,8 +59,9 @@ const useDataStore = create<DataState>((set) => ({
       isDeleted = false,
       icon = undefined,
       parentId = null,
-    ) => {
+    }: AddNodeOptions) => {
       set({ isLoading: true, error: null });
+      console.log('addNode called with parentId:', parentId);
       if (!title) {
         title = 'Untitled document';
       }
@@ -83,7 +90,9 @@ const useDataStore = create<DataState>((set) => ({
         };
 
         set((state) => ({
-          tree: [...state.tree, newNode],
+          tree: parentId
+            ? insertNode(state.tree, parentId, newNode)
+            : [...state.tree, newNode],
           isLoading: false,
         }));
 
@@ -293,6 +302,7 @@ export const useData = (): DataStoreState =>
   useDataStore(
     useShallow((s) => ({
       tree: s.tree,
+      isInitialLoading: s.isInitialLoading,
       isLoading: s.isLoading,
       isFetchingContent: s.isFetchingContent,
       isSyncing: s.isSyncing,

@@ -4,15 +4,7 @@ import type { NoteDTO, NoteResponse } from '@/types/note.types';
 export interface DataActions {
   fetchTree: (dataEncryptionKey: Uint8Array) => Promise<void>;
   setSyncing: (value: boolean) => void;
-  addNode: (
-    type: 'folder' | 'file',
-    dataEncryptionKey: Uint8Array,
-    title?: string, // Unencrypted title is passed and comes out as encrypted
-    isArchived?: boolean,
-    isDeleted?: boolean,
-    icon?: string | undefined,
-    parentId?: string | null,
-  ) => Promise<TreeNodeDTO | null>;
+  addNode: (options: AddNodeOptions) => Promise<TreeNodeDTO | null>;
   updateNode: (
     id: string,
     dataEncryptionKey: Uint8Array,
@@ -36,6 +28,7 @@ export interface DataActions {
 
 export interface DataState {
   tree: TreeNode[];
+  isInitialLoading: boolean;
   isLoading: boolean;
   isFetchingContent: boolean;
   isSyncing: boolean;
@@ -53,4 +46,14 @@ export interface TreeNodeResponse {
 export interface TreeResponse {
   success: boolean;
   tree: TreeNodeDTO[];
+}
+
+export interface AddNodeOptions {
+  type: 'folder' | 'file';
+  dataEncryptionKey: Uint8Array;
+  title?: string;
+  isArchived?: boolean;
+  isDeleted?: boolean;
+  icon?: string;
+  parentId?: string | null;
 }

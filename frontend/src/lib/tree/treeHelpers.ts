@@ -32,3 +32,19 @@ export const removeRecursive = (
         : undefined,
     }));
 };
+
+export const insertNode = (
+  nodes: TreeNode[],
+  parentId: string,
+  newNode: TreeNode,
+): TreeNode[] => {
+  return nodes.map((n) => {
+    if (n._id === parentId) {
+      return { ...n, children: [...(n.children ?? []), newNode] };
+    }
+    if (n.children?.length) {
+      return { ...n, children: insertNode(n.children, parentId, newNode) };
+    }
+    return n;
+  });
+};
