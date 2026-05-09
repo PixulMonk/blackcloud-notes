@@ -5,18 +5,7 @@ export interface DataActions {
   fetchTree: (dataEncryptionKey: Uint8Array) => Promise<void>;
   setSyncing: (value: boolean) => void;
   addNode: (options: AddNodeOptions) => Promise<TreeNodeDTO | null>;
-  updateNode: (
-    id: string,
-    dataEncryptionKey: Uint8Array,
-    title?: string | undefined,
-    type?: 'folder' | 'file',
-    position?: number,
-    isArchived?: boolean,
-    isDeleted?: boolean,
-    icon?: string | undefined,
-    parentId?: string | null,
-    fileId?: string,
-  ) => Promise<TreeNodeDTO | null>;
+  updateNode: (options: UpdateNodeOptions) => Promise<TreeNodeDTO | null>;
   softDeleteNode: (nodeId: string) => Promise<TreeNodeDTO | null>;
   archiveNode: (nodeId: string) => Promise<TreeNodeDTO | null>;
   fetchNodeContent: (fileId: string) => Promise<NoteDTO | null>;
@@ -56,4 +45,17 @@ export interface AddNodeOptions {
   isDeleted?: boolean;
   icon?: string;
   parentId?: string | null;
+}
+
+export interface UpdateNodeOptions {
+  nodeId: string;
+  dataEncryptionKey: Uint8Array;
+  title?: string;
+  type?: 'folder' | 'file';
+  position?: number;
+  isArchived?: boolean;
+  isDeleted?: boolean;
+  icon?: string;
+  parentId?: string | null;
+  fileId?: string;
 }
