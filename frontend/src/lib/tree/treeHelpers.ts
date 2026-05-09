@@ -1,7 +1,4 @@
-import type { TreeNode } from '@/types/treeStore.types';
-
-export type SortBy = 'alphabetical' | 'dateModified';
-export type SortOrder = 'asc' | 'desc';
+import type { TreeNode, SortPreference } from '@/types/treeStore.types';
 
 export const updateRecursive = (
   nodes: TreeNode[],
@@ -55,8 +52,8 @@ export const insertNode = (
 // TODO: add manual sort later for drag and drop
 export const sortTree = (
   nodes: TreeNode[],
-  sortBy: SortBy = 'alphabetical',
-  sortOrder: SortOrder = 'asc',
+  sortBy: SortPreference['sortBy'] = 'alphabetical',
+  sortOrder: SortPreference['order'] = 'asc',
 ): TreeNode[] => {
   const direction = sortOrder === 'asc' ? 1 : -1;
 

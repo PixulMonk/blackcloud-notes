@@ -3,8 +3,11 @@ import type {
   TreeUIActions,
   TreeUIState,
   TreeUIStoreState,
+  SortPreference,
 } from '@/types/treeStore.types';
 import { useShallow } from 'zustand/react/shallow';
+
+// TODO: selectedFileId and selectedNodeId is redundant
 
 const useTreeUIStore = create<TreeUIState>((set) => ({
   renamingNodeId: null,
@@ -12,21 +15,24 @@ const useTreeUIStore = create<TreeUIState>((set) => ({
   selectedFileId: null,
   selectedFileTitle: null,
   selectedNode: null,
-  sortPreference: null,
+  sortPreference: { sortBy: 'alphabetical', order: 'asc' },
   actions: {
     setRenamingNodeId: (id) => {
       set({ renamingNodeId: id });
     },
 
     selectNode: (node) => {
-      if (node.type === 'folder') return;
-
       set({
         selectedNodeId: node._id,
-        selectedFileId: node.type === 'file' ? (node.fileId ?? null) : null,
-        selectedFileTitle: node.type === 'file' ? (node.title ?? null) : null,
         selectedNode: node,
       });
+
+      if (node.type === 'file') {
+        set({
+          selectedFileId: node.fileId ?? null,
+          selectedFileTitle: node.title ?? null,
+        });
+      }
     },
 
     clearSelection: () =>
@@ -39,7 +45,13 @@ const useTreeUIStore = create<TreeUIState>((set) => ({
 
     setFileTitle: (newTitle) => set({ selectedFileTitle: newTitle }),
 
-    setSortPreference: (preference) => set({ selectedFileTitle: preference }),
+    setSortPreference: (preference: Partial<SortPreference>) =>
+      set((state) => ({
+        sortPreference: {
+          ...state.sortPreference,
+          ...preference,
+        },
+      })),
   },
 }));
 
@@ -47,7 +59,7 @@ export const useTreeUI = (): TreeUIStoreState =>
   useTreeUIStore(
     useShallow((s) => ({
       renamingNodeId: s.renamingNodeId,
-      selectedNodeId: s.selectedFileId,
+      selectedNodeId: s.selectedNodeId,
       selectedFileId: s.selectedFileId,
       selectedFileTitle: s.selectedFileTitle,
       selectedNode: s.selectedNode,

@@ -33,10 +33,17 @@ import { Separator } from '@/components/ui/separator';
 import SkeletonFileTree from './SkeletonFileTree';
 import useCreateNode from '@/hooks/useCreateNode';
 import { sortTree } from '@/lib/tree/treeHelpers';
+import SidebarNotesDropdown from './SidebarNotesDropdown';
+import { useTreeUI } from '@/store/useTreeUIStore';
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { tree, isInitialLoading } = useData();
-  const sortedTree = sortTree(tree, 'alphabetical', 'desc');
+  const { sortPreference } = useTreeUI();
+  const sortedTree = sortTree(
+    tree,
+    sortPreference.sortBy,
+    sortPreference.order,
+  );
   const { fetchTree } = useDataActions();
   const dataEncryptionKey = useDataEncryptionKey();
   const { clearKeys } = useVaultActions();
@@ -95,7 +102,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </div>
       </SidebarHeader>
       <SidebarContent>
-        <SidebarGroupLabel>Notes</SidebarGroupLabel>
+        <SidebarGroup>
+          <div className="flex items-center justify-between">
+            <SidebarGroupLabel>Notes</SidebarGroupLabel>
+            <SidebarNotesDropdown />
+          </div>
+        </SidebarGroup>
+
         <SidebarGroupContent>
           <SidebarMenu></SidebarMenu>
           {isInitialLoading ? <SkeletonFileTree /> : <Tree data={sortedTree} />}
