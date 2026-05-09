@@ -20,7 +20,7 @@ const formatDate = (iso?: string) => {
 };
 
 const Editor = () => {
-  const { selectedFileId, selectedNode } = useTreeUI(); // grab full node
+  const { selectedFileId, selectedNode } = useTreeUI();
   const editor = useEditorSetup();
   const [isFocused, setIsFocused] = useState(false);
   const { showSkeleton, isFetchingContent, isContentReady } = useEditorContent(
