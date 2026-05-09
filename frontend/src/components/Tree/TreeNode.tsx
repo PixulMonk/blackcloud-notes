@@ -77,6 +77,7 @@ const TreeNodeComponent = ({ node }: TreeNodeComponentProps) => {
     <NodeActions
       node={node}
       hasChildren={hasChildren}
+      isMenuOpen={isMenuOpen}
       setIsMenuOpen={setIsMenuOpen}
     />
   );
@@ -99,14 +100,13 @@ const TreeNodeComponent = ({ node }: TreeNodeComponentProps) => {
             }}
           >
             <CollapsibleTrigger asChild>
-              <div className="flex items-center">
+              <div className="group flex items-center">
                 {hasChildren && (
                   <ChevronRight className="h-4 w-4 mr-2 shrink-0 transition-transform duration-200 group-data-[state=open]:rotate-90" />
                 )}
-                {!isRenaming && <span>{treeData.title}</span>}
+                {Label}
               </div>
             </CollapsibleTrigger>
-            {isRenaming && Label}
             <div
               className={isHovered || isRenaming ? 'opacity-100' : 'opacity-0'}
             >
