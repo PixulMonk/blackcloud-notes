@@ -1,4 +1,4 @@
-import type { TreeNode } from '@/types/treeStore.types';
+import type { TreeNode, SortPreference } from '@/types/treeStore.types';
 
 export const updateRecursive = (
   nodes: TreeNode[],
@@ -7,7 +7,8 @@ export const updateRecursive = (
 ): TreeNode[] => {
   return nodes.map((node) => {
     if (node._id === nodeIdToUpdate) {
-      return { ...node, ...updatedFields };
+      const { children, ...fields } = updatedFields;
+      return { ...node, ...fields };
     }
     if (node.children) {
       return {
@@ -47,4 +48,37 @@ export const insertNode = (
     }
     return n;
   });
+};
+
+// TODO: add manual sort later for drag and drop
+export const sortTree = (
+  nodes: TreeNode[],
+  sortBy: SortPreference['sortBy'] = 'alphabetical',
+  sortOrder: SortPreference['order'] = 'asc',
+): TreeNode[] => {
+  const direction = sortOrder === 'asc' ? 1 : -1;
+
+  return [...nodes]
+    .sort((a, b) => {
+      // folders always first regardless of sort
+      if (a.type !== b.type) return a.type === 'folder' ? -1 : 1;
+
+      if (sortBy === 'alphabetical') {
+        return a.title.localeCompare(b.title) * direction;
+      }
+
+      if (sortBy === 'dateModified') {
+        const aDate = new Date(a.updatedAt ?? 0).getTime();
+        const bDate = new Date(b.updatedAt ?? 0).getTime();
+        return (aDate - bDate) * direction;
+      }
+
+      return 0;
+    })
+    .map((node) => ({
+      ...node,
+      children: node.children
+        ? sortTree(node.children, sortBy, sortOrder)
+        : undefined,
+    }));
 };

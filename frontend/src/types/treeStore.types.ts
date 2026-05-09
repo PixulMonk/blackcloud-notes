@@ -6,6 +6,7 @@ interface BaseTreeNode {
   type: 'folder' | 'file';
   position: number;
   createdAt?: string;
+  updatedAt?: string;
   isArchived?: boolean;
   isDeleted?: boolean;
   icon?: string;
@@ -46,6 +47,12 @@ export interface TreeUIActions {
   selectNode: (node: TreeNode) => void;
   clearSelection: () => void;
   setFileTitle: (newTitle: string) => void;
+  setSortPreference: (preference: Partial<SortPreference>) => void;
+}
+
+export interface SortPreference {
+  sortBy: 'alphabetical' | 'dateModified';
+  order: 'asc' | 'desc';
 }
 
 export interface TreeUIState {
@@ -54,6 +61,7 @@ export interface TreeUIState {
   selectedFileId: string | null;
   selectedFileTitle: string | null;
   selectedNode: TreeNode | null;
+  sortPreference: SortPreference;
   actions: TreeUIActions;
 }
 

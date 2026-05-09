@@ -15,10 +15,12 @@ import useCreateNode from '@/hooks/useCreateNode';
 function NodeActions({
   node,
   hasChildren,
+  isMenuOpen,
   setIsMenuOpen,
 }: {
   node: TreeNode;
   hasChildren: boolean;
+  isMenuOpen: boolean;
   setIsMenuOpen: (open: boolean) => void;
 }) {
   const { setRenamingNodeId, clearSelection } = useTreeUIActions();
@@ -51,13 +53,14 @@ function NodeActions({
 
   return (
     <div className="flex items-center ">
-      {hasChildren && (
+      {node.type == 'folder' && (
         <Button
           variant="ghost"
           size="icon"
           aria-label="Add"
           onClick={(e) => {
             e.stopPropagation();
+            setIsMenuOpen(true);
             createNode('file', node._id);
           }}
         >
@@ -65,7 +68,7 @@ function NodeActions({
         </Button>
       )}
 
-      <DropdownMenu onOpenChange={setIsMenuOpen}>
+      <DropdownMenu open={isMenuOpen} onOpenChange={setIsMenuOpen}>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" size="icon" className="h-6 w-6">
             <Ellipsis className="h-4 w-4" />

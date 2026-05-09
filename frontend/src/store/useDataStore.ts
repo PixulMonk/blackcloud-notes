@@ -37,6 +37,7 @@ const useDataStore = create<DataState>((set) => ({
   actions: {
     fetchTree: async (dataEncryptionKey) => {
       set({ isInitialLoading: true, error: null });
+
       try {
         const response = await axiosInstance.get<TreeResponse>(`tree/build`);
         const decryptedTree = await decryptTree(
