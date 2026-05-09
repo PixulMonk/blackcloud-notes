@@ -12,9 +12,13 @@ import {
   DropdownMenuCheckboxItem,
 } from '@/components/ui/dropdown-menu';
 import { Button } from './ui/button';
+
+import useCreateNode from '@/hooks/useCreateNode';
 import { useTreeUI, useTreeUIActions } from '@/store/useTreeUIStore';
 
 function SidebarNotesDropdown() {
+  const { createNode } = useCreateNode();
+
   const { sortPreference } = useTreeUI();
   const { setSortPreference } = useTreeUIActions();
 
@@ -27,8 +31,22 @@ function SidebarNotesDropdown() {
       </DropdownMenuTrigger>
 
       <DropdownMenuContent>
-        <DropdownMenuItem>New Note</DropdownMenuItem>
-        <DropdownMenuItem>New Folder</DropdownMenuItem>
+        <DropdownMenuItem
+          onClick={(e) => {
+            e.stopPropagation();
+            createNode('file', undefined);
+          }}
+        >
+          New Note
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          onClick={(e) => {
+            e.stopPropagation();
+            createNode('folder', undefined);
+          }}
+        >
+          New Folder
+        </DropdownMenuItem>
 
         <DropdownMenuSeparator />
 
