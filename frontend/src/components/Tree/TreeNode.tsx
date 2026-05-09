@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { ChevronRight } from 'lucide-react';
+import { useDraggable, useDroppable } from '@dnd-kit/react';
 
 import {
   Collapsible,
@@ -16,6 +17,17 @@ import { useAppStoreActions } from '@/store/useAppStore';
 
 // Renders individual node components
 const TreeNodeComponent = ({ node }: TreeNodeComponentProps) => {
+  const { ref: draggableRef } = useDraggable({ id: node._id });
+  const { ref: droppableRef } = useDroppable({
+    id: node._id,
+    disabled: node.type !== 'folder',
+  });
+  const setRef = (el: HTMLElement | null) => {
+    console.log('setRef called with:', el);
+    draggableRef(el);
+    droppableRef(el);
+  };
+
   const hasChildren = !!node.children?.length;
   const [isHovered, setIsHovered] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -84,7 +96,7 @@ const TreeNodeComponent = ({ node }: TreeNodeComponentProps) => {
   );
 
   return (
-    <div className="w-full px-1.5">
+    <div ref={setRef} className="w-full px-1.5">
       {hasChildren ? (
         <Collapsible open={isOpen} onOpenChange={setIsOpen}>
           <div

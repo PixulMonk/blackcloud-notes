@@ -20,6 +20,7 @@ import {
   removeRecursive,
   updateRecursive,
   insertNode,
+  moveNode,
 } from '@/lib/tree/treeHelpers';
 
 // TODO: error toast?
@@ -156,13 +157,15 @@ const useDataStore = create<DataState>((set) => ({
         }
 
         set((state) => ({
-          tree: updateRecursive(state.tree, nodeId, {
-            ...updatedNodeDTO,
-            title: title !== undefined ? title : undefined,
-            children: undefined,
-          }).map((n) => {
-            return n;
-          }),
+          tree:
+            parentId !== undefined
+              ? moveNode(state.tree, nodeId, parentId)
+              : updateRecursive(state.tree, nodeId, {
+                  ...(title !== undefined && { title }),
+                  ...(isArchived !== undefined && { isArchived }),
+                  ...(isDeleted !== undefined && { isDeleted }),
+                  ...(icon !== undefined && { icon }),
+                }),
           isLoading: false,
         }));
 
