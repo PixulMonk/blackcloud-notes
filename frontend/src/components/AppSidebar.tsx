@@ -32,9 +32,11 @@ import { useIsDark } from '@/store/useThemeStore';
 import { Separator } from '@/components/ui/separator';
 import SkeletonFileTree from './SkeletonFileTree';
 import useCreateNode from '@/hooks/useCreateNode';
+import { sortTree } from '@/lib/tree/treeHelpers';
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { tree, isInitialLoading } = useData();
+  const sortedTree = sortTree(tree, 'alphabetical', 'desc');
   const { fetchTree } = useDataActions();
   const dataEncryptionKey = useDataEncryptionKey();
   const { clearKeys } = useVaultActions();
@@ -96,7 +98,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <SidebarGroupLabel>Notes</SidebarGroupLabel>
         <SidebarGroupContent>
           <SidebarMenu></SidebarMenu>
-          {isInitialLoading ? <SkeletonFileTree /> : <Tree data={tree} />}
+          {isInitialLoading ? <SkeletonFileTree /> : <Tree data={sortedTree} />}
         </SidebarGroupContent>
         <SidebarGroup />
       </SidebarContent>

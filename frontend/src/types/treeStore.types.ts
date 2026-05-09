@@ -6,6 +6,7 @@ interface BaseTreeNode {
   type: 'folder' | 'file';
   position: number;
   createdAt?: string;
+  updatedAt?: string;
   isArchived?: boolean;
   isDeleted?: boolean;
   icon?: string;

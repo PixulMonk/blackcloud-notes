@@ -51,7 +51,7 @@ function NodeActions({
 
   return (
     <div className="flex items-center ">
-      {hasChildren && (
+      {node.type == 'folder' && (
         <Button
           variant="ghost"
           size="icon"

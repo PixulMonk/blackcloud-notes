@@ -1,5 +1,8 @@
 import type { TreeNode } from '@/types/treeStore.types';
 
+export type SortBy = 'alphabetical' | 'dateModified';
+export type SortOrder = 'asc' | 'desc';
+
 export const updateRecursive = (
   nodes: TreeNode[],
   nodeIdToUpdate: string,
@@ -47,4 +50,37 @@ export const insertNode = (
     }
     return n;
   });
+};
+
+// TODO: add manual sort later for drag and drop
+export const sortTree = (
+  nodes: TreeNode[],
+  sortBy: SortBy = 'alphabetical',
+  sortOrder: SortOrder = 'asc',
+): TreeNode[] => {
+  const direction = sortOrder === 'asc' ? 1 : -1;
+
+  return [...nodes]
+    .sort((a, b) => {
+      // folders always first regardless of sort
+      if (a.type !== b.type) return a.type === 'folder' ? -1 : 1;
+
+      if (sortBy === 'alphabetical') {
+        return a.title.localeCompare(b.title) * direction;
+      }
+
+      if (sortBy === 'dateModified') {
+        const aDate = new Date(a.updatedAt ?? 0).getTime();
+        const bDate = new Date(b.updatedAt ?? 0).getTime();
+        return (aDate - bDate) * direction;
+      }
+
+      return 0;
+    })
+    .map((node) => ({
+      ...node,
+      children: node.children
+        ? sortTree(node.children, sortBy, sortOrder)
+        : undefined,
+    }));
 };
