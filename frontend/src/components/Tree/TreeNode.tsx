@@ -56,7 +56,11 @@ const TreeNodeComponent = ({ node }: TreeNodeComponentProps) => {
       return;
     }
 
-    updateNode(renamingNodeId, dataEncryptionKey, treeData.title);
+    updateNode({
+      nodeId: renamingNodeId,
+      dataEncryptionKey: dataEncryptionKey,
+      title: treeData.title,
+    });
     setFileTitle(treeData.title);
     setRenamingNodeId(null);
   };

@@ -7,6 +7,7 @@ import type {
   TreeNodeResponse,
   TreeResponse,
   AddNodeOptions,
+  UpdateNodeOptions,
 } from '@/types/data.types';
 import { axiosInstance } from '@/lib/axios';
 
@@ -22,6 +23,7 @@ import {
   insertNode,
   moveNode,
 } from '@/lib/tree/treeHelpers';
+import handleStoreError from '@/utils/handleStoreError';
 
 // TODO: error toast?
 
@@ -100,20 +102,12 @@ const useDataStore = create<DataState>((set) => ({
 
         return newNodeDTO;
       } catch (error: unknown) {
-        if (axios.isAxiosError(error)) {
-          set({
-            error: error.response?.data?.message || 'Error creating node',
-            isLoading: false,
-          });
-        } else {
-          set({ error: 'An unexpected error occurred', isLoading: false });
-        }
+        handleStoreError(error, set);
         return null;
       }
     },
 
-    // TODO: maybe change this action to accept updates as objects for cleaner code
-    updateNode: async (
+    updateNode: async ({
       nodeId,
       dataEncryptionKey,
       title,
@@ -124,7 +118,7 @@ const useDataStore = create<DataState>((set) => ({
       icon,
       parentId,
       fileId,
-    ) => {
+    }: UpdateNodeOptions) => {
       set({ isLoading: true, error: null });
 
       try {
@@ -136,8 +130,6 @@ const useDataStore = create<DataState>((set) => ({
         if (icon !== undefined) payload.icon = icon;
         if (parentId !== undefined) payload.parentId = parentId;
         if (fileId !== undefined) payload.fileId = fileId;
-
-        // 1. Encrypt title
         if (title !== undefined) {
           payload.encryptedTitle = await encryptAESGCM(
             title,
@@ -151,10 +143,7 @@ const useDataStore = create<DataState>((set) => ({
         );
 
         const updatedNodeDTO = response.data.data;
-
-        if (!updatedNodeDTO) {
-          throw new Error('Invalid server response when updating node');
-        }
+        if (!updatedNodeDTO) throw new Error('Invalid server response');
 
         set((state) => ({
           tree:
@@ -170,15 +159,8 @@ const useDataStore = create<DataState>((set) => ({
         }));
 
         return updatedNodeDTO;
-      } catch (error: unknown) {
-        if (axios.isAxiosError(error)) {
-          set({
-            error: error.response?.data?.message || 'Error updating node',
-            isLoading: false,
-          });
-        } else {
-          set({ error: 'An unexpected error occurred', isLoading: false });
-        }
+      } catch (error) {
+        handleStoreError(error, set);
         return null;
       }
     },
@@ -203,14 +185,7 @@ const useDataStore = create<DataState>((set) => ({
 
         return updatedNodeDTO;
       } catch (error) {
-        if (axios.isAxiosError(error)) {
-          set({
-            error: error.response?.data?.message || 'Error updating node',
-            isLoading: false,
-          });
-        } else {
-          set({ error: 'An unexpected error occurred', isLoading: false });
-        }
+        handleStoreError(error, set);
         return null;
       }
     },
@@ -238,14 +213,7 @@ const useDataStore = create<DataState>((set) => ({
 
         return updatedNodeDTO;
       } catch (error) {
-        if (axios.isAxiosError(error)) {
-          set({
-            error: error.response?.data?.message || 'Error updating node',
-            isLoading: false,
-          });
-        } else {
-          set({ error: 'An unexpected error occurred', isLoading: false });
-        }
+        handleStoreError(error, set);
         return null;
       }
     },
@@ -260,18 +228,7 @@ const useDataStore = create<DataState>((set) => ({
         set({ isFetchingContent: false });
         return response.data.note;
       } catch (error) {
-        if (axios.isAxiosError(error)) {
-          set({
-            error:
-              error.response?.data?.message || 'Error fetching node content',
-            isFetchingContent: false,
-          });
-        } else {
-          set({
-            error: 'An unexpected error occurred',
-            isFetchingContent: false,
-          });
-        }
+        handleStoreError(error, set);
         return null;
       }
     },
@@ -287,15 +244,7 @@ const useDataStore = create<DataState>((set) => ({
         set({ isSyncing: false });
         return response.data;
       } catch (error) {
-        if (axios.isAxiosError(error)) {
-          set({
-            error:
-              error.response?.data?.message || 'Error updating node content',
-            isSyncing: false,
-          });
-        } else {
-          set({ error: 'An unexpected error occurred', isSyncing: false });
-        }
+        handleStoreError(error, set);
         return null;
       }
     },

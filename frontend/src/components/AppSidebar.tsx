@@ -75,17 +75,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
     const targetParentId = overId === 'root' ? null : overId;
 
-    updateNode(
-      activeId,
-      dataEncryptionKey!,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      targetParentId,
-    );
+    updateNode({
+      nodeId: activeId,
+      dataEncryptionKey: dataEncryptionKey!,
+      parentId: targetParentId,
+    });
   };
 
   return (
