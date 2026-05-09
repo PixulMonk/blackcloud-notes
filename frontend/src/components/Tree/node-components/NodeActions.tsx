@@ -15,13 +15,13 @@ import useCreateNode from '@/hooks/useCreateNode';
 function NodeActions({
   node,
   hasChildren,
-  isMenuOpen,
   setIsMenuOpen,
+  onExpand,
 }: {
   node: TreeNode;
   hasChildren: boolean;
-  isMenuOpen: boolean;
   setIsMenuOpen: (open: boolean) => void;
+  onExpand: () => void;
 }) {
   const { setRenamingNodeId, clearSelection } = useTreeUIActions();
   const { selectedNode } = useTreeUI();
@@ -60,7 +60,7 @@ function NodeActions({
           aria-label="Add"
           onClick={(e) => {
             e.stopPropagation();
-            setIsMenuOpen(true);
+            onExpand();
             createNode('file', node._id);
           }}
         >
@@ -68,7 +68,7 @@ function NodeActions({
         </Button>
       )}
 
-      <DropdownMenu open={isMenuOpen} onOpenChange={setIsMenuOpen}>
+      <DropdownMenu onOpenChange={setIsMenuOpen}>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" size="icon" className="h-6 w-6">
             <Ellipsis className="h-4 w-4" />

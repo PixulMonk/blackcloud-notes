@@ -19,6 +19,7 @@ const TreeNodeComponent = ({ node }: TreeNodeComponentProps) => {
   const hasChildren = !!node.children?.length;
   const [isHovered, setIsHovered] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
   const [treeData, setTreeData] = useState(node);
 
   const { setActiveView } = useAppStoreActions();
@@ -77,15 +78,15 @@ const TreeNodeComponent = ({ node }: TreeNodeComponentProps) => {
     <NodeActions
       node={node}
       hasChildren={hasChildren}
-      isMenuOpen={isMenuOpen}
       setIsMenuOpen={setIsMenuOpen}
+      onExpand={() => setIsOpen(true)}
     />
   );
 
   return (
     <div className="w-full px-1.5">
       {hasChildren ? (
-        <Collapsible>
+        <Collapsible open={isOpen} onOpenChange={setIsOpen}>
           <div
             className={`flex justify-between w-full px-1.5 rounded-md 
               ${isSelected && isHovered ? 'bg-accent' : ''}
