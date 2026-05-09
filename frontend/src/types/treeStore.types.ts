@@ -47,6 +47,7 @@ export interface TreeUIActions {
   selectNode: (node: TreeNode) => void;
   clearSelection: () => void;
   setFileTitle: (newTitle: string) => void;
+  setSortPreference: (preference: string) => void;
 }
 
 export interface TreeUIState {
@@ -55,6 +56,7 @@ export interface TreeUIState {
   selectedFileId: string | null;
   selectedFileTitle: string | null;
   selectedNode: TreeNode | null;
+  sortPreference: string | null;
   actions: TreeUIActions;
 }
 

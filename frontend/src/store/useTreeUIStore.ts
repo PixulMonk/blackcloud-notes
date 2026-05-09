@@ -11,7 +11,8 @@ const useTreeUIStore = create<TreeUIState>((set) => ({
   selectedNodeId: null,
   selectedFileId: null,
   selectedFileTitle: null,
-  selectedNode: null, // add this
+  selectedNode: null,
+  sortPreference: null,
   actions: {
     setRenamingNodeId: (id) => {
       set({ renamingNodeId: id });
@@ -37,6 +38,8 @@ const useTreeUIStore = create<TreeUIState>((set) => ({
       }),
 
     setFileTitle: (newTitle) => set({ selectedFileTitle: newTitle }),
+
+    setSortPreference: (preference) => set({ selectedFileTitle: preference }),
   },
 }));
 
@@ -47,7 +50,8 @@ export const useTreeUI = (): TreeUIStoreState =>
       selectedNodeId: s.selectedFileId,
       selectedFileId: s.selectedFileId,
       selectedFileTitle: s.selectedFileTitle,
-      selectedNode: s.selectedNode, // add this
+      selectedNode: s.selectedNode,
+      sortPreference: s.sortPreference,
     })),
   );
 
