@@ -18,9 +18,10 @@ interface ToolbarDropdownItem {
 interface ToolbarDropdownProps {
   value: string;
   items: ToolbarDropdownItem[];
+  displayValue?: string;
 }
 
-function ToolbarDropdown({ value, items }: ToolbarDropdownProps) {
+function ToolbarDropdown({ value, items, displayValue }: ToolbarDropdownProps) {
   const selectedLabel =
     items.find((item) => item.value === value)?.label ?? value;
 
@@ -31,7 +32,7 @@ function ToolbarDropdown({ value, items }: ToolbarDropdownProps) {
           variant="ghost"
           className="text-xs font-medium text-muted-foreground"
         >
-          {selectedLabel}
+          {displayValue ?? selectedLabel}
           <ChevronDown className="ml-2 h-4 w-4" />
         </Button>
       </DropdownMenuTrigger>

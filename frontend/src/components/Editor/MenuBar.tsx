@@ -1,4 +1,5 @@
 import { useState, type MouseEvent } from 'react';
+import { useEditorState } from '@tiptap/react';
 
 import type { Editor } from '@tiptap/core';
 import {
@@ -51,8 +52,61 @@ const ToolbarButton = ({
 const Divider = () => <div className="w-px h-5 bg-border self-center mx-1" />;
 
 const MenuBar = ({ editor }: MenuBarProps) => {
-  const [currentBlockType, setCurrentBlockType] = useState('paragraph');
-  const [currentFontSize, setCurrentFontSize] = useState('16');
+  const editorState = useEditorState({
+    editor,
+    selector: (ctx) => {
+      const e = ctx.editor!;
+      const fontSize = e.getAttributes('textStyle').fontSize?.replace('px', '');
+      const isH1 = e.isActive('heading', { level: 1 });
+      const isH2 = e.isActive('heading', { level: 2 });
+      const isH3 = e.isActive('heading', { level: 3 });
+
+      // map heading to its display font size
+      const headingFontSize = isH1 ? '32' : isH2 ? '24' : isH3 ? '20' : null;
+
+      // detect mixed selection — has textStyle but no single consistent size
+      const { from, to } = e.state.selection;
+      const sizes = new Set<string>();
+      e.state.doc.nodesBetween(from, to, (node) => {
+        node.marks.forEach((mark) => {
+          if (mark.type.name === 'textStyle') {
+            sizes.add(mark.attrs.fontSize?.replace('px', '') ?? '16');
+          }
+        });
+      });
+      const isMixed = sizes.size > 1;
+
+      const blockTypes = new Set<string>();
+      e.state.doc.nodesBetween(from, to, (node) => {
+        if (node.type.name === 'heading') {
+          blockTypes.add(`heading${node.attrs.level}`);
+        } else if (node.type.name === 'paragraph') {
+          blockTypes.add('paragraph');
+        }
+      });
+      const isMixedBlock = blockTypes.size > 1;
+
+      return {
+        fontSize: isMixed ? 'Mixed' : (fontSize ?? headingFontSize ?? '16'),
+
+        blockType: isMixedBlock
+          ? 'mixed'
+          : isH1
+            ? 'heading1'
+            : isH2
+              ? 'heading2'
+              : isH3
+                ? 'heading3'
+                : 'paragraph',
+        isH1,
+        isH2,
+        isH3,
+      };
+    },
+  });
+
+  const currentFontSize = editorState?.fontSize ?? '16';
+  const currentBlockType = editorState?.blockType ?? 'paragraph'; // use blockType from selector
 
   if (!editor) return null;
 
@@ -74,13 +128,13 @@ const MenuBar = ({ editor }: MenuBarProps) => {
       <Divider />
       {/* Font Size */}
       <ToolbarDropdown
+        // TODO: User should be able to type a font size
         value={currentFontSize}
         items={[
           {
             label: '8',
             value: '8',
             onSelect: () => {
-              setCurrentFontSize('8');
               editor.chain().focus().setFontSize('8px').run();
             },
           },
@@ -88,7 +142,6 @@ const MenuBar = ({ editor }: MenuBarProps) => {
             label: '9',
             value: '9',
             onSelect: () => {
-              setCurrentFontSize('9');
               editor.chain().focus().setFontSize('9px').run();
             },
           },
@@ -96,7 +149,6 @@ const MenuBar = ({ editor }: MenuBarProps) => {
             label: '10',
             value: '10',
             onSelect: () => {
-              setCurrentFontSize('10');
               editor.chain().focus().setFontSize('10px').run();
             },
           },
@@ -104,7 +156,6 @@ const MenuBar = ({ editor }: MenuBarProps) => {
             label: '11',
             value: '11',
             onSelect: () => {
-              setCurrentFontSize('11');
               editor.chain().focus().setFontSize('11px').run();
             },
           },
@@ -112,7 +163,6 @@ const MenuBar = ({ editor }: MenuBarProps) => {
             label: '12',
             value: '12',
             onSelect: () => {
-              setCurrentFontSize('12');
               editor.chain().focus().setFontSize('12px').run();
             },
           },
@@ -120,7 +170,6 @@ const MenuBar = ({ editor }: MenuBarProps) => {
             label: '14',
             value: '14',
             onSelect: () => {
-              setCurrentFontSize('14');
               editor.chain().focus().setFontSize('14px').run();
             },
           },
@@ -128,7 +177,6 @@ const MenuBar = ({ editor }: MenuBarProps) => {
             label: '16',
             value: '16',
             onSelect: () => {
-              setCurrentFontSize('16');
               editor.chain().focus().setFontSize('16px').run();
             },
           },
@@ -136,7 +184,6 @@ const MenuBar = ({ editor }: MenuBarProps) => {
             label: '18',
             value: '18',
             onSelect: () => {
-              setCurrentFontSize('18');
               editor.chain().focus().setFontSize('18px').run();
             },
           },
@@ -144,7 +191,6 @@ const MenuBar = ({ editor }: MenuBarProps) => {
             label: '24',
             value: '24',
             onSelect: () => {
-              setCurrentFontSize('24');
               editor.chain().focus().setFontSize('24px').run();
             },
           },
@@ -152,7 +198,6 @@ const MenuBar = ({ editor }: MenuBarProps) => {
             label: '30',
             value: '30',
             onSelect: () => {
-              setCurrentFontSize('30');
               editor.chain().focus().setFontSize('30px').run();
             },
           },
@@ -160,7 +205,6 @@ const MenuBar = ({ editor }: MenuBarProps) => {
             label: '36',
             value: '36',
             onSelect: () => {
-              setCurrentFontSize('36');
               editor.chain().focus().setFontSize('36px').run();
             },
           },
@@ -168,7 +212,6 @@ const MenuBar = ({ editor }: MenuBarProps) => {
             label: '48',
             value: '48',
             onSelect: () => {
-              setCurrentFontSize('48');
               editor.chain().focus().setFontSize('48px').run();
             },
           },
@@ -176,7 +219,6 @@ const MenuBar = ({ editor }: MenuBarProps) => {
             label: '60',
             value: '60',
             onSelect: () => {
-              setCurrentFontSize('60');
               editor.chain().focus().setFontSize('60px').run();
             },
           },
@@ -184,7 +226,6 @@ const MenuBar = ({ editor }: MenuBarProps) => {
             label: '72',
             value: '72',
             onSelect: () => {
-              setCurrentFontSize('72');
               editor.chain().focus().setFontSize('72px').run();
             },
           },
@@ -192,11 +233,11 @@ const MenuBar = ({ editor }: MenuBarProps) => {
             label: '96',
             value: '96',
             onSelect: () => {
-              setCurrentFontSize('96');
               editor.chain().focus().setFontSize('96px').run();
             },
           },
         ]}
+        displayValue={currentFontSize === 'mixed' ? 'Mixed' : undefined}
       />
 
       {/* Block Type */}
@@ -206,36 +247,28 @@ const MenuBar = ({ editor }: MenuBarProps) => {
           {
             label: 'Paragraph',
             value: 'paragraph',
-            onSelect: () => {
-              setCurrentBlockType('paragraph');
-              editor.chain().focus().setParagraph().run();
-            },
+            onSelect: () => editor.chain().focus().setParagraph().run(),
           },
           {
             label: 'Heading 1',
             value: 'heading1',
-            onSelect: () => {
-              setCurrentBlockType('heading1');
-              editor.chain().focus().toggleHeading({ level: 1 }).run();
-            },
+            onSelect: () =>
+              editor.chain().focus().setHeading({ level: 1 }).run(),
           },
           {
             label: 'Heading 2',
             value: 'heading2',
-            onSelect: () => {
-              setCurrentBlockType('heading2');
-              editor.chain().focus().toggleHeading({ level: 2 }).run();
-            },
+            onSelect: () =>
+              editor.chain().focus().setHeading({ level: 2 }).run(),
           },
           {
             label: 'Heading 3',
             value: 'heading3',
-            onSelect: () => {
-              setCurrentBlockType('heading2');
-              editor.chain().focus().toggleHeading({ level: 2 }).run();
-            },
+            onSelect: () =>
+              editor.chain().focus().setHeading({ level: 3 }).run(),
           },
         ]}
+        displayValue={currentBlockType === 'mixed' ? 'Mixed' : undefined}
       />
 
       <Divider />
