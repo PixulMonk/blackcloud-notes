@@ -82,3 +82,38 @@ export const sortTree = (
         : undefined,
     }));
 };
+
+export const moveNode = (
+  nodes: TreeNode[],
+  nodeId: string,
+  newParentId: string | null,
+): TreeNode[] => {
+  // First find the node to move
+  let nodeToMove: TreeNode | null = null;
+
+  const findAndRemove = (nodes: TreeNode[]): TreeNode[] => {
+    return nodes
+      .filter((n) => {
+        if (n._id === nodeId) {
+          nodeToMove = n;
+          return false; // remove it
+        }
+        return true;
+      })
+      .map((n) => ({
+        ...n,
+        children: n.children ? findAndRemove(n.children) : undefined,
+      }));
+  };
+
+  const treeWithoutNode = findAndRemove(nodes);
+
+  if (!nodeToMove) return nodes;
+
+  // Insert at new parent
+  if (!newParentId) {
+    return [...treeWithoutNode, nodeToMove];
+  }
+
+  return insertNode(treeWithoutNode, newParentId, nodeToMove);
+};

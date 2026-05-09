@@ -33,7 +33,11 @@ export const DocumentTitle = () => {
     if (!selectedNode?._id || selectedFileTitle === null) return;
 
     if (selectedFileTitle !== previousTitle && dataEncryptionKey) {
-      updateNode(selectedNode._id, dataEncryptionKey, selectedFileTitle); // use _id, not selectedNodeId
+      updateNode({
+        nodeId: selectedNode._id,
+        dataEncryptionKey: dataEncryptionKey,
+        title: selectedFileTitle,
+      });
       setPreviousTitle(selectedFileTitle);
       console.log('update sent to db');
     }
