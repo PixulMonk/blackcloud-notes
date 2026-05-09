@@ -7,7 +7,7 @@ import useEditorContent from '@/hooks/useEditorContent';
 import useEditorSync from '@/hooks/useEditorSync';
 import { useTreeUI } from '@/store/useTreeUIStore';
 
-import MenuBar from '../MenuBar';
+import MenuBar from './MenuBar';
 import { SkeletonText } from './SkeletonText';
 
 const formatDate = (iso?: string) => {
