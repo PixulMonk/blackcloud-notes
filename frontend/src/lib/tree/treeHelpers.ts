@@ -7,7 +7,8 @@ export const updateRecursive = (
 ): TreeNode[] => {
   return nodes.map((node) => {
     if (node._id === nodeIdToUpdate) {
-      return { ...node, ...updatedFields };
+      const { children, ...fields } = updatedFields;
+      return { ...node, ...fields };
     }
     if (node.children) {
       return {
