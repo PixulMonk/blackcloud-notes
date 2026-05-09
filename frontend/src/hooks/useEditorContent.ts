@@ -44,7 +44,7 @@ const useEditorContent = (
       );
       const jsonContent = JSON.parse(decryptedDataString);
       editor?.commands.setContent(jsonContent);
-      setIsContentReady(true); // content is set
+      setIsContentReady(true);
     });
   }, [selectedFileId, editor]);
 

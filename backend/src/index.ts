@@ -38,9 +38,11 @@ app.use(
   }),
 );
 
-app.use(express.json());
 app.use(cookieParser());
-app.use(express.json());
+// Added to support base64-encoded images embedded in note content
+// Note: MongoDB document size limit is 16mb — monitor note sizes if users
+// report save failures on image-heavy notes.
+app.use(express.json({ limit: '10mb' }));
 app.use('/api/auth', authRoutes);
 app.use('/api/notes', notesRoutes);
 app.use('/api/treeNodes', treeNodeRoutes);
