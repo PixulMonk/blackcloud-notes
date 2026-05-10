@@ -3,9 +3,6 @@ import { useEditorState } from '@tiptap/react';
 
 import type { Editor } from '@tiptap/core';
 import {
-  Heading1,
-  Heading2,
-  Heading3,
   Bold,
   Italic,
   Underline,
@@ -19,10 +16,14 @@ import {
   ListOrdered,
   Undo2,
   Redo2,
+  Type,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-import ToolbarDropdown from './ToolbarDropDown';
+import ToolbarDropdown from './ToolbarDropdown';
+import ColourDropdown from './ColourDropdown';
+
+// TODO: might need to extract some components. Component's geting a bit thicc
 
 interface MenuBarProps {
   editor: Editor | null;
@@ -57,6 +58,7 @@ const MenuBar = ({ editor }: MenuBarProps) => {
     selector: (ctx) => {
       const e = ctx.editor!;
       const fontSize = e.getAttributes('textStyle').fontSize?.replace('px', '');
+      const fontColor = e.getAttributes('textStyle').color ?? null;
       const isH1 = e.isActive('heading', { level: 1 });
       const isH2 = e.isActive('heading', { level: 2 });
       const isH3 = e.isActive('heading', { level: 3 });
@@ -98,6 +100,7 @@ const MenuBar = ({ editor }: MenuBarProps) => {
               : isH3
                 ? 'heading3'
                 : 'paragraph',
+        fontColor,
         isH1,
         isH2,
         isH3,
@@ -106,7 +109,8 @@ const MenuBar = ({ editor }: MenuBarProps) => {
   });
 
   const currentFontSize = editorState?.fontSize ?? '16';
-  const currentBlockType = editorState?.blockType ?? 'paragraph'; // use blockType from selector
+  const currentBlockType = editorState?.blockType ?? 'paragraph';
+  const currentFontColor = editorState?.fontColor ?? null;
 
   if (!editor) return null;
 
@@ -124,12 +128,11 @@ const MenuBar = ({ editor }: MenuBarProps) => {
       <ToolbarButton onClick={run(() => editor.chain().focus().redo().run())}>
         <Redo2 size={15} />
       </ToolbarButton>
-
       <Divider />
       {/* Font Size */}
       <ToolbarDropdown
         // TODO: User should be able to type a font size
-        value={currentFontSize}
+        currentValue={currentFontSize}
         items={[
           {
             label: '8',
@@ -239,10 +242,9 @@ const MenuBar = ({ editor }: MenuBarProps) => {
         ]}
         displayValue={currentFontSize === 'mixed' ? 'Mixed' : undefined}
       />
-
       {/* Block Type */}
       <ToolbarDropdown
-        value={currentBlockType}
+        currentValue={currentBlockType}
         items={[
           {
             label: 'Paragraph',
@@ -270,11 +272,9 @@ const MenuBar = ({ editor }: MenuBarProps) => {
         ]}
         displayValue={currentBlockType === 'mixed' ? 'Mixed' : undefined}
       />
-
       <Divider />
 
       {/* Formatting */}
-
       <ToolbarButton
         onClick={run(() => editor.chain().focus().toggleBold().run())}
         isActive={editor.isActive('bold')}
@@ -299,13 +299,20 @@ const MenuBar = ({ editor }: MenuBarProps) => {
       >
         <Strikethrough size={15} />
       </ToolbarButton>
-      <ToolbarButton
-        onClick={run(() => editor.chain().focus().toggleHighlight().run())}
-        isActive={editor.isActive('highlight')}
-      >
-        <Highlighter size={15} />
-      </ToolbarButton>
-
+      <ColourDropdown
+        icon={<Type />}
+        currentHexValue={currentFontColor}
+        onColorSelect={(hex) => editor.chain().focus().setColor(hex).run()}
+        onClear={() => editor.chain().focus().unsetColor().run()}
+      />
+      <ColourDropdown
+        icon={<Highlighter />}
+        currentHexValue={currentFontColor}
+        onColorSelect={(hex) =>
+          editor.chain().focus().setHighlight({ color: hex }).run()
+        }
+        onClear={() => editor.chain().focus().unsetHighlight().run()}
+      />
       <Divider />
 
       {/* Alignment */}
@@ -335,7 +342,6 @@ const MenuBar = ({ editor }: MenuBarProps) => {
       >
         <AlignJustify size={15} />
       </ToolbarButton>
-
       <Divider />
 
       {/* Lists */}

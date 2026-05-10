@@ -7,6 +7,8 @@ import Image from '@tiptap/extension-image';
 import { Dropcursor } from '@tiptap/extensions';
 import FileHandler from '@tiptap/extension-file-handler';
 import { FontSize, TextStyle } from '@tiptap/extension-text-style';
+import { Color } from '@tiptap/extension-color';
+
 import compressImage from '@/utils/compressImage';
 
 const useEditorSetup = () => {
@@ -14,9 +16,10 @@ const useEditorSetup = () => {
     extensions: [
       StarterKit,
       TextAlign.configure({ types: ['heading', 'paragraph'] }),
-      Highlight,
+      Highlight.configure({ multicolor: true }),
       TextStyle,
       FontSize,
+      Color,
       Placeholder.configure({
         placeholder: 'Start writing…',
       }),

@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { ChevronDown } from 'lucide-react';
 
 import {
@@ -16,14 +15,18 @@ interface ToolbarDropdownItem {
 }
 
 interface ToolbarDropdownProps {
-  value: string;
+  currentValue: string;
   items: ToolbarDropdownItem[];
   displayValue?: string;
 }
 
-function ToolbarDropdown({ value, items, displayValue }: ToolbarDropdownProps) {
+function ToolbarDropdown({
+  currentValue,
+  items,
+  displayValue,
+}: ToolbarDropdownProps) {
   const selectedLabel =
-    items.find((item) => item.value === value)?.label ?? value;
+    items.find((item) => item.value === currentValue)?.label ?? currentValue;
 
   return (
     <DropdownMenu>
