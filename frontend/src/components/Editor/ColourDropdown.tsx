@@ -6,9 +6,9 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
 } from '../ui/dropdown-menu';
-import { Button } from '../ui/button';
 import { EDITOR_COLOR_COLUMNS } from '@/constants/editorColours';
 import { isLight } from '@/lib/editor/colourPickerHelpers';
+import { cn } from '@/lib/utils';
 
 interface ColourDropdownProps {
   icon?: ReactNode;
@@ -26,12 +26,13 @@ function ColourDropdown({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="flex flex-col items-center gap-0.5 h-8 w-8 text-muted-foreground"
+        <button
+          className={cn(
+            'p-1.5 rounded-md transition-colors flex flex-col items-center gap-0.5',
+            'text-muted-foreground hover:text-foreground hover:bg-muted',
+          )}
         >
-          {icon ?? <Pipette size={14} />}
+          {icon ?? <Pipette size={12} />}
           <div
             className="h-0.5 w-4 rounded-full"
             style={{
@@ -39,7 +40,7 @@ function ColourDropdown({
               border: currentHexValue ? 'none' : '1px dashed currentColor',
             }}
           />
-        </Button>
+        </button>
       </DropdownMenuTrigger>
 
       <DropdownMenuContent className="p-3 w-auto">
