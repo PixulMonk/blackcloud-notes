@@ -127,6 +127,12 @@
     outline: none;
   }
 
+  /* Added to fix font colour not showing for bolded colours */
+  .prose .ProseMirror strong,
+  .prose .ProseMirror em {
+    color: inherit !important;
+  }
+
   /* This was added to fix the line-height issue with TipTap */
   .prose .ProseMirror p.line-height-target {
     margin-block: 0 !important;
