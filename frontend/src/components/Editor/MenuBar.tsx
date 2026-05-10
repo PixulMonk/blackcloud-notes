@@ -11,8 +11,6 @@ import AlignmentGroup from './toolbar/AlignmentGroup';
 import ListGroup from './toolbar/ListGroup';
 import SpacerGroup from './toolbar/SpacerGroup';
 
-// TODO: might need to extract some components. Component's geting a bit thicc
-
 interface MenuBarProps {
   editor: Editor | null;
 }
@@ -41,7 +39,7 @@ const MenuBar = ({ editor }: MenuBarProps) => {
       <Divider />
 
       <AlignmentGroup editor={editor} />
-      {/* <SpacerGroup editor={editor} /> */}
+      <SpacerGroup editor={editor} />
     </div>
   );
 };

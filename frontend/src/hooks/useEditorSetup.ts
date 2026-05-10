@@ -3,6 +3,8 @@ import TextAlign from '@tiptap/extension-text-align';
 import Placeholder from '@tiptap/extension-placeholder';
 import { useEditor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
+import Paragraph from '@tiptap/extension-paragraph';
+import Heading from '@tiptap/extension-heading';
 import Image from '@tiptap/extension-image';
 import { Dropcursor } from '@tiptap/extensions';
 import FileHandler from '@tiptap/extension-file-handler';
@@ -18,20 +20,25 @@ import { Superscript } from '@tiptap/extension-superscript';
 import { Subscript } from '@tiptap/extension-subscript';
 
 import compressImage from '@/utils/compressImage';
+import { withLineHeight } from '@/lib/editor/withLineHeight';
 
 const useEditorSetup = () => {
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
-        paragraph: {
-          HTMLAttributes: {
-            class: 'line-height-target',
-          },
-        },
+        paragraph: false, // disable built-in paragraph
+        heading: false, // disable built-in heading
+      }),
+      withLineHeight(Paragraph).configure({
+        HTMLAttributes: { class: 'line-height-target' },
+      }),
+      withLineHeight(Heading).configure({
+        levels: [1, 2, 3, 4, 5, 6],
       }),
       TextAlign.configure({ types: ['heading', 'paragraph'] }),
+      // TipTap V3's LineHeight extension applies via the Textstyle mark
       LineHeight.configure({
-        types: ['paragraph', 'heading'],
+        types: ['textStyle'],
       }),
       Highlight.configure({ multicolor: true }),
       TextStyle,

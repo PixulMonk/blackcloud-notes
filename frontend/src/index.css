@@ -127,14 +127,6 @@
     outline: none;
   }
 
-  .ProseMirror p {
-    line-height: inherit;
-  }
-
-  .ProseMirror p span[style*='line-height'] {
-    display: block;
-  }
-
   .prose ul > li::marker,
   .prose ol > li::marker {
     color: var(--color-foreground) !important;
