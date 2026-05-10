@@ -1,5 +1,5 @@
 import type { Editor } from '@tiptap/core';
-import { List, ListOrdered } from 'lucide-react';
+import { List, ListOrdered, ListChecks } from 'lucide-react';
 
 import { ToolbarButton } from './ToolBarPrimitives';
 import { run } from './toolbarUtils';
@@ -22,6 +22,12 @@ function ListGroup({ editor }: ListGroupProps) {
         isActive={editor.isActive('orderedList')}
       >
         <ListOrdered size={15} />
+      </ToolbarButton>
+      <ToolbarButton
+        onClick={run(() => editor.chain().focus().toggleTaskList().run())}
+        isActive={editor.isActive('taskList')}
+      >
+        <ListChecks size={15} />
       </ToolbarButton>
     </>
   );

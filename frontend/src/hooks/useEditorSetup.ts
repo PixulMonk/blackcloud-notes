@@ -8,6 +8,7 @@ import { Dropcursor } from '@tiptap/extensions';
 import FileHandler from '@tiptap/extension-file-handler';
 import { FontSize, TextStyle } from '@tiptap/extension-text-style';
 import { Color } from '@tiptap/extension-color';
+import { TaskItem, TaskList } from '@tiptap/extension-list';
 
 import compressImage from '@/utils/compressImage';
 
@@ -19,6 +20,13 @@ const useEditorSetup = () => {
       Highlight.configure({ multicolor: true }),
       TextStyle,
       FontSize,
+      TaskList,
+      TaskItem.configure({
+        nested: true,
+        HTMLAttributes: {
+          class: 'flex items-center not-prose gap-2', // Tailwind classes for alignment
+        },
+      }),
       Color,
       Placeholder.configure({
         placeholder: 'Start writing…',
