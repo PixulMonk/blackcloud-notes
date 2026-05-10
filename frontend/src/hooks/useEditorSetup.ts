@@ -9,6 +9,8 @@ import FileHandler from '@tiptap/extension-file-handler';
 import { FontSize, TextStyle, FontFamily } from '@tiptap/extension-text-style';
 import { Color } from '@tiptap/extension-color';
 import { TaskItem, TaskList } from '@tiptap/extension-list';
+import { Superscript } from '@tiptap/extension-superscript';
+import { Subscript } from '@tiptap/extension-subscript';
 
 import compressImage from '@/utils/compressImage';
 
@@ -22,6 +24,8 @@ const useEditorSetup = () => {
       FontSize,
       FontFamily,
       TaskList,
+      Superscript,
+      Subscript,
       TaskItem.configure({
         nested: true,
         HTMLAttributes: {

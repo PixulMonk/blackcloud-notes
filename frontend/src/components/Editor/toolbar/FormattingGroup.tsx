@@ -1,5 +1,12 @@
 import type { Editor } from '@tiptap/core';
-import { Bold, Italic, Underline, Strikethrough } from 'lucide-react';
+import {
+  Bold,
+  Italic,
+  Underline,
+  Strikethrough,
+  Superscript,
+  Subscript,
+} from 'lucide-react';
 
 import { ToolbarButton } from './ToolBarPrimitives';
 import { run } from './toolbarUtils';
@@ -34,6 +41,18 @@ function FormattingGroup({ editor }: FormattingGroupProps) {
         isActive={editor.isActive('strike')}
       >
         <Strikethrough size={15} />
+      </ToolbarButton>
+      <ToolbarButton
+        onClick={run(() => editor.chain().focus().toggleSuperscript().run())}
+        isActive={editor.isActive('superscript')}
+      >
+        <Superscript size={15} />
+      </ToolbarButton>
+      <ToolbarButton
+        onClick={run(() => editor.chain().focus().toggleSubscript().run())}
+        isActive={editor.isActive('subscript')}
+      >
+        <Subscript size={15} />
       </ToolbarButton>
     </>
   );
