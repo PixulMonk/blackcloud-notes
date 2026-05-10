@@ -1,6 +1,7 @@
 import { useEditorState } from '@tiptap/react';
 import type { Editor } from '@tiptap/core';
 import ToolbarDropdown from '../ToolbarDropdown';
+import { FONT_LIST } from '@/constants/fontList';
 
 interface TextStyleGroupProps {
   editor: Editor;
@@ -210,34 +211,24 @@ export const TextStyleGroup = ({ editor }: TextStyleGroupProps) => {
         ]}
         displayValue={currentFontSize === 'mixed' ? 'Mixed' : undefined}
       />
+
+      {/* Font Family */}
       <ToolbarDropdown
         currentValue={currentFontFamily}
         displayValue={currentFontFamily === 'Mixed' ? 'Mixed' : undefined}
-        items={[
-          {
-            label: 'Default',
-            value: '',
-            onSelect: () => editor.chain().focus().unsetFontFamily().run(),
+        items={FONT_LIST.map((font) => ({
+          label: font.label,
+          value: font.value,
+          onSelect: () => {
+            if (font.value === '') {
+              editor.chain().focus().unsetFontFamily().run();
+            } else {
+              editor.chain().focus().setFontFamily(font.value).run();
+            }
           },
-          {
-            label: 'serif',
-            value: 'serif',
-            onSelect: () => editor.chain().focus().setFontFamily('serif').run(),
-          },
-          {
-            label: 'Monospace',
-            value: 'monospace',
-            onSelect: () =>
-              editor.chain().focus().setFontFamily('monospace').run(),
-          },
-          {
-            label: 'Cursive',
-            value: 'cursive',
-            onSelect: () =>
-              editor.chain().focus().setFontFamily('cursive').run(),
-          },
-        ]}
+        }))}
       />
+
       {/* Block Type */}
       <ToolbarDropdown
         currentValue={currentBlockType}
