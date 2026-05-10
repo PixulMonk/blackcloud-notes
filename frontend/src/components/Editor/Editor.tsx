@@ -79,7 +79,7 @@ const Editor = () => {
                   editor={editor}
                   onFocus={() => setIsFocused(true)}
                   onBlur={() => setIsFocused(false)}
-                  className="prose dark:prose-invert max-w-full"
+                  className="tiptap-wrapper flex-1 overflow-hidden"
                 />
               </div>
             )}

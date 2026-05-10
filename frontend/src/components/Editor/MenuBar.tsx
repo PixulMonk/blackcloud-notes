@@ -9,6 +9,7 @@ import UndoRedoGroup from './toolbar/UndoRedoGroup';
 import FormattingGroup from './toolbar/FormattingGroup';
 import AlignmentGroup from './toolbar/AlignmentGroup';
 import ListGroup from './toolbar/ListGroup';
+import SpacerGroup from './toolbar/SpacerGroup';
 
 // TODO: might need to extract some components. Component's geting a bit thicc
 
@@ -28,22 +29,19 @@ const MenuBar = ({ editor }: MenuBarProps) => {
     <div className="flex items-center flex-wrap gap-0.5 px-4 py-1.5  border-border/50 bg-background">
       <UndoRedoGroup editor={editor} />
       <Divider />
+
       <TextStyleGroup editor={editor} />
       <Divider />
 
-      {/* Formatting */}
       <FormattingGroup editor={editor} />
       <ColourGroup editor={editor} />
       <Divider />
 
-      {/* Lists */}
       <ListGroup editor={editor} />
       <Divider />
 
-      {/* Alignment */}
       <AlignmentGroup editor={editor} />
-
-      <Divider />
+      <SpacerGroup editor={editor} />
     </div>
   );
 };

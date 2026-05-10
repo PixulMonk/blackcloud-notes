@@ -6,7 +6,12 @@ import StarterKit from '@tiptap/starter-kit';
 import Image from '@tiptap/extension-image';
 import { Dropcursor } from '@tiptap/extensions';
 import FileHandler from '@tiptap/extension-file-handler';
-import { FontSize, TextStyle, FontFamily } from '@tiptap/extension-text-style';
+import {
+  FontSize,
+  TextStyle,
+  FontFamily,
+  LineHeight,
+} from '@tiptap/extension-text-style';
 import { Color } from '@tiptap/extension-color';
 import { TaskItem, TaskList } from '@tiptap/extension-list';
 import { Superscript } from '@tiptap/extension-superscript';
@@ -19,6 +24,9 @@ const useEditorSetup = () => {
     extensions: [
       StarterKit,
       TextAlign.configure({ types: ['heading', 'paragraph'] }),
+      LineHeight.configure({
+        types: ['heading', 'paragraph'],
+      }),
       Highlight.configure({ multicolor: true }),
       TextStyle,
       FontSize,

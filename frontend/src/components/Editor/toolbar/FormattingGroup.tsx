@@ -54,6 +54,7 @@ function FormattingGroup({ editor }: FormattingGroupProps) {
       >
         <Subscript size={15} />
       </ToolbarButton>
+      {/* TODO: erase formatting button */}
     </>
   );
 }
