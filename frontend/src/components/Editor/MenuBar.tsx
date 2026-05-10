@@ -41,7 +41,7 @@ const MenuBar = ({ editor }: MenuBarProps) => {
       <Divider />
 
       <AlignmentGroup editor={editor} />
-      <SpacerGroup editor={editor} />
+      {/* <SpacerGroup editor={editor} /> */}
     </div>
   );
 };

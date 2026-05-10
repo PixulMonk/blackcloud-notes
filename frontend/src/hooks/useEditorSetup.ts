@@ -22,10 +22,16 @@ import compressImage from '@/utils/compressImage';
 const useEditorSetup = () => {
   const editor = useEditor({
     extensions: [
-      StarterKit,
+      StarterKit.configure({
+        paragraph: {
+          HTMLAttributes: {
+            class: 'line-height-target',
+          },
+        },
+      }),
       TextAlign.configure({ types: ['heading', 'paragraph'] }),
       LineHeight.configure({
-        types: ['heading', 'paragraph'],
+        types: ['paragraph', 'heading'],
       }),
       Highlight.configure({ multicolor: true }),
       TextStyle,
