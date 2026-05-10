@@ -127,6 +127,12 @@
     outline: none;
   }
 
+  /* This was added to fix the line-height issue with TipTap */
+  .prose .ProseMirror p.line-height-target {
+    margin-block: 0 !important;
+    line-height: 1.5;
+  }
+
   .prose ul > li::marker,
   .prose ol > li::marker {
     color: var(--color-foreground) !important;

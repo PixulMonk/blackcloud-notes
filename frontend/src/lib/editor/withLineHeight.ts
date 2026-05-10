@@ -7,7 +7,7 @@ export function withLineHeight(extension: any) {
       return {
         ...this.parent?.(),
         lineHeight: {
-          default: null,
+          default: '1.5',
           parseHTML: (el: HTMLElement) => el.style.lineHeight || null,
           renderHTML: (attrs: Record<string, string>) => {
             if (!attrs.lineHeight) return {};
