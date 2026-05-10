@@ -67,7 +67,7 @@ export const TextStyleGroup = ({ editor }: TextStyleGroupProps) => {
       e.state.doc.nodesBetween(from, to, (node) => {
         node.marks.forEach((mark) => {
           if (mark.type.name === 'textStyle') {
-            sizes.add(mark.attrs.fontFamily ?? '');
+            families.add(mark.attrs.fontFamily ?? '');
           }
         });
       });
