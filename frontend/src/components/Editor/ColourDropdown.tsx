@@ -66,6 +66,18 @@ function ColourDropdown({
             </div>
           ))}
         </div>
+        {/* Custom color picker */}
+        <div className="mt-2 flex items-center gap-2">
+          <input
+            type="color"
+            defaultValue="#000000"
+            className="h-6 w-6 rounded cursor-pointer border-0 bg-transparent p-0"
+            onInput={(e) => {
+              onColorSelect((e.target as HTMLInputElement).value);
+            }}
+          />
+          <span className="text-xs text-muted-foreground">Custom</span>
+        </div>
         {onClear && (
           <DropdownMenuItem
             onMouseDown={(e) => {
