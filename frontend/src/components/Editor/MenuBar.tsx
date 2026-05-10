@@ -36,13 +36,14 @@ const MenuBar = ({ editor }: MenuBarProps) => {
       <ColourGroup editor={editor} />
       <Divider />
 
+      {/* Lists */}
+      <ListGroup editor={editor} />
+      <Divider />
+
       {/* Alignment */}
       <AlignmentGroup editor={editor} />
 
       <Divider />
-
-      {/* Lists */}
-      <ListGroup editor={editor} />
     </div>
   );
 };

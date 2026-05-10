@@ -98,6 +98,53 @@ export const TextStyleGroup = ({ editor }: TextStyleGroupProps) => {
 
   return (
     <>
+      {/* Block Type */}
+      <ToolbarDropdown
+        currentValue={currentBlockType}
+        displayValue={currentBlockType === 'mixed' ? 'Mixed' : undefined}
+        items={[
+          {
+            label: 'Paragraph',
+            value: 'paragraph',
+            onSelect: () => editor.chain().focus().setParagraph().run(),
+          },
+          {
+            label: 'Heading 1',
+            value: 'heading1',
+            onSelect: () =>
+              editor.chain().focus().setHeading({ level: 1 }).run(),
+          },
+          {
+            label: 'Heading 2',
+            value: 'heading2',
+            onSelect: () =>
+              editor.chain().focus().setHeading({ level: 2 }).run(),
+          },
+          {
+            label: 'Heading 3',
+            value: 'heading3',
+            onSelect: () =>
+              editor.chain().focus().setHeading({ level: 3 }).run(),
+          },
+        ]}
+      />
+      {/* Font Family */}
+      <ToolbarDropdown
+        currentValue={currentFontFamily}
+        displayValue={currentFontFamily === 'Mixed' ? 'Mixed' : undefined}
+        items={FONT_LIST.map((font) => ({
+          label: font.label,
+          value: font.value,
+          onSelect: () => {
+            if (font.value === '') {
+              editor.chain().focus().unsetFontFamily().run();
+            } else {
+              editor.chain().focus().setFontFamily(font.value).run();
+            }
+          },
+        }))}
+      />
+
       {/* Font Size */}
       <ToolbarDropdown
         // TODO: User should be able to type a font size
@@ -210,54 +257,6 @@ export const TextStyleGroup = ({ editor }: TextStyleGroupProps) => {
           },
         ]}
         displayValue={currentFontSize === 'mixed' ? 'Mixed' : undefined}
-      />
-
-      {/* Font Family */}
-      <ToolbarDropdown
-        currentValue={currentFontFamily}
-        displayValue={currentFontFamily === 'Mixed' ? 'Mixed' : undefined}
-        items={FONT_LIST.map((font) => ({
-          label: font.label,
-          value: font.value,
-          onSelect: () => {
-            if (font.value === '') {
-              editor.chain().focus().unsetFontFamily().run();
-            } else {
-              editor.chain().focus().setFontFamily(font.value).run();
-            }
-          },
-        }))}
-      />
-
-      {/* Block Type */}
-      <ToolbarDropdown
-        currentValue={currentBlockType}
-        displayValue={currentBlockType === 'mixed' ? 'Mixed' : undefined}
-        items={[
-          {
-            label: 'Paragraph',
-            value: 'paragraph',
-            onSelect: () => editor.chain().focus().setParagraph().run(),
-          },
-          {
-            label: 'Heading 1',
-            value: 'heading1',
-            onSelect: () =>
-              editor.chain().focus().setHeading({ level: 1 }).run(),
-          },
-          {
-            label: 'Heading 2',
-            value: 'heading2',
-            onSelect: () =>
-              editor.chain().focus().setHeading({ level: 2 }).run(),
-          },
-          {
-            label: 'Heading 3',
-            value: 'heading3',
-            onSelect: () =>
-              editor.chain().focus().setHeading({ level: 3 }).run(),
-          },
-        ]}
       />
     </>
   );
