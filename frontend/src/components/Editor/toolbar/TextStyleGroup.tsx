@@ -30,6 +30,8 @@ export const TextStyleGroup = ({ editor }: TextStyleGroupProps) => {
     selector: (ctx) => {
       const e = ctx.editor!;
       const fontSize = e.getAttributes('textStyle').fontSize?.replace('px', '');
+      const fontFamily = e.getAttributes('textStyle').fontFamily ?? '';
+
       const isH1 = e.isActive('heading', { level: 1 });
       const isH2 = e.isActive('heading', { level: 2 });
       const isH3 = e.isActive('heading', { level: 3 });
@@ -39,6 +41,7 @@ export const TextStyleGroup = ({ editor }: TextStyleGroupProps) => {
 
       // detect mixed selection — has textStyle but no single consistent size
       const { from, to } = e.state.selection;
+
       const sizes = new Set<string>();
       e.state.doc.nodesBetween(from, to, (node) => {
         node.marks.forEach((mark) => {
@@ -47,7 +50,7 @@ export const TextStyleGroup = ({ editor }: TextStyleGroupProps) => {
           }
         });
       });
-      const isMixed = sizes.size > 1;
+      const isMixedSize = sizes.size > 1;
 
       const blockTypes = new Set<string>();
       e.state.doc.nodesBetween(from, to, (node) => {
@@ -59,9 +62,19 @@ export const TextStyleGroup = ({ editor }: TextStyleGroupProps) => {
       });
       const isMixedBlock = blockTypes.size > 1;
 
-      return {
-        fontSize: isMixed ? 'Mixed' : (fontSize ?? headingFontSize ?? '16'),
+      const families = new Set<string>();
+      e.state.doc.nodesBetween(from, to, (node) => {
+        node.marks.forEach((mark) => {
+          if (mark.type.name === 'textStyle') {
+            sizes.add(mark.attrs.fontFamily ?? '');
+          }
+        });
+      });
+      const isMixedFamily = families.size > 1;
 
+      return {
+        fontSize: isMixedSize ? 'Mixed' : (fontSize ?? headingFontSize ?? '16'),
+        fontFamily: isMixedFamily ? 'Mixed' : fontFamily,
         blockType: isMixedBlock
           ? 'mixed'
           : isH1
@@ -80,6 +93,8 @@ export const TextStyleGroup = ({ editor }: TextStyleGroupProps) => {
 
   const currentFontSize = editorState?.fontSize ?? '16';
   const currentBlockType = editorState?.blockType ?? 'paragraph';
+  const currentFontFamily = editorState?.fontFamily ?? '';
+
   return (
     <>
       {/* Font Size */}
@@ -195,9 +210,38 @@ export const TextStyleGroup = ({ editor }: TextStyleGroupProps) => {
         ]}
         displayValue={currentFontSize === 'mixed' ? 'Mixed' : undefined}
       />
+      <ToolbarDropdown
+        currentValue={currentFontFamily}
+        displayValue={currentFontFamily === 'Mixed' ? 'Mixed' : undefined}
+        items={[
+          {
+            label: 'Default',
+            value: '',
+            onSelect: () => editor.chain().focus().unsetFontFamily().run(),
+          },
+          {
+            label: 'serif',
+            value: 'serif',
+            onSelect: () => editor.chain().focus().setFontFamily('serif').run(),
+          },
+          {
+            label: 'Monospace',
+            value: 'monospace',
+            onSelect: () =>
+              editor.chain().focus().setFontFamily('monospace').run(),
+          },
+          {
+            label: 'Cursive',
+            value: 'cursive',
+            onSelect: () =>
+              editor.chain().focus().setFontFamily('cursive').run(),
+          },
+        ]}
+      />
       {/* Block Type */}
       <ToolbarDropdown
         currentValue={currentBlockType}
+        displayValue={currentBlockType === 'mixed' ? 'Mixed' : undefined}
         items={[
           {
             label: 'Paragraph',
@@ -223,7 +267,6 @@ export const TextStyleGroup = ({ editor }: TextStyleGroupProps) => {
               editor.chain().focus().setHeading({ level: 3 }).run(),
           },
         ]}
-        displayValue={currentBlockType === 'mixed' ? 'Mixed' : undefined}
       />
     </>
   );

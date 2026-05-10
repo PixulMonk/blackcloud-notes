@@ -40,7 +40,7 @@ const Editor = () => {
         {/* Sticky toolbar */}
         {selectedFileId && !isFetchingContent && (
           <div className="sticky top-0 z-10 bg-background border-b border-border/50">
-            <div className="max-w-3xl mx-auto px-8">
+            <div className="flex justify-center">
               <MenuBar editor={editor} />
             </div>
           </div>

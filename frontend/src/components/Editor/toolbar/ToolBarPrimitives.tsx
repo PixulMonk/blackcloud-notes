@@ -26,5 +26,8 @@ export const ToolbarButton = ({
 );
 
 export const Divider = () => (
-  <div className="w-px h-5 bg-border self-center mx-1" />
+  <div
+    className="h-5 w-0 border-l border-foreground/20 self-center mx-2 shrink-0"
+    aria-hidden="true"
+  />
 );

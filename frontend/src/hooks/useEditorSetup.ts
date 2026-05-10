@@ -6,7 +6,7 @@ import StarterKit from '@tiptap/starter-kit';
 import Image from '@tiptap/extension-image';
 import { Dropcursor } from '@tiptap/extensions';
 import FileHandler from '@tiptap/extension-file-handler';
-import { FontSize, TextStyle } from '@tiptap/extension-text-style';
+import { FontSize, TextStyle, FontFamily } from '@tiptap/extension-text-style';
 import { Color } from '@tiptap/extension-color';
 import { TaskItem, TaskList } from '@tiptap/extension-list';
 
@@ -20,6 +20,7 @@ const useEditorSetup = () => {
       Highlight.configure({ multicolor: true }),
       TextStyle,
       FontSize,
+      FontFamily,
       TaskList,
       TaskItem.configure({
         nested: true,

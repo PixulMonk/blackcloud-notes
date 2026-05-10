@@ -38,6 +38,7 @@ const MenuBar = ({ editor }: MenuBarProps) => {
 
       {/* Alignment */}
       <AlignmentGroup editor={editor} />
+
       <Divider />
 
       {/* Lists */}
