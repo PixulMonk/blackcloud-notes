@@ -1,4 +1,6 @@
 import type { Editor } from '@tiptap/core';
+import { useEditorState } from '@tiptap/react';
+
 import {
   Bold,
   Italic,
@@ -16,45 +18,58 @@ interface FormattingGroupProps {
 }
 
 function FormattingGroup({ editor }: FormattingGroupProps) {
+  const editorState = useEditorState({
+    editor,
+    selector: (ctx) => {
+      const e = ctx.editor!;
+      return {
+        isBold: e.isActive('bold'),
+        isItalic: e.isActive('italic'),
+        isUnderline: e.isActive('underline'),
+        isStrike: e.isActive('strike'),
+        isSuperscript: e.isActive('superscript'),
+        isSubscript: e.isActive('subscript'),
+      };
+    },
+  });
   return (
     <>
       <ToolbarButton
         onClick={run(() => editor.chain().focus().toggleBold().run())}
-        isActive={editor.isActive('bold')}
+        isActive={editorState?.isBold ?? false}
       >
         <Bold size={15} />
       </ToolbarButton>
       <ToolbarButton
         onClick={run(() => editor.chain().focus().toggleItalic().run())}
-        isActive={editor.isActive('italic')}
+        isActive={editorState?.isItalic ?? false}
       >
         <Italic size={15} />
       </ToolbarButton>
       <ToolbarButton
         onClick={run(() => editor.chain().focus().toggleUnderline().run())}
-        isActive={editor.isActive('underline')}
+        isActive={editorState?.isUnderline ?? false}
       >
         <Underline size={15} />
       </ToolbarButton>
       <ToolbarButton
         onClick={run(() => editor.chain().focus().toggleStrike().run())}
-        isActive={editor.isActive('strike')}
+        isActive={editorState?.isStrike ?? false}
       >
         <Strikethrough size={15} />
       </ToolbarButton>
       <ToolbarButton
         onClick={run(() => editor.chain().focus().toggleSuperscript().run())}
-        isActive={editor.isActive('superscript')}
+        isActive={editorState?.isSuperscript ?? false}
       >
         <Superscript size={15} />
       </ToolbarButton>
       <ToolbarButton
         onClick={run(() => editor.chain().focus().toggleSubscript().run())}
-        isActive={editor.isActive('subscript')}
+        isActive={editorState?.isSubscript ?? false}
       >
         <Subscript size={15} />
       </ToolbarButton>
-      {/* TODO: erase formatting button */}
     </>
   );
 }

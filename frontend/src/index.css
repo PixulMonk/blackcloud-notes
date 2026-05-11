@@ -184,7 +184,7 @@
 
 .ProseMirror ul[data-type='taskList'] li {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   gap: 0.5rem;
 }
 
