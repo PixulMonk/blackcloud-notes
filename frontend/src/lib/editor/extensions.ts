@@ -21,8 +21,13 @@ import {
 } from '@tiptap/extension-text-style';
 import Youtube from '@tiptap/extension-youtube';
 
+import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight';
+import { createLowlight, common } from 'lowlight';
+
 import compressImage from '@/utils/compressImage';
 import { withLineHeight } from '@/lib/editor/withLineHeight';
+
+const lowlight = createLowlight(common);
 
 export const editorExtensions = [
   StarterKit.configure({
@@ -54,6 +59,9 @@ export const editorExtensions = [
     },
   }),
   Color,
+  CodeBlockLowlight.configure({
+    lowlight,
+  }),
   Placeholder.configure({
     placeholder: 'Start writing…',
   }),
