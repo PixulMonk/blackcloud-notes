@@ -1,3 +1,5 @@
+import 'highlight.js/styles/github-dark.css';
+
 import Editor from '@/components/Editor/Editor';
 import SyncingIndicator from '@/components/Editor/SyncingIndicator';
 

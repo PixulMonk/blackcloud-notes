@@ -24,7 +24,7 @@ function SidebarNotesDropdown() {
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger>
+      <DropdownMenuTrigger asChild>
         <Button variant="ghost" size="icon">
           <Ellipsis />
         </Button>

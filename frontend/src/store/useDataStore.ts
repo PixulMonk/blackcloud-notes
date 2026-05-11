@@ -232,6 +232,8 @@ const useDataStore = create<DataState>((set) => ({
         return null;
       }
     },
+
+    // TODO: in case image upload fails, user doesn't get feedback. Perhaps an error toast is needed
     updateNote: async (encryptedContent, fileId) => {
       set({ error: null });
       try {
@@ -244,6 +246,7 @@ const useDataStore = create<DataState>((set) => ({
         set({ isSyncing: false });
         return response.data;
       } catch (error) {
+        set({ isSyncing: false });
         handleStoreError(error, set);
         return null;
       }
