@@ -9,6 +9,7 @@ import { useTreeUI } from '@/store/useTreeUIStore';
 
 import MenuBar from './MenuBar';
 import { SkeletonText } from './SkeletonText';
+import TableBubbleMenu from './TableBubbleMenu';
 
 const formatDate = (iso?: string) => {
   if (!iso) return null;
@@ -75,6 +76,7 @@ const Editor = () => {
                     <span className="text-sm">Start writing…</span>
                   </div>
                 )}
+                <TableBubbleMenu editor={editor} />
                 <EditorContent
                   editor={editor}
                   onFocus={() => setIsFocused(true)}
