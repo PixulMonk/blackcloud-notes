@@ -11,7 +11,8 @@ import AlignmentGroup from './toolbar/AlignmentGroup';
 import ListGroup from './toolbar/ListGroup';
 import SpacerGroup from './toolbar/SpacerGroup';
 import ResetFormattingButton from './toolbar/Buttons/ResetFormattingButton';
-import InsertLinkButton from './toolbar/InsertLinkButton';
+import InsertLinkButton from './toolbar/Buttons/InsertLinkButton';
+import InsertImageButton from './toolbar/Buttons/InsertImageButton';
 
 interface MenuBarProps {
   editor: Editor | null;
@@ -42,6 +43,7 @@ const MenuBar = ({ editor }: MenuBarProps) => {
       <Divider />
 
       <InsertLinkButton editor={editor} />
+      <InsertImageButton editor={editor} />
 
       <Divider />
 
@@ -50,6 +52,9 @@ const MenuBar = ({ editor }: MenuBarProps) => {
       <Divider />
 
       <AlignmentGroup editor={editor} />
+
+      <Divider />
+
       <SpacerGroup editor={editor} />
     </div>
   );

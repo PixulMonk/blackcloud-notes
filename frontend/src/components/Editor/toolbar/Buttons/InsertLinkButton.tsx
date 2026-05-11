@@ -4,8 +4,6 @@ import { useEditorState } from '@tiptap/react';
 
 import { AlertCircleIcon, Link2 } from 'lucide-react';
 
-import { cn } from '@/lib/utils';
-
 import {
   Popover,
   PopoverContent,
@@ -14,6 +12,8 @@ import {
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+
+import { cn } from '@/lib/utils';
 
 interface InsertLinkProps {
   editor: Editor;
