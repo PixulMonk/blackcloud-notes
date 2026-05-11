@@ -19,6 +19,7 @@ import {
   FontFamily,
   LineHeight,
 } from '@tiptap/extension-text-style';
+import Youtube from '@tiptap/extension-youtube';
 
 import compressImage from '@/utils/compressImage';
 import { withLineHeight } from '@/lib/editor/withLineHeight';
@@ -119,5 +120,9 @@ export const editorExtensions = [
     HTMLAttributes: {
       rel: 'noopener noreferrer',
     },
+  }),
+  Youtube.configure({
+    controls: false,
+    nocookie: true,
   }),
 ];
