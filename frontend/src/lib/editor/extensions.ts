@@ -4,11 +4,14 @@ import Heading from '@tiptap/extension-heading';
 import Image from '@tiptap/extension-image';
 import { Dropcursor } from '@tiptap/extensions';
 
+import { BubbleMenu } from '@tiptap/react/menus';
+
 import Highlight from '@tiptap/extension-highlight';
 import TextAlign from '@tiptap/extension-text-align';
 import Placeholder from '@tiptap/extension-placeholder';
 import FileHandler from '@tiptap/extension-file-handler';
 import Link from '@tiptap/extension-link';
+import { TableKit } from '@tiptap/extension-table';
 import { Color } from '@tiptap/extension-color';
 import { TaskItem, TaskList } from '@tiptap/extension-list';
 import { Superscript } from '@tiptap/extension-superscript';
@@ -52,6 +55,9 @@ export const editorExtensions = [
   TaskList,
   Superscript,
   Subscript,
+  TableKit.configure({
+    table: { resizable: true },
+  }),
   TaskItem.configure({
     nested: true,
     HTMLAttributes: {
