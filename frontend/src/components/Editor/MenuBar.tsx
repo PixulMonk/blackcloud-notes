@@ -10,6 +10,7 @@ import FormattingGroup from './toolbar/FormattingGroup';
 import AlignmentGroup from './toolbar/AlignmentGroup';
 import ListGroup from './toolbar/ListGroup';
 import SpacerGroup from './toolbar/SpacerGroup';
+import ResetFormattingButton from './toolbar/ResetFormattingButton';
 
 interface MenuBarProps {
   editor: Editor | null;
@@ -33,6 +34,7 @@ const MenuBar = ({ editor }: MenuBarProps) => {
 
       <FormattingGroup editor={editor} />
       <ColourGroup editor={editor} />
+      <ResetFormattingButton editor={editor} />
       <Divider />
 
       <ListGroup editor={editor} />
