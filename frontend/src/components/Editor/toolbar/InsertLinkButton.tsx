@@ -86,13 +86,15 @@ function InsertLinkButton({ editor }: InsertLinkProps) {
           </button>
         </PopoverTrigger>
         <PopoverContent>
-          <div className="flex flex-row gap-4">
+          <div className="flex flex-row gap-4 items-center">
             <Input
               value={typedUrl}
               onChange={(e) => setTypedUrl(e.target.value)}
               placeholder="Paste a link"
             />
-            <Button onClick={handleSubmit}>Apply</Button>
+            <Button size="sm" onClick={handleSubmit}>
+              Apply
+            </Button>
           </div>
           {error && (
             <Alert variant="destructive">
