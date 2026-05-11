@@ -1,0 +1,97 @@
+import type { ReactNode } from 'react';
+import { Pipette } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from '../ui/dropdown-menu';
+import { EDITOR_COLOR_COLUMNS } from '@/constants/editorColours';
+import { isLight } from '@/lib/editor/colourPickerHelpers';
+import { cn } from '@/lib/utils';
+
+interface ColourDropdownProps {
+  icon?: ReactNode;
+  currentHexValue: string | null;
+  onColorSelect: (hex: string) => void;
+  onClear?: () => void;
+}
+
+function ColourDropdown({
+  icon,
+  currentHexValue,
+  onColorSelect,
+  onClear,
+}: ColourDropdownProps) {
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button
+          className={cn(
+            'p-1.5 rounded-md transition-colors flex flex-col items-center gap-0.5',
+            'text-muted-foreground hover:text-foreground hover:bg-muted',
+          )}
+        >
+          {icon ?? <Pipette size={12} />}
+          <div
+            className="h-0.5 w-4 rounded-full"
+            style={{
+              backgroundColor: currentHexValue ?? 'transparent',
+              border: currentHexValue ? 'none' : '1px dashed currentColor',
+            }}
+          />
+        </button>
+      </DropdownMenuTrigger>
+
+      <DropdownMenuContent className="p-3 w-auto">
+        <div className="flex flex-row gap-1">
+          {EDITOR_COLOR_COLUMNS.map((column, colIndex) => (
+            <div key={colIndex} className="flex flex-col gap-1">
+              {column!.map((hex) => (
+                <button
+                  key={hex}
+                  onMouseDown={(e) => {
+                    e.preventDefault();
+                    onColorSelect(hex);
+                  }}
+                  className="h-5 w-5 rounded-sm flex-shrink-0 cursor-pointer hover:scale-110 transition-transform"
+                  style={{
+                    backgroundColor: hex,
+                    border: isLight(hex)
+                      ? '1px solid #e2e8f0'
+                      : '1px solid transparent',
+                  }}
+                />
+              ))}
+            </div>
+          ))}
+        </div>
+        {/* Custom color picker */}
+        <div className="mt-2 flex items-center gap-2">
+          <input
+            type="color"
+            defaultValue="#000000"
+            className="h-6 w-6 rounded cursor-pointer border-0 bg-transparent p-0"
+            onInput={(e) => {
+              onColorSelect((e.target as HTMLInputElement).value);
+            }}
+          />
+          <span className="text-xs text-muted-foreground">Custom</span>
+        </div>
+        {onClear && (
+          <DropdownMenuItem
+            onMouseDown={(e) => {
+              e.preventDefault();
+              onClear();
+            }}
+            className="mt-2 text-xs text-muted-foreground justify-center"
+          >
+            Clear
+          </DropdownMenuItem>
+        )}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
+export default ColourDropdown;

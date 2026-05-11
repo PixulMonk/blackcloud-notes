@@ -1,19 +1,21 @@
-import Highlight from '@tiptap/extension-highlight';
-import TextAlign from '@tiptap/extension-text-align';
-import Placeholder from '@tiptap/extension-placeholder';
 import { useEditor } from '@tiptap/react';
-import StarterKit from '@tiptap/starter-kit';
+import { editorExtensions } from '@/lib/editor/extensions';
 
 const useEditorSetup = () => {
   const editor = useEditor({
-    extensions: [
-      StarterKit,
-      TextAlign.configure({ types: ['heading', 'paragraph'] }),
-      Highlight,
-      Placeholder.configure({
-        placeholder: 'Start writing…',
-      }),
-    ],
+    editorProps: {
+      handleClick(view, pos, event) {
+        const attrs = view.state.doc
+          .resolve(pos)
+          .marks()
+          .find((m) => m.type.name === 'link');
+        if (attrs && (event.metaKey || event.ctrlKey)) {
+          window.open(attrs.attrs.href, '_blank', 'noopener noreferrer');
+        }
+        return false;
+      },
+    },
+    extensions: editorExtensions,
     content: '',
   });
 

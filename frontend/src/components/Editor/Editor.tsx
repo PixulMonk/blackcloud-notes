@@ -7,7 +7,7 @@ import useEditorContent from '@/hooks/useEditorContent';
 import useEditorSync from '@/hooks/useEditorSync';
 import { useTreeUI } from '@/store/useTreeUIStore';
 
-import MenuBar from '../MenuBar';
+import MenuBar from './MenuBar';
 import { SkeletonText } from './SkeletonText';
 
 const formatDate = (iso?: string) => {
@@ -20,7 +20,7 @@ const formatDate = (iso?: string) => {
 };
 
 const Editor = () => {
-  const { selectedFileId, selectedNode } = useTreeUI(); // grab full node
+  const { selectedFileId, selectedNode } = useTreeUI();
   const editor = useEditorSetup();
   const [isFocused, setIsFocused] = useState(false);
   const { showSkeleton, isFetchingContent, isContentReady } = useEditorContent(
@@ -40,7 +40,7 @@ const Editor = () => {
         {/* Sticky toolbar */}
         {selectedFileId && !isFetchingContent && (
           <div className="sticky top-0 z-10 bg-background border-b border-border/50">
-            <div className="max-w-3xl mx-auto px-8">
+            <div className="flex justify-center">
               <MenuBar editor={editor} />
             </div>
           </div>
