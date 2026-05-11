@@ -2,8 +2,8 @@ import type { Editor } from '@tiptap/core';
 
 import { RemoveFormatting } from 'lucide-react';
 
-import { ToolbarButton } from './ToolBarPrimitives';
-import { run } from './toolbarUtils';
+import { ToolbarButton } from '../ToolBarPrimitives';
+import { run } from '../toolbarUtils';
 
 interface ResetFormattingButtonProps {
   editor: Editor;

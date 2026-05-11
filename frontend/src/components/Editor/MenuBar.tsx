@@ -10,7 +10,8 @@ import FormattingGroup from './toolbar/FormattingGroup';
 import AlignmentGroup from './toolbar/AlignmentGroup';
 import ListGroup from './toolbar/ListGroup';
 import SpacerGroup from './toolbar/SpacerGroup';
-import ResetFormattingButton from './toolbar/ResetFormattingButton';
+import ResetFormattingButton from './toolbar/Buttons/ResetFormattingButton';
+import InsertLinkButton from './toolbar/InsertLinkButton';
 
 interface MenuBarProps {
   editor: Editor | null;
@@ -27,17 +28,25 @@ const MenuBar = ({ editor }: MenuBarProps) => {
   return (
     <div className="flex items-center flex-wrap gap-0.5 px-4 py-1.5  border-border/50 bg-background">
       <UndoRedoGroup editor={editor} />
+
       <Divider />
 
       <TextStyleGroup editor={editor} />
+
       <Divider />
 
       <FormattingGroup editor={editor} />
       <ColourGroup editor={editor} />
       <ResetFormattingButton editor={editor} />
+
+      <Divider />
+
+      <InsertLinkButton editor={editor} />
+
       <Divider />
 
       <ListGroup editor={editor} />
+
       <Divider />
 
       <AlignmentGroup editor={editor} />

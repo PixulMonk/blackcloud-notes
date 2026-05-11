@@ -18,12 +18,25 @@ import { Color } from '@tiptap/extension-color';
 import { TaskItem, TaskList } from '@tiptap/extension-list';
 import { Superscript } from '@tiptap/extension-superscript';
 import { Subscript } from '@tiptap/extension-subscript';
+import Link from '@tiptap/extension-link';
 
 import compressImage from '@/utils/compressImage';
 import { withLineHeight } from '@/lib/editor/withLineHeight';
 
 const useEditorSetup = () => {
   const editor = useEditor({
+    editorProps: {
+      handleClick(view, pos, event) {
+        const attrs = view.state.doc
+          .resolve(pos)
+          .marks()
+          .find((m) => m.type.name === 'link');
+        if (attrs && (event.metaKey || event.ctrlKey)) {
+          window.open(attrs.attrs.href, '_blank', 'noopener noreferrer');
+        }
+        return false;
+      },
+    },
     extensions: [
       StarterKit.configure({
         paragraph: false, // disable built-in paragraph
@@ -86,6 +99,46 @@ const useEditorSetup = () => {
             };
             reader.readAsDataURL(file);
           });
+        },
+      }),
+      Link.configure({
+        openOnClick: false,
+        autolink: true,
+        defaultProtocol: 'https',
+        protocols: ['http', 'https'],
+        isAllowedUri: (url, ctx) => {
+          try {
+            const parsedUrl = url.includes(':')
+              ? new URL(url)
+              : new URL(`${ctx.defaultProtocol}://${url}`);
+
+            if (!ctx.defaultValidate(parsedUrl.href)) return false;
+
+            const allowedProtocols = ctx.protocols.map((p) =>
+              typeof p === 'string' ? p : p.scheme,
+            );
+
+            return allowedProtocols.includes(
+              parsedUrl.protocol.replace(':', ''),
+            );
+          } catch {
+            return false;
+          }
+        },
+        shouldAutoLink: (url) => {
+          try {
+            const parsedUrl = url.includes(':')
+              ? new URL(url)
+              : new URL(`https://${url}`);
+            return (
+              parsedUrl.protocol === 'https:' || parsedUrl.protocol === 'http:'
+            );
+          } catch {
+            return false;
+          }
+        },
+        HTMLAttributes: {
+          rel: 'noopener noreferrer',
         },
       }),
     ],

@@ -8,7 +8,6 @@ import {
   Strikethrough,
   Superscript,
   Subscript,
-  RemoveFormatting,
 } from 'lucide-react';
 
 import { ToolbarButton } from './ToolBarPrimitives';

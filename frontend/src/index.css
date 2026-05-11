@@ -163,6 +163,15 @@
   }
 }
 
+/* Added to prevent open on click, requiring ctrl/cmd + click*/
+/* Also adds the conventional link styling */
+.ProseMirror a {
+  pointer-events: none;
+  color: oklch(0.6 0.2 250);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
 /* Checkbox styling */
 .ProseMirror input[type='checkbox'] {
   @apply appearance-none h-4 w-4 rounded border border-primary/50 bg-background checked:bg-primary checked:border-primary cursor-pointer flex items-center justify-center;
