@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import bcrypt from 'bcrypt';
-import { buildRes } from '../../src/lib/testHelpers';
+import { buildRes, buildMockUser } from '../../src/lib/testHelpers';
 import mongoose from 'mongoose';
 import { signup } from '../../src/controllers/auth.controller';
 import { User } from '../../src/models/user.model';
@@ -14,18 +14,7 @@ jest.mock('../../src/mailer/emails');
 
 const buildReq = (overrides = {}): Partial<Request> => ({
   body: {
-    name: 'Test User',
-    email: 'test@example.com',
-    authToken: 'fake-auth-token-bytes',
-    protectedDEK: 'base64encodedDEK==',
-    argon2Salt: 'base64encodedSalt==',
-    argon2Params: {
-      memoryCost: 65536,
-      timeCost: 3,
-      parallelism: 1,
-      hashLength: 64,
-      type: 2,
-    },
+    ...buildMockUser(),
     ...overrides,
   },
 });
