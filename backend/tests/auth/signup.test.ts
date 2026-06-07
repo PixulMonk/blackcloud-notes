@@ -1,15 +1,16 @@
 import { Request, Response } from 'express';
 import bcrypt from 'bcrypt';
+import { buildRes } from '../../src/lib/testHelpers';
 import mongoose from 'mongoose';
 import { signup } from '../../src/controllers/auth.controller';
 import { User } from '../../src/models/user.model';
 import { generateTokenAndSetCookie } from '../../src/utils/generateTokenAndSetCookie';
 import { sendVerificationEmail } from '../../src/mailer/emails';
 
+jest.mock('bcrypt');
 jest.mock('../../src/models/user.model');
 jest.mock('../../src/utils/generateTokenAndSetCookie');
 jest.mock('../../src/mailer/emails');
-jest.mock('bcrypt');
 
 const buildReq = (overrides = {}): Partial<Request> => ({
   body: {
@@ -28,14 +29,6 @@ const buildReq = (overrides = {}): Partial<Request> => ({
     ...overrides,
   },
 });
-
-const buildRes = (): Partial<Response> => {
-  const res: Partial<Response> = {};
-  res.status = jest.fn().mockReturnValue(res);
-  res.json = jest.fn().mockReturnValue(res);
-  res.cookie = jest.fn().mockReturnValue(res);
-  return res;
-};
 
 describe('Signup Controller', () => {
   let req: Partial<Request>;
