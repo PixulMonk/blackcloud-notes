@@ -46,7 +46,6 @@ describe('Signup Controller', () => {
       return mockUserInstance;
     });
 
-    // Setup other dependencies
     (User.findOne as jest.Mock).mockResolvedValue(null);
     (bcrypt.hash as jest.Mock).mockResolvedValue('$2b$12$fakehashedtoken');
     (generateTokenAndSetCookie as jest.Mock).mockImplementation(() => {});
