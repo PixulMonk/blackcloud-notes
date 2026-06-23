@@ -61,6 +61,7 @@ describe('Get Login Metadata Controller', () => {
       const firstSalt = (res.json as jest.Mock).mock.calls[0][0].argon2Salt;
 
       res = buildRes(); // fresh res for second call
+      jest.clearAllMocks();
 
       await getLoginMetadata(req as Request, res as Response, next);
       await new Promise(process.nextTick);
