@@ -93,6 +93,7 @@ describe('Verify Email Controller', () => {
       await new Promise(process.nextTick);
 
       expect(mockUser.isVerified).toBe(true);
+      expect(mockUser.save).toHaveBeenCalled();
     });
 
     test('clears verification token and expiry upon success', async () => {
@@ -103,6 +104,7 @@ describe('Verify Email Controller', () => {
 
       expect(mockUser.verificationToken).toBeUndefined();
       expect(mockUser.verificationTokenExpiresAt).toBeUndefined();
+      expect(mockUser.save).toHaveBeenCalled();
     });
   });
 
