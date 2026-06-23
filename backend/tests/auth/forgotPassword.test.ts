@@ -13,7 +13,6 @@ import { User } from '../../src/models/user.model';
 jest.mock('../../src/models/user.model');
 jest.mock('../../src/mailer/emails');
 jest.mock('../../src/utils/cooldownHelpers');
-jest.mock('../../src/utils/cooldownHelpers');
 
 describe('Forgot Password Controller', () => {
   let req: Partial<Request>;
