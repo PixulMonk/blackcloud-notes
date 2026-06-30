@@ -3,7 +3,6 @@ import bcrypt from 'bcrypt';
 import mongoose from 'mongoose';
 
 import { buildRes, buildMockUser } from '../../src/lib/testHelpers';
-
 import { signup } from '../../src/controllers/auth.controller';
 import { User } from '../../src/models/user.model';
 import { generateTokenAndSetCookie } from '../../src/utils/generateTokenAndSetCookie';
