@@ -183,11 +183,15 @@ describe('Reset Password Controller', () => {
   describe('response', () => {
     test('returns 200 on success', async () => {
       await resetPassword(req as any, res as any, next);
+      await new Promise(process.nextTick);
+
       expect(res.status).toHaveBeenCalledWith(200);
     });
 
     test('returns success true', async () => {
       await resetPassword(req as any, res as any, next);
+      await new Promise(process.nextTick);
+
       const body = (res.json as jest.Mock).mock.calls[0][0];
       expect(body.success).toBe(true);
     });
