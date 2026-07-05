@@ -10,7 +10,7 @@
   ],
   "compilerOptions": {
     "baseUrl": ".",
-    "types": ["node", "jest"],
+    "types": ["node"],
     "paths": {
       "@/*": ["./src/*"]
     }
