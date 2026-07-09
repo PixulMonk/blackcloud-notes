@@ -41,7 +41,10 @@ export const insertNode = (
 ): TreeNode[] => {
   return nodes.map((n) => {
     if (n._id === parentId) {
-      return { ...n, children: [...(n.children ?? []), newNode] };
+      return {
+        ...n,
+        children: [...(n.children ?? []), { ...newNode, parentId }],
+      };
     }
     if (n.children?.length) {
       return { ...n, children: insertNode(n.children, parentId, newNode) };
