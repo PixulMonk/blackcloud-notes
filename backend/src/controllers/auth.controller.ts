@@ -175,6 +175,7 @@ export const getLoginMetadata = asyncHandler(
         argon2Params: ENCRYPTION_CONFIG.argon2,
         protectedDEK: fakeBlobBase64,
       });
+
       return;
     }
 

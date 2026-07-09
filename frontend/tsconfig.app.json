@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
     "baseUrl": ".",
+    "types": ["node", "vitest/globals"],
     "paths": {
       "@/*": ["./src/*"]
     },
@@ -9,6 +10,7 @@
     "useDefineForClassFields": true,
     "lib": ["ES2023", "DOM", "DOM.Iterable"],
     "module": "ESNext",
+
     "skipLibCheck": true,
 
     /* Bundler mode */
@@ -27,5 +29,5 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true
   },
-  "include": ["src"]
+  "include": ["src", "tests", "jest.setup.ts"]
 }
