@@ -9,7 +9,8 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest",
-    "test:watch": "vitest --watch"
+    "test:watch": "vitest --watch",
+    "visualize": "vite build && npx vite-bundle-visualizer"
   },
   "dependencies": {
     "@blackcloud/shared": "*",
@@ -80,6 +81,7 @@
     "typescript": "~5.8.3",
     "typescript-eslint": "^8.35.1",
     "vite": "^7.0.4",
+    "vite-bundle-visualizer": "^1.2.1",
     "vitest": "^4.1.9"
   }
 }
