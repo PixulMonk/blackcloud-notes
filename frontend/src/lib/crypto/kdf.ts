@@ -1,5 +1,3 @@
-import { argon2id } from 'hash-wasm';
-
 import { ENCRYPTION_CONFIG } from '@blackcloud/shared';
 import type { Argon2Params } from '@blackcloud/shared';
 
@@ -17,6 +15,7 @@ const deriveKeys = async (
   salt: Uint8Array,
   params: Argon2Params,
 ): Promise<DerivedKeys> => {
+  const { argon2id } = await import('hash-wasm');
   const derived = await argon2id({
     password: masterPassword,
     salt,
