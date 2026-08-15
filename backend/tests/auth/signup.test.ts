@@ -12,6 +12,7 @@ jest.mock('bcrypt');
 jest.mock('../../src/models/user.model');
 jest.mock('../../src/utils/generateTokenAndSetCookie');
 jest.mock('../../src/mailer/emails');
+jest.mock('../../src/mailer/emailClient');
 
 const buildReq = (overrides = {}): Partial<Request> => ({
   body: {

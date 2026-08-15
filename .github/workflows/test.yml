@@ -38,3 +38,7 @@ jobs:
         working-directory: ./shared
       - run: npm test
         working-directory: ./backend
+        env:
+          JWT_SECRET: test-secret-for-ci
+          SALT_HMAC_SECRET: test-hmac-secret-for-ci
+          RESEND_API_KEY: re_test_fake_key_for_ci
