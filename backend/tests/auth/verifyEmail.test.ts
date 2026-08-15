@@ -8,6 +8,7 @@ import { User } from '../../src/models/user.model';
 
 jest.mock('../../src/models/user.model');
 jest.mock('../../src/mailer/emails');
+jest.mock('../../src/mailer/emailClient');
 
 describe('Verify Email Controller', () => {
   let req: Partial<Request>;

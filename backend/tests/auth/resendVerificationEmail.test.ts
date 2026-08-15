@@ -13,6 +13,7 @@ import {
 
 jest.mock('../../src/models/user.model');
 jest.mock('../../src/mailer/emails');
+jest.mock('../../src/mailer/emailClient');
 jest.mock('../../src/utils/cooldownHelpers');
 
 describe('Resend Verification Email Controller', () => {
