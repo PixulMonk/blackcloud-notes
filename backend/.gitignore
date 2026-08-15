@@ -1,0 +1,9 @@
+# Compiled test artifacts
+tests/**/*.js
+tests/**/*.js.map
+
+# Build output
+dist/
+
+# Environment
+.env
