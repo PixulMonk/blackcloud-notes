@@ -1,4 +1,5 @@
 export type AppView =
+  | { type: 'empty' }
   | { type: 'editor' }
   | { type: 'trash' }
   | { type: 'archived' }
