@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import type { AppState, AppStateActions, AppView } from '@/types/app.types';
 
 const useAppStore = create<AppState>((set) => ({
-  activeView: null,
+  activeView: {type: 'empty'},
   actions: {
     setActiveView: (view) => set({ activeView: view }),
   },

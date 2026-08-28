@@ -7,10 +7,10 @@ export type AppView =
 // Add new types along with renderView function at HomePage.tsx
 
 export interface AppState {
-  activeView: AppView | null;
+  activeView: AppView;
   actions: AppStateActions;
 }
 
 export interface AppStateActions {
-  setActiveView: (view: AppView | null) => void;
+  setActiveView: (view: AppView) => void;
 }

@@ -12,7 +12,7 @@ function HomePage() {
 
   const renderView = () => {
     // Add new views along with AppView type at app.types.ts
-    switch (activeView?.type) {
+    switch (activeView.type) {
       case 'trash':
         return <TrashPage />;
       case 'archived':
@@ -21,8 +21,11 @@ function HomePage() {
         return <SettingsPage />;
       case 'editor':
         return selectedFileId ? <EditorPage /> : <EmptyPlaceholder />;
+      case 'empty':
+        return <EmptyPlaceholder />
       default:
-        return <EmptyPlaceholder />;
+        const _exhaustive: never = activeView;
+        return _exhaustive;
     }
   };
 
