@@ -1,7 +1,7 @@
-import { useEffect } from 'react';
-import { DragDropProvider } from '@dnd-kit/react';
+import { useEffect } from "react";
+import { DragDropProvider } from "@dnd-kit/react";
 
-import { Tree } from './Tree/Tree';
+import { Tree } from "./Tree/Tree";
 
 import {
   FilePlus2,
@@ -11,9 +11,10 @@ import {
   Trash2,
   HelpCircle,
   Lock,
-} from 'lucide-react';
+  Settings,
+} from "lucide-react";
 
-import { Button } from './ui/button';
+import { Button } from "./ui/button";
 
 import {
   Sidebar,
@@ -24,18 +25,18 @@ import {
   SidebarHeader,
   SidebarMenu,
   SidebarFooter,
-} from '@/components/ui/sidebar';
-import { useData, useDataActions } from '@/store/useDataStore';
-import { useAppStoreActions } from '@/store/useAppStore';
-import { useDataEncryptionKey, useVaultActions } from '@/store/useVaultStore';
-import { useIsDark } from '@/store/useThemeStore';
-import { Separator } from '@/components/ui/separator';
-import RootDropZone from './RootDropZone';
-import SkeletonFileTree from './SkeletonFileTree';
-import useCreateNode from '@/hooks/useCreateNode';
-import { sortTree } from '@/lib/tree/treeHelpers';
-import SidebarNotesDropdown from './SidebarNotesDropdown';
-import { useTreeUI } from '@/store/useTreeUIStore';
+} from "@/components/ui/sidebar";
+import { useData, useDataActions } from "@/store/useDataStore";
+import { useAppStoreActions } from "@/store/useAppStore";
+import { useDataEncryptionKey, useVaultActions } from "@/store/useVaultStore";
+import { useIsDark } from "@/store/useThemeStore";
+import { Separator } from "@/components/ui/separator";
+import RootDropZone from "./RootDropZone";
+import SkeletonFileTree from "./SkeletonFileTree";
+import useCreateNode from "@/hooks/useCreateNode";
+import { sortTree } from "@/lib/tree/treeHelpers";
+import SidebarNotesDropdown from "./SidebarNotesDropdown";
+import { useTreeUI } from "@/store/useTreeUIStore";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { tree, isInitialLoading } = useData();
@@ -54,8 +55,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
   const isDark = useIsDark();
   const logoUrl = isDark
-    ? ' /logo/logo-horiz-dark.svg'
-    : '/logo/logo-horiz.svg';
+    ? " /logo/logo-horiz-dark.svg"
+    : "/logo/logo-horiz.svg";
 
   useEffect(() => {
     fetchTree(dataEncryptionKey!);
@@ -73,7 +74,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
     if (activeId === overId) return;
 
-    const targetParentId = overId === 'root' ? null : overId;
+    const targetParentId = overId === "root" ? null : overId;
 
     updateNode({
       nodeId: activeId,
@@ -103,7 +104,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               className="size-8"
               onClick={(e) => {
                 e.stopPropagation();
-                createNode('folder', undefined);
+                createNode("folder", undefined);
               }}
             >
               <FolderPlus className="size-4" />
@@ -114,7 +115,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               className="size-8"
               onClick={(e) => {
                 e.stopPropagation();
-                createNode('file', undefined);
+                createNode("file", undefined);
               }}
             >
               <FilePlus2 className="size-4" />
@@ -147,7 +148,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <Button
             variant="ghost"
             className="w-full justify-start gap-2 h-9 px-2 text-sm font-normal"
-            onClick={() => setActiveView({ type: 'archived' })}
+            onClick={() => setActiveView({ type: "archived" })}
           >
             <Archive className="size-4 opacity-70" />
             <span>Archived</span>
@@ -156,13 +157,23 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <Button
             variant="ghost"
             className="w-full justify-start gap-2 h-9 px-2 text-sm font-normal"
-            onClick={() => setActiveView({ type: 'trash' })}
+            onClick={() => setActiveView({ type: "trash" })}
           >
             <Trash2 className="size-4 opacity-70" />
             <span>Trash</span>
           </Button>
 
           <Separator className="my-1 opacity-50" />
+
+          {/* System / Help Actions */}
+          <Button
+            variant="ghost"
+            className="w-full justify-start gap-2 h-9 px-2 text-sm font-normal"
+            onClick={() => setActiveView({ type: "settings" })}
+          >
+            <Settings className="size-4 opacity-70" />
+            <span>Settings</span>
+          </Button>
 
           {/* System / Help Actions */}
           <Button
