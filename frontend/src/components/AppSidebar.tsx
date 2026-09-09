@@ -50,7 +50,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const dataEncryptionKey = useDataEncryptionKey();
   const { clearKeys } = useVaultActions();
 
-  const { setActiveView } = useAppStoreActions();
+  const { setActiveView, openSettings } = useAppStoreActions();
   const { createNode } = useCreateNode();
 
   const isDark = useIsDark();
@@ -169,7 +169,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <Button
             variant="ghost"
             className="w-full justify-start gap-2 h-9 px-2 text-sm font-normal"
-            onClick={() => setActiveView({ type: "settings" })}
+            onClick={() => openSettings("account")}
           >
             <Settings className="size-4 opacity-70" />
             <span>Settings</span>
