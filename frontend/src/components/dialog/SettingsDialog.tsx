@@ -8,10 +8,10 @@ import {
 } from "@/store/useAppStore";
 import type { SettingsTab } from "@/types/app.types";
 import { CircleUser, ShieldUser, LockKeyhole, Palette } from "lucide-react";
-import AccountSection from "@/pages/Settings/AccountSection";
-// import SecuritySection from "./settings/SecuritySection";
-// import VaultSection from "./settings/VaultSection";
-// import AppearanceSection from "./settings/AppearanceSection";
+import AccountSection from "@/pages/settings/AccountSection";
+import SecuritySection from "@/pages/settings/SecuritySection";
+import VaultSection from "@/pages/settings/VaultSection";
+import AppearanceSection from "@/pages/settings/AppearanceSection";
 
 function SettingsDialog() {
   const isOpen = useIsSettingsOpen();
@@ -54,11 +54,13 @@ function SettingsDialog() {
               <AccountSection />
             </TabsContent>
             <TabsContent value="security">
-              {/* <SecuritySection /> */}
+              <SecuritySection />
             </TabsContent>
-            <TabsContent value="vault">{/* <VaultSection /> */}</TabsContent>
+            <TabsContent value="vault">
+              <VaultSection />
+            </TabsContent>
             <TabsContent value="appearance">
-              {/* <AppearanceSection /> */}
+              <AppearanceSection />
             </TabsContent>
           </div>
         </Tabs>
