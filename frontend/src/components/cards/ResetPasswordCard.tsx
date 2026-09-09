@@ -16,13 +16,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { confirm } from "./dialog/ConfirmDialog";
+import { confirm } from "../dialog/ConfirmDialog";
 
 import { deriveKeysForNewUser } from "@/lib/crypto/kdf";
 import { encryptAESGCM } from "@/lib/crypto/aes";
-import { toBase64 } from "./../lib/crypto/crypto-utils";
-import PasswordStrengthBar from "./PasswordStrengthBar";
-import PasswordRequirements from "./PasswordRequirements";
+import { toBase64 } from "../../lib/crypto/crypto-utils";
+import PasswordStrengthBar from "../PasswordStrengthBar";
+import PasswordRequirements from "../PasswordRequirements";
 import { arePasswordRequirementsMet } from "@/utils/passwordRules";
 import { initializeUserVault } from "@/lib/crypto/vault";
 
