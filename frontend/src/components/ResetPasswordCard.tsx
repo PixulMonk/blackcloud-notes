@@ -1,9 +1,9 @@
-import { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 
-import { Eye, EyeOff, AlertCircleIcon, Loader } from 'lucide-react';
+import { Eye, EyeOff, AlertCircleIcon, Loader } from "lucide-react";
 
-import { useAuth, useAuthActions } from '@/store/useAuthStore';
+import { useAuth, useAuthActions } from "@/store/useAuthStore";
 
 import {
   Card,
@@ -11,24 +11,24 @@ import {
   CardTitle,
   CardDescription,
   CardContent,
-} from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Button } from '@/components/ui/button';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { confirm } from './ConfirmDialogue';
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { confirm } from "./dialog/ConfirmDialog";
 
-import { deriveKeysForNewUser } from '@/lib/crypto/kdf';
-import { encryptAESGCM } from '@/lib/crypto/aes';
-import { toBase64 } from './../lib/crypto/crypto-utils';
-import PasswordStrengthBar from './PasswordStrengthBar';
-import PasswordRequirements from './PasswordRequirements';
-import { arePasswordRequirementsMet } from '@/utils/passwordRules';
-import { initializeUserVault } from '@/lib/crypto/vault';
+import { deriveKeysForNewUser } from "@/lib/crypto/kdf";
+import { encryptAESGCM } from "@/lib/crypto/aes";
+import { toBase64 } from "./../lib/crypto/crypto-utils";
+import PasswordStrengthBar from "./PasswordStrengthBar";
+import PasswordRequirements from "./PasswordRequirements";
+import { arePasswordRequirementsMet } from "@/utils/passwordRules";
+import { initializeUserVault } from "@/lib/crypto/vault";
 
 function ResetPasswordCard() {
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
@@ -43,32 +43,32 @@ function ResetPasswordCard() {
   const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
     const ok = await confirm({
-      title: '⚠️ WARNING: DATA WILL BE LOST',
+      title: "⚠️ WARNING: DATA WILL BE LOST",
       message: `Resetting your password will permanently delete all your encrypted notes.
       This action cannot be undone.
       Only proceed if you understand that your data will be lost.`,
-      noText: 'Cancel',
+      noText: "Cancel",
     });
     if (ok) await handleChangePassword();
   };
 
   const handleChangePassword = async () => {
     if (!token) {
-      setError('Invalid or expired reset link');
+      setError("Invalid or expired reset link");
       return;
     }
 
     if (!password || !confirmPassword) {
-      setError('All fields are required.');
+      setError("All fields are required.");
       return;
     }
 
     if (password != confirmPassword) {
-      setError('Passwords do not match.');
+      setError("Passwords do not match.");
       return;
     }
     if (!arePasswordRequirementsMet(password)) {
-      setError('Password does not meet requirements.');
+      setError("Password does not meet requirements.");
       return;
     }
 
@@ -86,7 +86,7 @@ function ResetPasswordCard() {
         await initializeUserVault(newKeyEncryptionKey);
 
       if (!newProtectedDEK) {
-        throw new Error('Vault initialization failed.');
+        throw new Error("Vault initialization failed.");
       }
 
       // Step 4 - send to database (make API call)
@@ -99,18 +99,18 @@ function ResetPasswordCard() {
       );
 
       if (success) {
-        navigate('/login', {
+        navigate("/login", {
           state: {
             message:
-              'Your password has been reset successfully. Please log in.',
+              "Your password has been reset successfully. Please log in.",
           },
         });
       }
     } catch (error: unknown) {
       if (error instanceof Error) {
-        console.error('Error:', error.message);
+        console.error("Error:", error.message);
       } else {
-        console.error('Unknown error:', error);
+        console.error("Unknown error:", error);
       }
     }
   };
@@ -135,7 +135,7 @@ function ResetPasswordCard() {
                 <div className="relative">
                   <div className="flex items-center">
                     <Input
-                      type={showPassword ? 'text' : 'password'}
+                      type={showPassword ? "text" : "password"}
                       id="password"
                       value={password}
                       placeholder="Password"
@@ -165,7 +165,7 @@ function ResetPasswordCard() {
                 <div className="relative">
                   <div className="flex items-center">
                     <Input
-                      type={showConfirmPassword ? 'text' : 'password'}
+                      type={showConfirmPassword ? "text" : "password"}
                       id="confirm-password"
                       value={confirmPassword}
                       placeholder="Confirm password"
@@ -215,7 +215,7 @@ function ResetPasswordCard() {
                 {isLoading ? (
                   <Loader className="animate-spin mx-auto" size={24} />
                 ) : (
-                  'Change password'
+                  "Change password"
                 )}
               </Button>
             </div>
