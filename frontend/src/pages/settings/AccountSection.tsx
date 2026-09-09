@@ -14,7 +14,7 @@ function AccountSection() {
           <div>
             <Label>Avatar</Label>
             <p className="text-xs text-muted-foreground mt-1">
-              Shown on your profile and shared notes.
+              Shown on your profile.
             </p>
           </div>
           <Avatar>
