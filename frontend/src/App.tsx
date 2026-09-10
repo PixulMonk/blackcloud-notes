@@ -1,23 +1,23 @@
-import { Routes, Route, Navigate, useLocation } from "react-router-dom";
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
-import { AppSidebar } from "./components/AppSidebar";
-import { useEffect, lazy, Suspense } from "react";
-import { useIsDark } from "./store/useThemeStore";
-import { updateFavicon } from "./lib/utils";
-import { useAuth, useAuthActions } from "./store/useAuthStore";
-import { Loader } from "lucide-react";
-import { useDataEncryptionKey } from "./store/useVaultStore";
-import Header from "./components/Header";
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
+import { AppSidebar } from './components/AppSidebar';
+import { useEffect, lazy, Suspense } from 'react';
+import { useIsDark } from './store/useThemeStore';
+import { updateFavicon } from './lib/utils';
+import { useAuth, useAuthActions } from './store/useAuthStore';
+import { Loader } from 'lucide-react';
+import { useDataEncryptionKey } from './store/useVaultStore';
+import Header from './components/Header';
 
 // Lazy-loaded pages
-const HomePage = lazy(() => import("./pages/HomePage"));
-const SignupPage = lazy(() => import("./pages/SignupPage"));
-const LoginPage = lazy(() => import("./pages/LoginPage"));
-const SettingsDialog = lazy(() => import("./components/dialog/SettingsDialog"));
-const ForgotPasswordPage = lazy(() => import("./pages/ForgotPasswordPage"));
-const VerifyEmailPage = lazy(() => import("./pages/VerifyEmailPage"));
-const ResetPasswordPage = lazy(() => import("./pages/ResetPasswordPage"));
-const UnlockVaultPage = lazy(() => import("./pages/UnlockVaultPage"));
+const HomePage = lazy(() => import('./pages/HomePage'));
+const SignupPage = lazy(() => import('./pages/SignupPage'));
+const LoginPage = lazy(() => import('./pages/LoginPage'));
+const SettingsPage = lazy(() => import('./pages/SettingsPage'));
+const ForgotPasswordPage = lazy(() => import('./pages/ForgotPasswordPage'));
+const VerifyEmailPage = lazy(() => import('./pages/VerifyEmailPage'));
+const ResetPasswordPage = lazy(() => import('./pages/ResetPasswordPage'));
+const UnlockVaultPage = lazy(() => import('./pages/UnlockVaultPage'));
 
 function App() {
   const { user, isCheckingAuth, isAuthenticated } = useAuth();
