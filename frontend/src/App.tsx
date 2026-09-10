@@ -27,20 +27,20 @@ function App() {
   const location = useLocation();
 
   const authRoutes = [
-    '/login',
-    '/signup',
-    '/verify-email',
-    '/forgot-password',
-    '/unlock-vault',
+    "/login",
+    "/signup",
+    "/verify-email",
+    "/forgot-password",
+    "/unlock-vault",
   ];
 
   const hideSidebar =
     authRoutes.includes(location.pathname) ||
-    location.pathname.startsWith('/reset-password/');
+    location.pathname.startsWith("/reset-password/");
 
   useEffect(() => {
-    document.documentElement.classList.toggle('dark', isDark);
-    localStorage.setItem('theme', isDark ? 'dark' : 'light');
+    document.documentElement.classList.toggle("dark", isDark);
+    localStorage.setItem("theme", isDark ? "dark" : "light");
   }, [isDark]);
 
   useEffect(() => {
@@ -109,22 +109,12 @@ function App() {
               }
             />
             <Route
-              path="/settings"
-              element={
-                user && isAuthenticated ? (
-                  <SettingsPage />
-                ) : (
-                  <Navigate to="/login" />
-                )
-              }
-            />
-            <Route
               path="/verify-email"
               element={
                 user && !user.isVerified ? (
                   <VerifyEmailPage />
                 ) : (
-                  <Navigate to={user ? '/' : '/login'} />
+                  <Navigate to={user ? "/" : "/login"} />
                 )
               }
             />
@@ -146,6 +136,7 @@ function App() {
             />
           </Routes>
         </main>
+        {!hideSidebar && <SettingsDialog />}
       </SidebarProvider>
     </Suspense>
   );

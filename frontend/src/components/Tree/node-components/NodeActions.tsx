@@ -1,16 +1,16 @@
-import { Button } from '@/components/ui/button';
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { Ellipsis, Plus } from 'lucide-react';
-import { confirm } from '../../ConfirmDialogue';
-import { useTreeUIActions, useTreeUI } from '@/store/useTreeUIStore';
-import { useDataActions } from '@/store/useDataStore';
-import type { TreeNode } from '@/types/treeStore.types';
-import useCreateNode from '@/hooks/useCreateNode';
+} from "@/components/ui/dropdown-menu";
+import { Ellipsis, Plus } from "lucide-react";
+import { confirm } from "../../dialog/ConfirmDialog";
+import { useTreeUIActions, useTreeUI } from "@/store/useTreeUIStore";
+import { useDataActions } from "@/store/useDataStore";
+import type { TreeNode } from "@/types/treeStore.types";
+import useCreateNode from "@/hooks/useCreateNode";
 
 function NodeActions({
   node,
@@ -30,10 +30,10 @@ function NodeActions({
 
   const handleSoftDelete = async (id: string) => {
     const ok = await confirm({
-      title: 'Delete',
-      message: 'Are you sure you want to delete this item?',
-      yesText: 'Delete',
-      noText: 'Cancel',
+      title: "Delete",
+      message: "Are you sure you want to delete this item?",
+      yesText: "Delete",
+      noText: "Cancel",
     });
     if (ok) {
       softDeleteNode(id);
@@ -43,17 +43,17 @@ function NodeActions({
 
   const handleArchive = async (id: string) => {
     const ok = await confirm({
-      title: 'Archive',
-      message: 'Are you sure you want to archive this item?',
-      yesText: 'Archive',
-      noText: 'Cancel',
+      title: "Archive",
+      message: "Are you sure you want to archive this item?",
+      yesText: "Archive",
+      noText: "Cancel",
     });
     if (ok) archiveNode(id);
   };
 
   return (
     <div className="flex items-center ">
-      {node.type == 'folder' && (
+      {node.type == "folder" && (
         <Button
           variant="ghost"
           size="icon"
@@ -61,7 +61,7 @@ function NodeActions({
           onClick={(e) => {
             e.stopPropagation();
             onExpand();
-            createNode('file', node._id);
+            createNode("file", node._id);
           }}
         >
           <Plus className="h-4 w-4" />

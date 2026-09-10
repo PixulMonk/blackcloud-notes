@@ -1,29 +1,30 @@
-import { create } from 'zustand';
-import axios from 'axios';
+import { create } from "zustand";
+import axios from "axios";
 import type {
   DataActions,
   DataState,
   DataStoreState,
+  TreeNodeListResponse,
   TreeNodeResponse,
   TreeResponse,
   AddNodeOptions,
   UpdateNodeOptions,
-} from '@/types/data.types';
-import { axiosInstance } from '@/lib/axios';
+} from "@/types/data.types";
+import { axiosInstance } from "@/lib/axios";
 
-import { useShallow } from 'zustand/react/shallow';
+import { useShallow } from "zustand/react/shallow";
 
-import type { NoteResponse } from '@/types/note.types';
-import type { TreeNode } from '@/types/treeStore.types';
-import { encryptAESGCM } from '@/lib/crypto/aes';
-import { decryptTree } from '@/lib/tree/treeEncryption';
+import type { NoteResponse } from "@/types/note.types";
+import type { TreeNode, TreeNodeDTO } from "@/types/treeStore.types";
+import { encryptAESGCM, decryptAESGCM } from "@/lib/crypto/aes";
+import { decryptTree } from "@/lib/tree/treeEncryption";
 import {
   removeRecursive,
   updateRecursive,
   insertNode,
   moveNode,
-} from '@/lib/tree/treeHelpers';
-import handleStoreError from '@/utils/handleStoreError';
+} from "@/lib/tree/treeHelpers";
+import handleStoreError from "@/utils/handleStoreError";
 
 // TODO: error toast?
 
@@ -32,6 +33,8 @@ import handleStoreError from '@/utils/handleStoreError';
 // Encryption and decryption happens outside of this actions to avoid debug nightmare
 const useDataStore = create<DataState>((set) => ({
   tree: [], // Should be decrypted
+  archivedNodes: [],
+  deletedNodes: [],
   isInitialLoading: false,
   isLoading: false,
   isFetchingContent: false,
@@ -49,7 +52,7 @@ const useDataStore = create<DataState>((set) => ({
         );
         set({ tree: decryptedTree, isInitialLoading: false });
       } catch (err: any) {
-        set({ error: err.message || 'Failed to fetch tree', isLoading: false });
+        set({ error: err.message || "Failed to fetch tree", isLoading: false });
       }
     },
 
@@ -65,14 +68,14 @@ const useDataStore = create<DataState>((set) => ({
       parentId = null,
     }: AddNodeOptions) => {
       set({ isLoading: true, error: null });
-      console.log('addNode called with parentId:', parentId);
+      console.log("addNode called with parentId:", parentId);
       if (!title) {
-        title = 'Untitled document';
+        title = "Untitled document";
       }
       const encryptedTitle = await encryptAESGCM(title, dataEncryptionKey!);
 
       try {
-        console.log('Sending encryptedTitle:', encryptedTitle);
+        console.log("Sending encryptedTitle:", encryptedTitle);
 
         const response = await axiosInstance.post<TreeNodeResponse>(
           `treeNodes/create`,
@@ -143,7 +146,7 @@ const useDataStore = create<DataState>((set) => ({
         );
 
         const updatedNodeDTO = response.data.data;
-        if (!updatedNodeDTO) throw new Error('Invalid server response');
+        if (!updatedNodeDTO) throw new Error("Invalid server response");
 
         set((state) => ({
           tree:
@@ -251,6 +254,37 @@ const useDataStore = create<DataState>((set) => ({
         return null;
       }
     },
+
+    fetchNodesByStatus: async (status, dataEncryptionKey) => {
+      set({ isLoading: true, error: null });
+
+      try {
+        const endpoint =
+          status === "trash" ? "treeNodes/deleted" : "treeNodes/archived";
+
+        const response =
+          await axiosInstance.get<TreeNodeListResponse>(endpoint);
+
+        const nodes: TreeNode[] = await Promise.all(
+          response.data.data.map(async (node) => ({
+            ...node,
+            title: await decryptAESGCM(node.encryptedTitle, dataEncryptionKey),
+            children: [],
+          })),
+        );
+
+        set(
+          status === "trash"
+            ? { deletedNodes: nodes, isLoading: false }
+            : { archivedNodes: nodes, isLoading: false },
+        );
+      } catch (error: any) {
+        set({
+          error: error.message || "Failed to fetch nodes",
+          isLoading: false,
+        });
+      }
+    },
   },
 }));
 
@@ -258,6 +292,8 @@ export const useData = (): DataStoreState =>
   useDataStore(
     useShallow((s) => ({
       tree: s.tree,
+      archivedNodes: s.archivedNodes,
+      deletedNodes: s.deletedNodes,
       isInitialLoading: s.isInitialLoading,
       isLoading: s.isLoading,
       isFetchingContent: s.isFetchingContent,
