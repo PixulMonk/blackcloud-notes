@@ -4,6 +4,7 @@ import { FileText, RotateCcw, Trash2, X, Loader } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useData, useDataActions } from "@/store/useDataStore";
 import { useDataEncryptionKey } from "@/store/useVaultStore";
+import { formatStatusDate } from "@/lib/date";
 
 type NoteStatus = "trash" | "archived";
 
@@ -68,8 +69,8 @@ function NoteListView({ status }: NoteListViewProps) {
                   <p className="text-sm truncate">{note.title}</p>
                   <p className="text-xs text-muted-foreground">
                     {isTrash
-                      ? `Deleted ${note.deletedAt}`
-                      : `Archived ${note.archivedAt}`}
+                      ? formatStatusDate(note.deletedAt, "Deleted")
+                      : formatStatusDate(note.archivedAt, "Archived")}
                   </p>
                 </div>
               </div>
