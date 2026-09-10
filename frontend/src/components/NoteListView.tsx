@@ -1,5 +1,8 @@
+import { useEffect } from "react";
 import { FileText, RotateCcw, Trash2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useData, useDataActions } from "@/store/useDataStore";
+import { useDataEncryptionKey } from "@/store/useVaultStore";
 
 type NoteStatus = "trash" | "archived";
 
@@ -9,15 +12,26 @@ interface NoteListViewProps {
 
 function NoteListView({ status }: NoteListViewProps) {
   const isTrash = status === "trash";
-  const title = isTrash ? "Trash" : "Archived";
-  const emptyMessage = isTrash ? "Nothing in trash." : "No archived notes.";
+  const { archivedNodes, deletedNodes, isLoading } = useData();
+  const dataEncryptionKey = useDataEncryptionKey();
+  const { fetchNodesByStatus } = useDataActions();
 
-  // Replace with real data — e.g. useTrashedNotes() / useArchivedNotes()
-  const notes: any[] = [];
+  useEffect(() => {
+    if (!dataEncryptionKey) return;
+
+    void fetchNodesByStatus(status, dataEncryptionKey);
+  }, [status, dataEncryptionKey, fetchNodesByStatus]);
+
+  const notes = isTrash ? deletedNodes : archivedNodes;
 
   return (
+    // TODO: Add a loading state when fetching notes
+    // TODO: Restore and delete functionality
+    // TODO: Make date formatting more readable (e.g., "2 days ago" instead of "2023-06-01T12:34:56Z")
     <div className="flex flex-col w-full max-w-3xl mx-auto py-8">
-      <h1 className="text-lg font-semibold mb-1">{title}</h1>
+      <h1 className="text-lg font-semibold mb-1">
+        {status === "trash" ? "Trash" : "Archived"}
+      </h1>
       {isTrash && (
         <p className="text-xs text-muted-foreground mb-6">
           Notes are permanently deleted after 30 days.
@@ -32,13 +46,15 @@ function NoteListView({ status }: NoteListViewProps) {
       {notes.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 text-center">
           <FileText className="size-8 text-muted-foreground mb-3 opacity-50" />
-          <p className="text-sm text-muted-foreground">{emptyMessage}</p>
+          <p className="text-sm text-muted-foreground">
+            {status === "trash" ? "Nothing in trash." : "No archived notes."}
+          </p>
         </div>
       ) : (
         <div className="flex flex-col divide-y divide-border">
           {notes.map((note) => (
             <div
-              key={note.id}
+              key={note._id}
               className="flex items-center justify-between py-3"
             >
               <div className="flex items-center gap-3 min-w-0">
