@@ -1,7 +1,7 @@
-import React from 'react';
+import NoteListView from "@/components/NoteListView";
 
 function TrashPage() {
-  return <div>TrashPage</div>;
+  return <NoteListView status="trash" />;
 }
 
 export default TrashPage;

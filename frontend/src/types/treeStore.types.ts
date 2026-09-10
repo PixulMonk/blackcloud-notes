@@ -1,14 +1,16 @@
-import type { RefObject } from 'react';
+import type { RefObject } from "react";
 
 interface BaseTreeNode {
   _id: string;
   userId: string;
-  type: 'folder' | 'file';
+  type: "folder" | "file";
   position: number;
   createdAt?: string;
   updatedAt?: string;
   isArchived?: boolean;
+  archivedAt?: string | null;
   isDeleted?: boolean;
+  deletedAt?: string | null;
   icon?: string;
   parentId?: string | null;
   fileId?: string;
@@ -51,8 +53,8 @@ export interface TreeUIActions {
 }
 
 export interface SortPreference {
-  sortBy: 'alphabetical' | 'dateModified';
-  order: 'asc' | 'desc';
+  sortBy: "alphabetical" | "dateModified";
+  order: "asc" | "desc";
 }
 
 export interface TreeUIState {
@@ -65,4 +67,4 @@ export interface TreeUIState {
   actions: TreeUIActions;
 }
 
-export type TreeUIStoreState = Omit<TreeUIState, 'actions'>;
+export type TreeUIStoreState = Omit<TreeUIState, "actions">;
