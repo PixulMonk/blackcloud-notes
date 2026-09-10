@@ -1,5 +1,6 @@
 import { useEffect } from "react";
-import { FileText, RotateCcw, Trash2, X } from "lucide-react";
+import { FileText, RotateCcw, Trash2, X, Loader } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 import { useData, useDataActions } from "@/store/useDataStore";
 import { useDataEncryptionKey } from "@/store/useVaultStore";
@@ -43,7 +44,11 @@ function NoteListView({ status }: NoteListViewProps) {
         </p>
       )}
 
-      {notes.length === 0 ? (
+      {isLoading ? (
+        <div className="flex items-center justify-center py-20">
+          <Loader className="animate-spin" size={24} />
+        </div>
+      ) : notes.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 text-center">
           <FileText className="size-8 text-muted-foreground mb-3 opacity-50" />
           <p className="text-sm text-muted-foreground">
