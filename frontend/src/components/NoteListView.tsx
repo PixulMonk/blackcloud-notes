@@ -46,7 +46,7 @@ function NoteListView({ status }: NoteListViewProps) {
   const handleRestore = async (nodeId: string, nodeTitle: string) => {
     const ok = await confirm({
       title: "Restore",
-      message: `Are you sure you want to restore ${nodeTitle}?`,
+      message: `Are you sure you want to restore "${nodeTitle}"?`,
       yesText: "Restore",
       noText: "Cancel",
     });
