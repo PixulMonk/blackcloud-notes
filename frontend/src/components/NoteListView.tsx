@@ -6,6 +6,7 @@ import { useData, useDataActions } from "@/store/useDataStore";
 import { useDataEncryptionKey } from "@/store/useVaultStore";
 import { formatStatusDate } from "@/lib/date";
 import type { TreeNode } from "@/types/treeStore.types";
+import { confirm } from "@/components/dialog/ConfirmDialog";
 
 type NoteStatus = "trash" | "archived";
 
@@ -42,9 +43,16 @@ function NoteListView({ status }: NoteListViewProps) {
     void fetchNodesByStatus(status, dataEncryptionKey);
   }, [status, dataEncryptionKey, fetchNodesByStatus]);
 
-  const handleRestore = async (nodeId: string) => {
-    // TODO: Show confirmation dialog before restoring
-    await restoreNode(nodeId);
+  const handleRestore = async (nodeId: string, nodeTitle: string) => {
+    const ok = await confirm({
+      title: "Restore",
+      message: `Are you sure you want to restore ${nodeTitle}?`,
+      yesText: "Restore",
+      noText: "Cancel",
+    });
+    if (ok) {
+      await restoreNode(nodeId);
+    }
   };
 
   const notes = isTrash
@@ -52,8 +60,8 @@ function NoteListView({ status }: NoteListViewProps) {
     : archivedNodes;
 
   return (
-    // TODO: Restore and delete functionality
-    // TODO: Remove children from trash and archive when restoring or deleting parent folder
+    // TODO: Permanent delete (recursive)
+
     <div className="flex flex-col w-full max-w-3xl mx-auto py-8">
       <h1 className="text-lg font-semibold mb-1">
         {status === "trash" ? "Trash" : "Archived"}
@@ -104,7 +112,7 @@ function NoteListView({ status }: NoteListViewProps) {
                   variant="ghost"
                   size="icon"
                   className="size-8"
-                  onClick={() => handleRestore(note._id)}
+                  onClick={() => handleRestore(note._id, note.title)}
                 >
                   <RotateCcw className="size-4" />
                 </Button>
