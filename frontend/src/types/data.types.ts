@@ -10,6 +10,7 @@ export interface DataActions {
   updateNode: (options: UpdateNodeOptions) => Promise<TreeNodeDTO | null>;
   softDeleteNode: (nodeId: string) => Promise<TreeNodeDTO | null>;
   archiveNode: (nodeId: string) => Promise<TreeNodeDTO | null>;
+  restoreNode: (nodeId: string) => Promise<TreeNodeDTO | null>;
   fetchNodeContent: (fileId: string) => Promise<NoteDTO | null>;
   fetchNodesByStatus: (
     status: NoteStatus,
@@ -70,6 +71,8 @@ export interface UpdateNodeOptions {
   position?: number;
   isArchived?: boolean;
   isDeleted?: boolean;
+  deletedAt?: string | null;
+  archivedAt?: string | null;
   icon?: string;
   parentId?: string | null;
   fileId?: string;

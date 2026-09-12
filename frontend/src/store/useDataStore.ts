@@ -117,6 +117,8 @@ const useDataStore = create<DataState>((set) => ({
       type,
       position,
       isArchived,
+      deletedAt,
+      archivedAt,
       isDeleted,
       icon,
       parentId,
@@ -130,6 +132,8 @@ const useDataStore = create<DataState>((set) => ({
         if (position !== undefined) payload.position = position;
         if (isArchived !== undefined) payload.isArchived = isArchived;
         if (isDeleted !== undefined) payload.isDeleted = isDeleted;
+        if (deletedAt !== undefined) payload.deletedAt = deletedAt;
+        if (archivedAt !== undefined) payload.archivedAt = archivedAt;
         if (icon !== undefined) payload.icon = icon;
         if (parentId !== undefined) payload.parentId = parentId;
         if (fileId !== undefined) payload.fileId = fileId;
@@ -157,6 +161,8 @@ const useDataStore = create<DataState>((set) => ({
                   ...(isArchived !== undefined && { isArchived }),
                   ...(isDeleted !== undefined && { isDeleted }),
                   ...(icon !== undefined && { icon }),
+                  ...(deletedAt !== undefined && { deletedAt }),
+                  ...(archivedAt !== undefined && { archivedAt }),
                 }),
           isLoading: false,
         }));
