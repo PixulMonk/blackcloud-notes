@@ -453,3 +453,57 @@ export const archiveTreeNode = asyncHandler(
     });
   },
 );
+
+export const restoreTreeNode = asyncHandler(
+  async (
+    req: Request<TreeNodeParams, TreeNodeResponse, {}>,
+    res: Response<TreeNodeResponse>,
+  ): Promise<void> => {
+    const treeNodeId = req.params.id;
+
+    if (!req.user?._id) {
+      throw new Error("User not authenticated");
+    }
+
+    if (
+      !treeNodeId ||
+      typeof treeNodeId !== "string" ||
+      !mongoose.Types.ObjectId.isValid(treeNodeId)
+    ) {
+      res.status(400).json({
+        success: false,
+        message: "Invalid tree node ID",
+      });
+    }
+
+    const treeNodeToRestore = await TreeNode.findOne({
+      _id: treeNodeId,
+      userId: req.user._id,
+    });
+
+    if (!treeNodeToRestore) {
+      throw new Error("Tree node does not exist or unauthorized");
+    }
+
+    if (!treeNodeToRestore.isDeleted && !treeNodeToRestore.isArchived) {
+      throw new Error("Node is neither deleted nor archived");
+    }
+
+    await updateNodeAndChildrenRecursively(
+      treeNodeId,
+      req.user._id.toString(),
+      {
+        isDeleted: false,
+        deletedAt: null,
+        isArchived: false,
+        archivedAt: null,
+      },
+    );
+
+    res.status(200).json({
+      success: true,
+      message: "Tree node and all descendants restored successfully",
+      data: treeNodeToRestore,
+    });
+  },
+);
