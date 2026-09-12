@@ -10,6 +10,7 @@ import {
   softDeleteTreeNode,
   archiveTreeNode,
   restoreTreeNode,
+  deleteAllTrash,
 } from "../controllers/treeNode.controller";
 
 const router = express.Router();
@@ -21,6 +22,8 @@ router.post("/create", protectRoute, createTreeNode);
 router.patch("/:id", protectRoute, updateTreeNode);
 router.patch("/:id/soft-delete", protectRoute, softDeleteTreeNode);
 router.patch("/:id/archive", protectRoute, archiveTreeNode);
+router.delete("/empty-trash", protectRoute, deleteAllTrash);
+
 router.delete("/:id", protectRoute, deleteTreeNode);
 router.patch("/:id/restore", protectRoute, restoreTreeNode);
 

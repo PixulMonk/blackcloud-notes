@@ -508,3 +508,53 @@ export const restoreTreeNode = asyncHandler(
     });
   },
 );
+
+export const deleteAllTrash = asyncHandler(
+  async (
+    req: Request<{}, TreeNodeResponse, {}>,
+    res: Response<TreeNodeResponse>,
+  ): Promise<void> => {
+    if (!req.user?._id) {
+      throw new Error("User not authenticated");
+    }
+
+    const deletedTreeNodes = await TreeNode.find({
+      userId: req.user._id,
+      isDeleted: true,
+    });
+
+    let deletedNotesCount = 0;
+    let deletedNodesCount = 0;
+
+    for (const treeNode of deletedTreeNodes) {
+      if (treeNode.type === "file") {
+        const noteToDelete = await Note.findOneAndDelete({
+          _id: treeNode.fileId,
+          userId: req.user!._id,
+        });
+        if (noteToDelete) deletedNotesCount++;
+      }
+
+      if (treeNode.type === "folder") {
+        const { notes, nodes } = await deleteNodeChildren(
+          treeNode._id.toString(),
+          req.user!._id.toString(),
+        );
+        deletedNotesCount += notes;
+        deletedNodesCount += nodes;
+      }
+
+      const deletedRoot = await TreeNode.findOneAndDelete({
+        _id: treeNode._id,
+        userId: req.user!._id,
+      });
+      if (deletedRoot) deletedNodesCount++;
+    }
+
+    res.status(200).json({
+      success: true,
+      message: `All trash cleared successfully (${deletedNodesCount} nodes, ${deletedNotesCount} notes)`,
+      data: null,
+    });
+  },
+);
