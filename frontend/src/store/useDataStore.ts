@@ -110,6 +110,34 @@ const useDataStore = create<DataState>((set) => ({
       }
     },
 
+    deleteNode: async (nodeIdToDelete) => {
+      set({ isLoading: true, error: null });
+
+      try {
+        const response = await axiosInstance.delete<TreeNodeResponse>(
+          `treeNodes/${nodeIdToDelete}`,
+        );
+
+        const deletedNodeDTO = response.data.data;
+
+        set((state) => ({
+          tree: removeRecursive(state.tree, nodeIdToDelete),
+          archivedNodes: state.archivedNodes.filter(
+            (node) => node._id !== nodeIdToDelete,
+          ),
+          deletedNodes: state.deletedNodes.filter(
+            (node) => node._id !== nodeIdToDelete,
+          ),
+          isLoading: false,
+        }));
+
+        return deletedNodeDTO;
+      } catch (error) {
+        handleStoreError(error, set);
+        return null;
+      }
+    },
+
     updateNode: async ({
       nodeId,
       dataEncryptionKey,
@@ -258,25 +286,25 @@ const useDataStore = create<DataState>((set) => ({
           }
 
           let restoredTree = state.tree;
-          const restoredNodes = statusNodes.filter((node) =>
-            restoredIds.has(node._id),
-          ).sort((firstNode, secondNode) => {
-            const getDepth = (node: TreeNode) => {
-              let depth = 0;
-              let parentId = node.parentId;
+          const restoredNodes = statusNodes
+            .filter((node) => restoredIds.has(node._id))
+            .sort((firstNode, secondNode) => {
+              const getDepth = (node: TreeNode) => {
+                let depth = 0;
+                let parentId = node.parentId;
 
-              while (parentId && restoredIds.has(parentId)) {
-                depth += 1;
-                parentId = statusNodes.find(
-                  (candidate) => candidate._id === parentId,
-                )?.parentId;
-              }
+                while (parentId && restoredIds.has(parentId)) {
+                  depth += 1;
+                  parentId = statusNodes.find(
+                    (candidate) => candidate._id === parentId,
+                  )?.parentId;
+                }
 
-              return depth;
-            };
+                return depth;
+              };
 
-            return getDepth(firstNode) - getDepth(secondNode);
-          });
+              return getDepth(firstNode) - getDepth(secondNode);
+            });
 
           for (const node of restoredNodes) {
             const restoredNode = {

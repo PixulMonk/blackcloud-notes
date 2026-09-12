@@ -8,6 +8,8 @@ import { formatStatusDate } from "@/lib/date";
 import type { TreeNode } from "@/types/treeStore.types";
 import { confirm } from "@/components/dialog/ConfirmDialog";
 
+// TODO: pop up notif for restore and delete success/failure
+
 type NoteStatus = "trash" | "archived";
 
 interface NoteListViewProps {
@@ -35,7 +37,7 @@ function NoteListView({ status }: NoteListViewProps) {
   const isTrash = status === "trash";
   const { archivedNodes, deletedNodes, isLoading } = useData();
   const dataEncryptionKey = useDataEncryptionKey();
-  const { fetchNodesByStatus, restoreNode } = useDataActions();
+  const { fetchNodesByStatus, restoreNode, deleteNode } = useDataActions();
 
   useEffect(() => {
     if (!dataEncryptionKey) return;
@@ -52,6 +54,18 @@ function NoteListView({ status }: NoteListViewProps) {
     });
     if (ok) {
       await restoreNode(nodeId);
+    }
+  };
+
+  const handlePermanentDelete = async (nodeId: string, nodeTitle: string) => {
+    const ok = await confirm({
+      title: "Permanently Delete",
+      message: `Are you sure you want to permanently delete "${nodeTitle}"? This action cannot be undone.`,
+      yesText: "Delete",
+      noText: "Cancel",
+    });
+    if (ok) {
+      await deleteNode(nodeId);
     }
   };
 
@@ -121,6 +135,7 @@ function NoteListView({ status }: NoteListViewProps) {
                     variant="ghost"
                     size="icon"
                     className="size-8 text-destructive"
+                    onClick={() => handlePermanentDelete(note._id, note.title)}
                   >
                     <Trash2 className="size-4" />
                   </Button>

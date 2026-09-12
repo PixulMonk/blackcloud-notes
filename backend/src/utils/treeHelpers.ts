@@ -2,6 +2,7 @@ import { TreeNode, type ITreeNode } from "../models/treeNode.model";
 import { Note } from "../models/note.model";
 
 export const deleteNodeChildren = async (
+  // TODO: return list of deleted node ids and note ids for further processing (e.g., removing from cache)
   parentId: string,
   userId: string,
 ): Promise<{ notes: number; nodes: number }> => {

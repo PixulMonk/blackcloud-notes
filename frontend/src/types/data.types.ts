@@ -7,6 +7,7 @@ export interface DataActions {
   fetchTree: (dataEncryptionKey: Uint8Array) => Promise<void>;
   setSyncing: (value: boolean) => void;
   addNode: (options: AddNodeOptions) => Promise<TreeNodeDTO | null>;
+  deleteNode: (nodeId: string) => Promise<TreeNodeDTO | null>;
   updateNode: (options: UpdateNodeOptions) => Promise<TreeNodeDTO | null>;
   softDeleteNode: (nodeId: string) => Promise<TreeNodeDTO | null>;
   archiveNode: (nodeId: string) => Promise<TreeNodeDTO | null>;
