@@ -69,17 +69,36 @@ function NoteListView({ status }: NoteListViewProps) {
     }
   };
 
+  const handleEmptyTrash = async () => {
+    const ok = await confirm({
+      title: "Empty Trash",
+      message:
+        "Are you sure you want to permanently delete all items in the trash? This action cannot be undone.",
+      yesText: "Empty Trash",
+      noText: "Cancel",
+    });
+    if (ok) {
+      // Implement logic to permanently delete all items in the trash
+    }
+  };
+
   const notes = isTrash
     ? deletedNodes.filter((node) => !hasDeletedAncestor(node, deletedNodes))
     : archivedNodes;
 
   return (
-    // TODO: Permanent delete (recursive)
-
     <div className="flex flex-col w-full max-w-3xl mx-auto py-8">
-      <h1 className="text-lg font-semibold mb-1">
-        {status === "trash" ? "Trash" : "Archived"}
-      </h1>
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-lg font-semibold mb-1">
+          {status === "trash" ? "Trash" : "Archived"}
+        </h1>
+        {status === "trash" && notes.length > 0 && (
+          <Button size="sm" variant="destructive" onClick={handleEmptyTrash}>
+            Empty Trash
+          </Button>
+        )}
+      </div>
+
       {/* {isTrash && (
         <p className="text-xs text-muted-foreground mb-6">
           Notes are permanently deleted after 30 days.
