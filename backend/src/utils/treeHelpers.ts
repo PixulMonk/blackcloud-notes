@@ -1,9 +1,9 @@
-import { TreeNode, type ITreeNode } from '../models/treeNode.model';
-import { Note } from '../models/note.model';
+import { TreeNode, type ITreeNode } from "../models/treeNode.model";
+import { Note } from "../models/note.model";
 
 export const deleteNodeChildren = async (
   parentId: string,
-  userId: string
+  userId: string,
 ): Promise<{ notes: number; nodes: number }> => {
   let notes = 0;
   let nodes = 0;
@@ -11,7 +11,7 @@ export const deleteNodeChildren = async (
   const children = await TreeNode.find({ parentId, userId });
 
   for (const child of children) {
-    if (child.type === 'file') {
+    if (child.type === "file") {
       const note = await Note.findOneAndDelete({ _id: child.fileId, userId });
       if (note) notes++;
     } else {
@@ -32,15 +32,16 @@ export const deleteNodeChildren = async (
 export const updateNodeAndChildrenRecursively = async (
   nodeId: string,
   userId: string,
-  updates: Partial<ITreeNode>
+  updates: Partial<ITreeNode>,
 ) => {
   await TreeNode.findOneAndUpdate({ _id: nodeId, userId }, { $set: updates });
   const children = await TreeNode.find({ parentId: nodeId, userId });
+
   for (const child of children) {
     await updateNodeAndChildrenRecursively(
       child._id.toString(),
       userId,
-      updates
+      updates,
     );
   }
 };

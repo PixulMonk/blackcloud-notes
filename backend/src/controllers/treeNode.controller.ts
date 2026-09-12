@@ -290,6 +290,7 @@ export const deleteTreeNode = asyncHandler(
         message: "Invalid tree node ID",
         data: null,
       });
+      return;
     }
 
     let deletedNotesCount = 0;

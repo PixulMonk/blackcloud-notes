@@ -1,4 +1,18 @@
-import type { TreeNode, SortPreference } from '@/types/treeStore.types';
+import type { TreeNode, SortPreference } from "@/types/treeStore.types";
+
+const findNodeRecursive = (
+  nodes: TreeNode[],
+  targetId: string,
+): TreeNode | null => {
+  for (const node of nodes) {
+    if (node._id === targetId) return node;
+    if (node.children?.length) {
+      const found = findNodeRecursive(node.children, targetId);
+      if (found) return found;
+    }
+  }
+  return null;
+};
 
 export const updateRecursive = (
   nodes: TreeNode[],
@@ -56,21 +70,21 @@ export const insertNode = (
 // TODO: add manual sort later for drag and drop
 export const sortTree = (
   nodes: TreeNode[],
-  sortBy: SortPreference['sortBy'] = 'alphabetical',
-  sortOrder: SortPreference['order'] = 'asc',
+  sortBy: SortPreference["sortBy"] = "alphabetical",
+  sortOrder: SortPreference["order"] = "asc",
 ): TreeNode[] => {
-  const direction = sortOrder === 'asc' ? 1 : -1;
+  const direction = sortOrder === "asc" ? 1 : -1;
 
   return [...nodes]
     .sort((a, b) => {
       // folders always first regardless of sort
-      if (a.type !== b.type) return a.type === 'folder' ? -1 : 1;
+      if (a.type !== b.type) return a.type === "folder" ? -1 : 1;
 
-      if (sortBy === 'alphabetical') {
+      if (sortBy === "alphabetical") {
         return a.title.localeCompare(b.title) * direction;
       }
 
-      if (sortBy === 'dateModified') {
+      if (sortBy === "dateModified") {
         const aDate = new Date(a.updatedAt ?? 0).getTime();
         const bDate = new Date(b.updatedAt ?? 0).getTime();
         return (aDate - bDate) * direction;

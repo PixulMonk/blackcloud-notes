@@ -227,6 +227,95 @@ const useDataStore = create<DataState>((set) => ({
       }
     },
 
+    restoreNode: async (nodeIdToRestore) => {
+      set({ isLoading: true, error: null });
+
+      try {
+        const response = await axiosInstance.patch<TreeNodeResponse>(
+          `treeNodes/${nodeIdToRestore}/restore`,
+        );
+
+        const updatedNodeDTO = response.data.data;
+
+        set((state) => {
+          const statusNodes = [...state.archivedNodes, ...state.deletedNodes];
+          const restoredIds = new Set([nodeIdToRestore]);
+
+          let foundDescendant = true;
+          while (foundDescendant) {
+            foundDescendant = false;
+
+            for (const node of statusNodes) {
+              if (
+                node.parentId &&
+                restoredIds.has(node.parentId) &&
+                !restoredIds.has(node._id)
+              ) {
+                restoredIds.add(node._id);
+                foundDescendant = true;
+              }
+            }
+          }
+
+          let restoredTree = state.tree;
+          const restoredNodes = statusNodes.filter((node) =>
+            restoredIds.has(node._id),
+          ).sort((firstNode, secondNode) => {
+            const getDepth = (node: TreeNode) => {
+              let depth = 0;
+              let parentId = node.parentId;
+
+              while (parentId && restoredIds.has(parentId)) {
+                depth += 1;
+                parentId = statusNodes.find(
+                  (candidate) => candidate._id === parentId,
+                )?.parentId;
+              }
+
+              return depth;
+            };
+
+            return getDepth(firstNode) - getDepth(secondNode);
+          });
+
+          for (const node of restoredNodes) {
+            const restoredNode = {
+              ...node,
+              isArchived: false,
+              archivedAt: null,
+              isDeleted: false,
+              deletedAt: null,
+            };
+
+            restoredTree = restoredNode.parentId
+              ? insertNode(restoredTree, restoredNode.parentId, restoredNode)
+              : [...restoredTree, restoredNode];
+          }
+
+          return {
+            tree: updateRecursive(restoredTree, nodeIdToRestore, {
+              isArchived: false,
+              archivedAt: null,
+              isDeleted: false,
+              deletedAt: null,
+            }),
+            archivedNodes: state.archivedNodes.filter(
+              (node) => !restoredIds.has(node._id),
+            ),
+            deletedNodes: state.deletedNodes.filter(
+              (node) => !restoredIds.has(node._id),
+            ),
+            isLoading: false,
+          };
+        });
+
+        return updatedNodeDTO;
+      } catch (error) {
+        handleStoreError(error, set);
+        return null;
+      }
+    },
+
     fetchNodeContent: async (fileId) => {
       set({ isFetchingContent: true, error: null });
 

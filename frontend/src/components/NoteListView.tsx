@@ -1,10 +1,11 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { FileText, RotateCcw, Trash2, X, Loader } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { useData, useDataActions } from "@/store/useDataStore";
 import { useDataEncryptionKey } from "@/store/useVaultStore";
 import { formatStatusDate } from "@/lib/date";
+import type { TreeNode } from "@/types/treeStore.types";
 
 type NoteStatus = "trash" | "archived";
 
@@ -12,11 +13,28 @@ interface NoteListViewProps {
   status: NoteStatus;
 }
 
+const hasDeletedAncestor = (node: TreeNode, deletedNodes: TreeNode[]) => {
+  const deletedNodeById = new Map(
+    deletedNodes.map((deletedNode) => [deletedNode._id, deletedNode]),
+  );
+  const visitedIds = new Set<string>();
+  let parentId = node.parentId;
+
+  while (parentId && !visitedIds.has(parentId)) {
+    if (deletedNodeById.has(parentId)) return true;
+
+    visitedIds.add(parentId);
+    parentId = deletedNodeById.get(parentId)?.parentId ?? null;
+  }
+
+  return false;
+};
+
 function NoteListView({ status }: NoteListViewProps) {
   const isTrash = status === "trash";
   const { archivedNodes, deletedNodes, isLoading } = useData();
   const dataEncryptionKey = useDataEncryptionKey();
-  const { fetchNodesByStatus } = useDataActions();
+  const { fetchNodesByStatus, restoreNode } = useDataActions();
 
   useEffect(() => {
     if (!dataEncryptionKey) return;
@@ -24,12 +42,18 @@ function NoteListView({ status }: NoteListViewProps) {
     void fetchNodesByStatus(status, dataEncryptionKey);
   }, [status, dataEncryptionKey, fetchNodesByStatus]);
 
-  const notes = isTrash ? deletedNodes : archivedNodes;
+  const handleRestore = async (nodeId: string) => {
+    // TODO: Show confirmation dialog before restoring
+    await restoreNode(nodeId);
+  };
+
+  const notes = isTrash
+    ? deletedNodes.filter((node) => !hasDeletedAncestor(node, deletedNodes))
+    : archivedNodes;
 
   return (
-    // TODO: Add a loading state when fetching notes
     // TODO: Restore and delete functionality
-    // TODO: Make date formatting more readable (e.g., "2 days ago" instead of "2023-06-01T12:34:56Z")
+    // TODO: Remove children from trash and archive when restoring or deleting parent folder
     <div className="flex flex-col w-full max-w-3xl mx-auto py-8">
       <h1 className="text-lg font-semibold mb-1">
         {status === "trash" ? "Trash" : "Archived"}
@@ -76,7 +100,12 @@ function NoteListView({ status }: NoteListViewProps) {
               </div>
 
               <div className="flex items-center gap-1 shrink-0">
-                <Button variant="ghost" size="icon" className="size-8">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="size-8"
+                  onClick={() => handleRestore(note._id)}
+                >
                   <RotateCcw className="size-4" />
                 </Button>
                 {isTrash ? (
