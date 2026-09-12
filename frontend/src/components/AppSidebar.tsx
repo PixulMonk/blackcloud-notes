@@ -145,14 +145,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </SidebarContent>
         <SidebarFooter className="p-2 mb-5 gap-1 border-t border-border/20">
           {/* Functional Navigation */}
-          <Button
+          {/* <Button
             variant="ghost"
             className="w-full justify-start gap-2 h-9 px-2 text-sm font-normal"
             onClick={() => setActiveView({ type: "archived" })}
           >
             <Archive className="size-4 opacity-70" />
             <span>Archived</span>
-          </Button>
+          </Button> */}
 
           <Button
             variant="ghost"
