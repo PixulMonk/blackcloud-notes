@@ -66,11 +66,11 @@ function NoteListView({ status }: NoteListViewProps) {
       <h1 className="text-lg font-semibold mb-1">
         {status === "trash" ? "Trash" : "Archived"}
       </h1>
-      {isTrash && (
+      {/* {isTrash && (
         <p className="text-xs text-muted-foreground mb-6">
           Notes are permanently deleted after 30 days.
         </p>
-      )}
+      )} */}
       {!isTrash && (
         <p className="text-xs text-muted-foreground mb-6">
           Archived notes stay out of your sidebar until restored.
