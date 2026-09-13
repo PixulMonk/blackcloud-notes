@@ -21,6 +21,7 @@ export interface DataActions {
     encryptedContent: string,
     fileId: string,
   ) => Promise<NoteResponse | null>;
+  emptyTrash: () => Promise<void>;
 }
 
 export interface DataState {

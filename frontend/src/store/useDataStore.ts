@@ -408,6 +408,27 @@ const useDataStore = create<DataState>((set) => ({
         });
       }
     },
+
+    emptyTrash: async () => {
+      set({ isLoading: true, error: null });
+
+      try {
+        await axiosInstance.delete(`treeNodes/empty-trash`);
+
+        set((state) => ({
+          deletedNodes: [],
+          tree: state.tree.filter(
+            (node) =>
+              !state.deletedNodes.some(
+                (deletedNode) => deletedNode._id === node._id,
+              ),
+          ),
+          isLoading: false,
+        }));
+      } catch (error) {
+        handleStoreError(error, set);
+      }
+    },
   },
 }));
 
