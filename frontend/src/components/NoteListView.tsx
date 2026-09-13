@@ -37,7 +37,8 @@ function NoteListView({ status }: NoteListViewProps) {
   const isTrash = status === "trash";
   const { archivedNodes, deletedNodes, isLoading } = useData();
   const dataEncryptionKey = useDataEncryptionKey();
-  const { fetchNodesByStatus, restoreNode, deleteNode } = useDataActions();
+  const { fetchNodesByStatus, restoreNode, deleteNode, emptyTrash } =
+    useDataActions();
 
   useEffect(() => {
     if (!dataEncryptionKey) return;
@@ -78,7 +79,7 @@ function NoteListView({ status }: NoteListViewProps) {
       noText: "Cancel",
     });
     if (ok) {
-      // Implement logic to permanently delete all items in the trash
+      await emptyTrash();
     }
   };
 
