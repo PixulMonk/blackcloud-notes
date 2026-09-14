@@ -28,10 +28,10 @@ function NodeActions({
   const { softDeleteNode, archiveNode } = useDataActions();
   const { createNode } = useCreateNode();
 
-  const handleSoftDelete = async (id: string) => {
+  const handleSoftDelete = async (id: string, title: string) => {
     const ok = await confirm({
       title: "Delete",
-      message: "Are you sure you want to delete this item?",
+      message: `Are you sure you want to delete "${title}"?`,
       yesText: "Delete",
       noText: "Cancel",
     });
@@ -86,7 +86,7 @@ function NodeActions({
           </DropdownMenuItem>
           <DropdownMenuItem
             className="py-1 px-2"
-            onClick={() => handleSoftDelete(node._id)}
+            onClick={() => handleSoftDelete(node._id, node.title)}
           >
             Delete
           </DropdownMenuItem>
