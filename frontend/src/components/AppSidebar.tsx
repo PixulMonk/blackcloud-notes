@@ -4,9 +4,10 @@ import { DragDropProvider, type DragEndEvent } from "@dnd-kit/react";
 import { Tree } from "./Tree/Tree";
 
 import {
-  FilePlus2,
-  FolderPlus,
+  FileText,
+  FolderClosed,
   Search,
+  Plus,
   Archive,
   HelpCircle,
   Lock,
@@ -116,28 +117,40 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             <Button
               variant="ghost"
               size="icon"
-              className="size-8"
+              className="size-8 relative"
+              title="New Folder"
               onClick={(e) => {
                 e.stopPropagation();
                 createNode("folder", undefined);
               }}
             >
-              <FolderPlus className="size-4" />
+              <FolderClosed className="size-4" />
+              <Plus className="size-2.5 absolute bottom-1 right-1 bg-sidebar text-sidebar-foreground rounded-full ring-1 ring-sidebar-border" />
             </Button>
+
             <Button
               variant="ghost"
               size="icon"
-              className="size-8"
+              className="size-8 relative"
+              title="New Note"
               onClick={(e) => {
                 e.stopPropagation();
                 createNode("file", undefined);
               }}
             >
-              <FilePlus2 className="size-4" />
+              <FileText className="size-4" />
+              <Plus className="size-2.5 absolute bottom-1 right-1 bg-sidebar text-sidebar-foreground rounded-full ring-1 ring-sidebar-border" />
             </Button>
-            <Button variant="ghost" size="icon" className="size-8">
+
+            {/* TODO: Unhide after implementing search feat */}
+            {/* <Button
+              variant="ghost"
+              size="icon"
+              className="size-8"
+              title="Search"
+            >
               <Search className="size-4" />
-            </Button>
+            </Button> */}
           </div>
         </SidebarHeader>
         <SidebarContent>

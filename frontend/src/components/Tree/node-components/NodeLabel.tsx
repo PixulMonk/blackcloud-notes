@@ -1,6 +1,6 @@
-import { Input } from '@/components/ui/input';
-import { File, Folder } from 'lucide-react';
-import { type NodeLabelProps } from '@/types/treeStore.types';
+import { Input } from "@/components/ui/input";
+import { FileText, FolderClosed } from "lucide-react";
+import { type NodeLabelProps } from "@/types/treeStore.types";
 
 function NodeLabel({
   node,
@@ -11,10 +11,10 @@ function NodeLabel({
   handleRenameSubmit,
   className,
 }: NodeLabelProps) {
-  const Icon = node.icon || (node.type === 'folder' ? Folder : File);
+  const Icon = node.icon || (node.type === "folder" ? FolderClosed : FileText);
 
   return (
-    <div className={`flex items-center ${className || ''}`}>
+    <div className={`flex items-center ${className || ""}`}>
       <Icon className="h-4 w-4 shrink-0 mr-2" />
       {isRenaming ? (
         <Input
@@ -23,7 +23,7 @@ function NodeLabel({
           value={treeData.title}
           onChange={(e) => setTreeData({ ...treeData, title: e.target.value })}
           onKeyDown={(e) => {
-            if (e.key === 'Enter') handleRenameSubmit();
+            if (e.key === "Enter") handleRenameSubmit();
           }}
           onBlur={handleRenameSubmit}
         />
