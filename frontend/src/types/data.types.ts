@@ -7,9 +7,11 @@ export interface DataActions {
   fetchTree: (dataEncryptionKey: Uint8Array) => Promise<void>;
   setSyncing: (value: boolean) => void;
   addNode: (options: AddNodeOptions) => Promise<TreeNodeDTO | null>;
+  deleteNode: (nodeId: string) => Promise<TreeNodeDTO | null>;
   updateNode: (options: UpdateNodeOptions) => Promise<TreeNodeDTO | null>;
   softDeleteNode: (nodeId: string) => Promise<TreeNodeDTO | null>;
   archiveNode: (nodeId: string) => Promise<TreeNodeDTO | null>;
+  restoreNode: (nodeId: string) => Promise<TreeNodeDTO | null>;
   fetchNodeContent: (fileId: string) => Promise<NoteDTO | null>;
   fetchNodesByStatus: (
     status: NoteStatus,
@@ -19,6 +21,7 @@ export interface DataActions {
     encryptedContent: string,
     fileId: string,
   ) => Promise<NoteResponse | null>;
+  emptyTrash: () => Promise<void>;
 }
 
 export interface DataState {
@@ -70,6 +73,8 @@ export interface UpdateNodeOptions {
   position?: number;
   isArchived?: boolean;
   isDeleted?: boolean;
+  deletedAt?: string | null;
+  archivedAt?: string | null;
   icon?: string;
   parentId?: string | null;
   fileId?: string;

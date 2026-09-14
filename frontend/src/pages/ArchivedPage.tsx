@@ -1,7 +1,7 @@
-import NoteListView from "@/components/NoteListView";
+import NodeListView from "@/components/NodeListView";
 
 function ArchivedPage() {
-  return <NoteListView status="archived" />;
+  return <NodeListView status="archived" />;
 }
 
 export default ArchivedPage;

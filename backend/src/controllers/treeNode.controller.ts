@@ -290,6 +290,7 @@ export const deleteTreeNode = asyncHandler(
         message: "Invalid tree node ID",
         data: null,
       });
+      return;
     }
 
     let deletedNotesCount = 0;
@@ -450,6 +451,110 @@ export const archiveTreeNode = asyncHandler(
       success: true,
       message: "Tree node and all descendants archived successfully",
       data: treeNodeToArchive,
+    });
+  },
+);
+
+export const restoreTreeNode = asyncHandler(
+  async (
+    req: Request<TreeNodeParams, TreeNodeResponse, {}>,
+    res: Response<TreeNodeResponse>,
+  ): Promise<void> => {
+    const treeNodeId = req.params.id;
+
+    if (!req.user?._id) {
+      throw new Error("User not authenticated");
+    }
+
+    if (
+      !treeNodeId ||
+      typeof treeNodeId !== "string" ||
+      !mongoose.Types.ObjectId.isValid(treeNodeId)
+    ) {
+      res.status(400).json({
+        success: false,
+        message: "Invalid tree node ID",
+      });
+    }
+
+    const treeNodeToRestore = await TreeNode.findOne({
+      _id: treeNodeId,
+      userId: req.user._id,
+    });
+
+    if (!treeNodeToRestore) {
+      throw new Error("Tree node does not exist or unauthorized");
+    }
+
+    if (!treeNodeToRestore.isDeleted && !treeNodeToRestore.isArchived) {
+      throw new Error("Node is neither deleted nor archived");
+    }
+
+    await updateNodeAndChildrenRecursively(
+      treeNodeId,
+      req.user._id.toString(),
+      {
+        isDeleted: false,
+        deletedAt: null,
+        isArchived: false,
+        archivedAt: null,
+      },
+    );
+
+    res.status(200).json({
+      success: true,
+      message: "Tree node and all descendants restored successfully",
+      data: treeNodeToRestore,
+    });
+  },
+);
+
+export const deleteAllTrash = asyncHandler(
+  async (
+    req: Request<{}, TreeNodeResponse, {}>,
+    res: Response<TreeNodeResponse>,
+  ): Promise<void> => {
+    if (!req.user?._id) {
+      throw new Error("User not authenticated");
+    }
+
+    const deletedTreeNodes = await TreeNode.find({
+      userId: req.user._id,
+      isDeleted: true,
+    });
+
+    let deletedNotesCount = 0;
+    let deletedNodesCount = 0;
+
+    for (const treeNode of deletedTreeNodes) {
+      if (treeNode.type === "file") {
+        const noteToDelete = await Note.findOneAndDelete({
+          _id: treeNode.fileId,
+          userId: req.user!._id,
+        });
+        if (noteToDelete) deletedNotesCount++;
+      }
+
+      if (treeNode.type === "folder") {
+        const { notes, nodes } = await deleteNodeChildren(
+          treeNode._id.toString(),
+          req.user!._id.toString(),
+        );
+        deletedNotesCount += notes;
+        deletedNodesCount += nodes;
+      }
+
+      const deletedRoot = await TreeNode.findOneAndDelete({
+        _id: treeNode._id,
+        userId: req.user!._id,
+      });
+      if (deletedRoot) deletedNodesCount++;
+    }
+
+    res.status(200).json({
+      success: true,
+      message: `All trash cleared successfully (${deletedNodesCount} nodes, ${deletedNotesCount} notes)`,
+      data: null,
     });
   },
 );

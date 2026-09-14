@@ -1,11 +1,13 @@
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
-import { SidebarTrigger } from '@/components/ui/sidebar';
-import { useAuth, useAuthActions } from '@/store/useAuthStore';
-import { Sun, Moon, Bell } from 'lucide-react';
-import { useIsDark, useThemeStoreActions } from '@/store/useThemeStore';
-import { DocumentTitle } from './Editor/DocumentTitle';
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import { SidebarTrigger } from "@/components/ui/sidebar";
+import { useAuth, useAuthActions } from "@/store/useAuthStore";
+import { Sun, Moon, Bell } from "lucide-react";
+import { useIsDark, useThemeStoreActions } from "@/store/useThemeStore";
+import { useActiveView } from "@/store/useAppStore";
+
+import { DocumentTitle } from "./Editor/DocumentTitle";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,12 +15,13 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+} from "@/components/ui/dropdown-menu";
 
 export default function Header() {
   const { user } = useAuth();
   const { logout } = useAuthActions();
   const isDark = useIsDark();
+  const activeView = useActiveView();
   const { toggleTheme } = useThemeStoreActions();
   return (
     <header className="flex mb-4 py-2  px-7 h-(--header-height) shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-(--header-height) ">
@@ -28,7 +31,7 @@ export default function Header() {
         orientation="vertical"
         className="mx-2 data-[orientation=vertical]:h-4"
       />
-      <DocumentTitle />
+      {activeView.type === "editor" && <DocumentTitle />}
       <div className="ml-auto flex items-center gap-2">
         <Button
           variant="ghost"

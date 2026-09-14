@@ -110,6 +110,34 @@ const useDataStore = create<DataState>((set) => ({
       }
     },
 
+    deleteNode: async (nodeIdToDelete) => {
+      set({ isLoading: true, error: null });
+
+      try {
+        const response = await axiosInstance.delete<TreeNodeResponse>(
+          `treeNodes/${nodeIdToDelete}`,
+        );
+
+        const deletedNodeDTO = response.data.data;
+
+        set((state) => ({
+          tree: removeRecursive(state.tree, nodeIdToDelete),
+          archivedNodes: state.archivedNodes.filter(
+            (node) => node._id !== nodeIdToDelete,
+          ),
+          deletedNodes: state.deletedNodes.filter(
+            (node) => node._id !== nodeIdToDelete,
+          ),
+          isLoading: false,
+        }));
+
+        return deletedNodeDTO;
+      } catch (error) {
+        handleStoreError(error, set);
+        return null;
+      }
+    },
+
     updateNode: async ({
       nodeId,
       dataEncryptionKey,
@@ -117,6 +145,8 @@ const useDataStore = create<DataState>((set) => ({
       type,
       position,
       isArchived,
+      deletedAt,
+      archivedAt,
       isDeleted,
       icon,
       parentId,
@@ -130,6 +160,8 @@ const useDataStore = create<DataState>((set) => ({
         if (position !== undefined) payload.position = position;
         if (isArchived !== undefined) payload.isArchived = isArchived;
         if (isDeleted !== undefined) payload.isDeleted = isDeleted;
+        if (deletedAt !== undefined) payload.deletedAt = deletedAt;
+        if (archivedAt !== undefined) payload.archivedAt = archivedAt;
         if (icon !== undefined) payload.icon = icon;
         if (parentId !== undefined) payload.parentId = parentId;
         if (fileId !== undefined) payload.fileId = fileId;
@@ -157,6 +189,8 @@ const useDataStore = create<DataState>((set) => ({
                   ...(isArchived !== undefined && { isArchived }),
                   ...(isDeleted !== undefined && { isDeleted }),
                   ...(icon !== undefined && { icon }),
+                  ...(deletedAt !== undefined && { deletedAt }),
+                  ...(archivedAt !== undefined && { archivedAt }),
                 }),
           isLoading: false,
         }));
@@ -213,6 +247,95 @@ const useDataStore = create<DataState>((set) => ({
           }),
           isLoading: false,
         }));
+
+        return updatedNodeDTO;
+      } catch (error) {
+        handleStoreError(error, set);
+        return null;
+      }
+    },
+
+    restoreNode: async (nodeIdToRestore) => {
+      set({ isLoading: true, error: null });
+
+      try {
+        const response = await axiosInstance.patch<TreeNodeResponse>(
+          `treeNodes/${nodeIdToRestore}/restore`,
+        );
+
+        const updatedNodeDTO = response.data.data;
+
+        set((state) => {
+          const statusNodes = [...state.archivedNodes, ...state.deletedNodes];
+          const restoredIds = new Set([nodeIdToRestore]);
+
+          let foundDescendant = true;
+          while (foundDescendant) {
+            foundDescendant = false;
+
+            for (const node of statusNodes) {
+              if (
+                node.parentId &&
+                restoredIds.has(node.parentId) &&
+                !restoredIds.has(node._id)
+              ) {
+                restoredIds.add(node._id);
+                foundDescendant = true;
+              }
+            }
+          }
+
+          let restoredTree = state.tree;
+          const restoredNodes = statusNodes
+            .filter((node) => restoredIds.has(node._id))
+            .sort((firstNode, secondNode) => {
+              const getDepth = (node: TreeNode) => {
+                let depth = 0;
+                let parentId = node.parentId;
+
+                while (parentId && restoredIds.has(parentId)) {
+                  depth += 1;
+                  parentId = statusNodes.find(
+                    (candidate) => candidate._id === parentId,
+                  )?.parentId;
+                }
+
+                return depth;
+              };
+
+              return getDepth(firstNode) - getDepth(secondNode);
+            });
+
+          for (const node of restoredNodes) {
+            const restoredNode = {
+              ...node,
+              isArchived: false,
+              archivedAt: null,
+              isDeleted: false,
+              deletedAt: null,
+            };
+
+            restoredTree = restoredNode.parentId
+              ? insertNode(restoredTree, restoredNode.parentId, restoredNode)
+              : [...restoredTree, restoredNode];
+          }
+
+          return {
+            tree: updateRecursive(restoredTree, nodeIdToRestore, {
+              isArchived: false,
+              archivedAt: null,
+              isDeleted: false,
+              deletedAt: null,
+            }),
+            archivedNodes: state.archivedNodes.filter(
+              (node) => !restoredIds.has(node._id),
+            ),
+            deletedNodes: state.deletedNodes.filter(
+              (node) => !restoredIds.has(node._id),
+            ),
+            isLoading: false,
+          };
+        });
 
         return updatedNodeDTO;
       } catch (error) {
@@ -283,6 +406,27 @@ const useDataStore = create<DataState>((set) => ({
           error: error.message || "Failed to fetch nodes",
           isLoading: false,
         });
+      }
+    },
+
+    emptyTrash: async () => {
+      set({ isLoading: true, error: null });
+
+      try {
+        await axiosInstance.delete(`treeNodes/empty-trash`);
+
+        set((state) => ({
+          deletedNodes: [],
+          tree: state.tree.filter(
+            (node) =>
+              !state.deletedNodes.some(
+                (deletedNode) => deletedNode._id === node._id,
+              ),
+          ),
+          isLoading: false,
+        }));
+      } catch (error) {
+        handleStoreError(error, set);
       }
     },
   },
