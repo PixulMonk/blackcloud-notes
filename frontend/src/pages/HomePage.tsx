@@ -2,9 +2,9 @@ import { useTreeUI } from "@/store/useTreeUIStore";
 import EmptyPlaceholder from "@/components/Editor/EmptyPlaceholder";
 import { useActiveView } from "@/store/useAppStore";
 import TrashPage from "./TrashPage";
-import SettingsPage from "../components/dialog/SettingsDialog";
 import EditorPage from "./EditorPage";
 import ArchivedPage from "./ArchivedPage";
+import SupportPage from "./SupportPage";
 
 function HomePage() {
   const activeView = useActiveView();
@@ -21,6 +21,8 @@ function HomePage() {
         return selectedFileId ? <EditorPage /> : <EmptyPlaceholder />;
       case "empty":
         return <EmptyPlaceholder />;
+      case "support":
+        return <SupportPage />;
       default:
         const _exhaustive: never = activeView;
         return _exhaustive;

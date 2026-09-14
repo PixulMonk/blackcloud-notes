@@ -2,7 +2,8 @@ export type AppView =
   | { type: "empty" }
   | { type: "editor" }
   | { type: "trash" }
-  | { type: "archived" };
+  | { type: "archived" }
+  | { type: "support" };
 // Add new types along with renderView function at HomePage.tsx
 
 export type SettingsTab = "account" | "security" | "vault" | "appearance";
