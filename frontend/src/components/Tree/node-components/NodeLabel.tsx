@@ -14,7 +14,7 @@ function NodeLabel({
   const Icon = node.icon || (node.type === "folder" ? FolderClosed : FileText);
 
   return (
-    <div className={`flex items-center ${className || ""}`}>
+    <div className={`flex items-center min-w-0 ${className || ""}`}>
       <Icon className="h-4 w-4 shrink-0 mr-2" />
       {isRenaming ? (
         <Input
@@ -28,7 +28,7 @@ function NodeLabel({
           onBlur={handleRenameSubmit}
         />
       ) : (
-        <span>{treeData.title}</span>
+        <span className="truncate">{treeData.title}</span>
       )}
     </div>
   );

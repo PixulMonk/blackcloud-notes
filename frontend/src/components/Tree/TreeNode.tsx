@@ -1,29 +1,29 @@
-import { useState, useRef, useEffect } from 'react';
-import { ChevronRight } from 'lucide-react';
-import { useDraggable, useDroppable } from '@dnd-kit/react';
+import { useState, useRef, useEffect } from "react";
+import { ChevronRight } from "lucide-react";
+import { useDraggable, useDroppable } from "@dnd-kit/react";
 
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-} from '@/components/ui/collapsible';
-import NodeActions from './node-components/NodeActions';
-import NodeLabel from './node-components/NodeLabel';
-import { type TreeNodeComponentProps } from '../../types/treeStore.types';
-import { useDataActions } from '@/store/useDataStore';
-import { useTreeUI, useTreeUIActions } from '@/store/useTreeUIStore';
-import { useDataEncryptionKey } from '@/store/useVaultStore';
-import { useAppStoreActions } from '@/store/useAppStore';
+} from "@/components/ui/collapsible";
+import NodeActions from "./node-components/NodeActions";
+import NodeLabel from "./node-components/NodeLabel";
+import { type TreeNodeComponentProps } from "../../types/treeStore.types";
+import { useDataActions } from "@/store/useDataStore";
+import { useTreeUI, useTreeUIActions } from "@/store/useTreeUIStore";
+import { useDataEncryptionKey } from "@/store/useVaultStore";
+import { useAppStoreActions } from "@/store/useAppStore";
 
 // Renders individual node components
 const TreeNodeComponent = ({ node }: TreeNodeComponentProps) => {
   const { ref: draggableRef } = useDraggable({ id: node._id });
   const { ref: droppableRef } = useDroppable({
     id: node._id,
-    disabled: node.type !== 'folder',
+    disabled: node.type !== "folder",
   });
   const setRef = (el: HTMLElement | null) => {
-    console.log('setRef called with:', el);
+    console.log("setRef called with:", el);
     draggableRef(el);
     droppableRef(el);
   };
@@ -105,19 +105,19 @@ const TreeNodeComponent = ({ node }: TreeNodeComponentProps) => {
         <Collapsible open={isOpen} onOpenChange={setIsOpen}>
           <div
             className={`flex justify-between w-full px-1.5 rounded-md 
-              ${isSelected && isHovered ? 'bg-accent' : ''}
-              ${isSelected && !isHovered ? 'bg-accent/50' : ''}
-              ${!isSelected && (isHovered || isMenuOpen) ? 'bg-accent/30' : ''}
+              ${isSelected && isHovered ? "bg-accent" : ""}
+              ${isSelected && !isHovered ? "bg-accent/50" : ""}
+              ${!isSelected && (isHovered || isMenuOpen) ? "bg-accent/30" : ""}
               `}
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
             onClick={() => {
               selectNode(node);
-              setActiveView({ type: 'editor' });
+              setActiveView({ type: "editor" });
             }}
           >
             <CollapsibleTrigger asChild>
-              <div className="group flex items-center">
+              <div className="group flex items-center min-w-0 flex-1 py-1">
                 {hasChildren && (
                   <ChevronRight className="h-4 w-4 mr-2 shrink-0 transition-transform duration-200 group-data-[state=open]:rotate-90" />
                 )}
@@ -125,14 +125,14 @@ const TreeNodeComponent = ({ node }: TreeNodeComponentProps) => {
               </div>
             </CollapsibleTrigger>
             <div
-              className={isHovered || isRenaming ? 'opacity-100' : 'opacity-0'}
+              className={isHovered || isRenaming ? "opacity-100" : "opacity-0"}
             >
               {Actions}
             </div>
           </div>
 
           <CollapsibleContent>
-            <ul className="pl-4 space-y-1.5">
+            <ul className="pl-5 space-y-1.5">
               {node.children!.map((child) => (
                 <TreeNodeComponent key={child._id} node={child} />
               ))}
@@ -142,19 +142,19 @@ const TreeNodeComponent = ({ node }: TreeNodeComponentProps) => {
       ) : (
         <div
           className={`flex justify-between items-center p-1 rounded-md group 
-              ${isSelected && isHovered ? 'bg-accent' : ''}
-              ${isSelected && !isHovered ? 'bg-accent/50' : ''}
-              ${!isSelected && isHovered ? 'bg-accent/30' : ''}`}
+              ${isSelected && isHovered ? "bg-accent" : ""}
+              ${isSelected && !isHovered ? "bg-accent/50" : ""}
+              ${!isSelected && isHovered ? "bg-accent/30" : ""}`}
           onMouseEnter={() => setIsHovered(true)}
           onMouseLeave={() => setIsHovered(false)}
           onClick={() => {
             selectNode(node);
-            setActiveView({ type: 'editor' });
+            setActiveView({ type: "editor" });
           }}
         >
           {Label}
           <div
-            className={isHovered || isRenaming ? 'opacity-100' : 'opacity-0'}
+            className={isHovered || isRenaming ? "opacity-100" : "opacity-0"}
           >
             {Actions}
           </div>
