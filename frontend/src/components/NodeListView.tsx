@@ -46,27 +46,40 @@ function NodeListView({ status }: NodeListViewProps) {
     void fetchNodesByStatus(status, dataEncryptionKey);
   }, [status, dataEncryptionKey, fetchNodesByStatus]);
 
-  const handleRestore = async (nodeId: string, nodeTitle: string) => {
+  const handleRestore = async (node: TreeNode) => {
+    const message = isTrash
+      ? node.type === "folder"
+        ? `Are you sure you want to restore the folder "${node.title}" and all its contents?`
+        : `Are you sure you want to restore "${node.title}"?`
+      : node.type === "folder"
+        ? `Are you sure you want to restore the folder "${node.title}" and all its contents from the archive?`
+        : `Are you sure you want to restore "${node.title}" from the archive?`;
+
     const ok = await confirm({
       title: "Restore",
-      message: `Are you sure you want to restore "${nodeTitle}"?`,
+      message: message,
       yesText: "Restore",
       noText: "Cancel",
     });
     if (ok) {
-      await restoreNode(nodeId);
+      await restoreNode(node._id);
     }
   };
 
-  const handlePermanentDelete = async (nodeId: string, nodeTitle: string) => {
+  const handlePermanentDelete = async (node: TreeNode) => {
+    const message =
+      node.type === "folder"
+        ? `Are you sure you want to permanently delete the folder "${node.title}" and all its contents? This action cannot be undone.`
+        : `Are you sure you want to permanently delete "${node.title}"? This action cannot be undone.`;
+
     const ok = await confirm({
       title: "Permanently Delete",
-      message: `Are you sure you want to permanently delete "${nodeTitle}"? This action cannot be undone.`,
+      message: message,
       yesText: "Delete",
       noText: "Cancel",
     });
     if (ok) {
-      await deleteNode(nodeId);
+      await deleteNode(node._id);
     }
   };
 
@@ -146,7 +159,7 @@ function NodeListView({ status }: NodeListViewProps) {
                   variant="ghost"
                   size="icon"
                   className="size-8"
-                  onClick={() => handleRestore(node._id, node.title)}
+                  onClick={() => handleRestore(node)}
                 >
                   <RotateCcw className="size-4" />
                 </Button>
@@ -155,7 +168,7 @@ function NodeListView({ status }: NodeListViewProps) {
                     variant="ghost"
                     size="icon"
                     className="size-8 text-destructive"
-                    onClick={() => handlePermanentDelete(node._id, node.title)}
+                    onClick={() => handlePermanentDelete(node)}
                   >
                     <Trash2 className="size-4" />
                   </Button>

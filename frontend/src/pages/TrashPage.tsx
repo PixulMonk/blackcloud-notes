@@ -1,7 +1,7 @@
-import NoteListView from "@/components/NoteListView";
+import NodeListView from "@/components/NodeListView";
 
 function TrashPage() {
-  return <NoteListView status="trash" />;
+  return <NodeListView status="trash" />;
 }
 
 export default TrashPage;

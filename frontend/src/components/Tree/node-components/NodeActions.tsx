@@ -28,27 +28,32 @@ function NodeActions({
   const { softDeleteNode, archiveNode } = useDataActions();
   const { createNode } = useCreateNode();
 
-  const handleSoftDelete = async (id: string, title: string) => {
+  const handleSoftDelete = async (node: TreeNode) => {
+    const message =
+      node.type === "folder"
+        ? `Are you sure you want to delete the folder "${node.title}" and all its contents?`
+        : `Are you sure you want to delete "${node.title}"?`;
+
     const ok = await confirm({
       title: "Delete",
-      message: `Are you sure you want to delete "${title}"?`,
+      message: message,
       yesText: "Delete",
       noText: "Cancel",
     });
     if (ok) {
-      softDeleteNode(id);
-      if (selectedNode?._id === id) clearSelection();
+      softDeleteNode(node._id);
+      if (selectedNode?._id === node._id) clearSelection();
     }
   };
 
-  const handleArchive = async (id: string) => {
+  const handleArchive = async (node: TreeNode) => {
     const ok = await confirm({
       title: "Archive",
-      message: "Are you sure you want to archive this item?",
+      message: `Are you sure you want to archive "${node.title}"?`,
       yesText: "Archive",
       noText: "Cancel",
     });
-    if (ok) archiveNode(id);
+    if (ok) archiveNode(node._id);
   };
 
   return (
@@ -86,7 +91,7 @@ function NodeActions({
           </DropdownMenuItem>
           <DropdownMenuItem
             className="py-1 px-2"
-            onClick={() => handleSoftDelete(node._id, node.title)}
+            onClick={() => handleSoftDelete(node)}
           >
             Delete
           </DropdownMenuItem>
