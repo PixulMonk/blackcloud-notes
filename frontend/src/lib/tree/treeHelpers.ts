@@ -1,6 +1,6 @@
 import type { TreeNode, SortPreference } from "@/types/treeStore.types";
 
-const findNodeRecursive = (
+export const findNodeRecursive = (
   nodes: TreeNode[],
   targetId: string,
 ): TreeNode | null => {
