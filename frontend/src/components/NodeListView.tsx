@@ -1,6 +1,13 @@
-import { useEffect, useState } from "react";
-import { FileText, RotateCcw, Trash2, X, Loader } from "lucide-react";
-
+import { useEffect } from "react";
+import {
+  Archive,
+  FileText,
+  FolderClosed,
+  RotateCcw,
+  Trash2,
+  X,
+  Loader,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useData, useDataActions } from "@/store/useDataStore";
 import { useDataEncryptionKey } from "@/store/useVaultStore";
@@ -130,9 +137,14 @@ function NodeListView({ status }: NodeListViewProps) {
         </div>
       ) : nodes.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 text-center">
-          <FileText className="size-8 text-muted-foreground mb-3 opacity-50" />
+          {isTrash ? (
+            <Trash2 className="size-8 text-muted-foreground mb-3 opacity-50" />
+          ) : (
+            <Archive className="size-8 text-muted-foreground mb-3 opacity-50" />
+          )}
+
           <p className="text-sm text-muted-foreground">
-            {status === "trash" ? "Nothing in trash." : "No archived notes."}
+            {isTrash ? "Nothing in trash." : "No archived items."}
           </p>
         </div>
       ) : (
@@ -143,7 +155,11 @@ function NodeListView({ status }: NodeListViewProps) {
               className="flex items-center justify-between py-3"
             >
               <div className="flex items-center gap-3 min-w-0">
-                <FileText className="size-4 shrink-0 text-muted-foreground" />
+                {node.type === "folder" ? (
+                  <FolderClosed className="size-4 shrink-0 text-muted-foreground" />
+                ) : (
+                  <FileText className="size-4 shrink-0 text-muted-foreground" />
+                )}
                 <div className="min-w-0">
                   <p className="text-sm truncate">{node.title}</p>
                   <p className="text-xs text-muted-foreground">
