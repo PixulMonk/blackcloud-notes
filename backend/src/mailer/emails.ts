@@ -17,14 +17,15 @@ export const sendEmailTemplate = async (
 ) => {
   try {
     await emailClient.send({
-      to: to,
-      subject: subject,
-      html: html,
+      to,
+      subject,
+      html,
       ...(replyTo && { replyTo }),
     });
     console.log(`Email sent successfully: To: ${to} Subject: ${subject}`);
   } catch (error) {
-    throw new Error("Error in sending email");
+    console.error("sendEmailTemplate failed:", error);
+    throw error;
   }
 };
 
