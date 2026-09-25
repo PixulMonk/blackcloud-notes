@@ -48,10 +48,6 @@ function SupportPage() {
 
         <form className="flex flex-col gap-4">
           <div>
-            <Label htmlFor="contact-email">Email</Label>
-            <Input id="contact-email" type="email" className="mt-1.5" />
-          </div>
-          <div>
             <Label htmlFor="contact-subject">Subject</Label>
             <Input id="contact-subject" className="mt-1.5" />
           </div>
