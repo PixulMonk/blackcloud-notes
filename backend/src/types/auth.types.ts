@@ -1,21 +1,18 @@
-import { Request } from 'express';
-import { ParamsDictionary, Query } from 'express-serve-static-core';
-import { Argon2Params } from '@blackcloud/shared';
-import { IUser } from '../models/user.model';
-import { SimpleResponse } from './common.types';
-import { Resend } from 'resend';
-import { resendVerificationEmail } from './../controllers/auth.controller';
+import { ParamsDictionary } from "express-serve-static-core";
+import { Argon2Params } from "@blackcloud/shared";
+import { IUser } from "../models/user.model";
+import { SimpleResponse } from "./common.types";
 
 export type SanitizedUser = Omit<
   IUser,
-  | 'hashedAuthToken'
-  | 'protectedDEK'
-  | 'argon2Salt'
-  | 'argon2Params'
-  | 'resetPasswordToken'
-  | 'resetPasswordExpiresAt'
-  | 'verificationToken'
-  | 'verificationTokenExpiresAt'
+  | "hashedAuthToken"
+  | "protectedDEK"
+  | "argon2Salt"
+  | "argon2Params"
+  | "resetPasswordToken"
+  | "resetPasswordExpiresAt"
+  | "verificationToken"
+  | "verificationTokenExpiresAt"
 >;
 
 export interface AuthResponse extends SimpleResponse {
@@ -54,7 +51,7 @@ export interface ForgotPasswordRequest {
   email: string;
 }
 
-export interface ResetPasswordParams {
+export interface ResetPasswordParams extends ParamsDictionary {
   token: string;
 }
 
