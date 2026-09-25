@@ -13,6 +13,7 @@ import treeNodeRoutes from "./routes/treeNode.route";
 import treeRoutes from "./routes/tree.route";
 import healthRoutes from "./routes/health.route";
 import supportRoutes from "./routes/support.route";
+import { apiLimiter } from "./middleware/rateLimiters";
 
 const app: Express = express();
 const PORT: number = parseInt(process.env.PORT || "3000", 10);
@@ -23,13 +24,20 @@ const allowedOrigins = [
   process.env.CLIENT_URL_DEV, // preview Vercel URL or pattern
 ].filter(Boolean);
 
+const isVercelPreview = (origin: string) =>
+  // ! Note: This is a simple heuristic to allow Vercel preview deployments to access the API.
+  // ! It assumes that the preview URLs follow the pattern "https://blackcloud-notes-frontend-<random-string>.vercel.app".
+  // ! Adjust this logic if your deployment patterns change.
+  origin.startsWith("https://blackcloud-notes-frontend- ") &&
+  origin.endsWith(".vercel.app");
+
 app.use(
   cors({
     origin: (origin, callback) => {
       if (
         !origin ||
         allowedOrigins.includes(origin) ||
-        origin.endsWith(".vercel.app")
+        isVercelPreview(origin)
       ) {
         callback(null, true);
       } else {
@@ -46,6 +54,7 @@ app.use(cookieParser());
 // report save failures on image-heavy notes.
 app.use(express.json({ limit: "10mb" }));
 app.use("/api/health", healthRoutes);
+app.use("/api", apiLimiter);
 app.use("/api/auth", authRoutes);
 app.use("/api/notes", notesRoutes);
 app.use("/api/treeNodes", treeNodeRoutes);
