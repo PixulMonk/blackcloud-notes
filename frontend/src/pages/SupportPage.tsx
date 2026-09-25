@@ -13,7 +13,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import faqSections from "@/lib/support/faq";
 
-const MAX_MESSAGE_LENGTH = 5000;
+const MAX_MESSAGE_LENGTH = 1500;
 
 function SupportPage() {
   const [formState, setFormState] = useState({
