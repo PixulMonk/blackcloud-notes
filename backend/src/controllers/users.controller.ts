@@ -13,6 +13,7 @@ export const deleteUser = asyncHandler(async (req: Request, res: Response) => {
   await deleteUserData(userId.toString());
   await User.findByIdAndDelete(userId);
 
+  res.cookie("jwt", "", { maxAge: 0 });
   res.status(200).json({ message: "User deleted successfully" });
 });
 
