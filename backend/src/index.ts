@@ -13,6 +13,7 @@ import treeNodeRoutes from "./routes/treeNode.route";
 import treeRoutes from "./routes/tree.route";
 import healthRoutes from "./routes/health.route";
 import supportRoutes from "./routes/support.route";
+import usersRoutes from "./routes/users.route";
 import { apiLimiter } from "./middleware/rateLimiters";
 
 const app: Express = express();
@@ -56,6 +57,7 @@ app.use(express.json({ limit: "10mb" }));
 app.use("/api/health", healthRoutes);
 app.use("/api", apiLimiter);
 app.use("/api/auth", authRoutes);
+app.use("/api/users", usersRoutes);
 app.use("/api/notes", notesRoutes);
 app.use("/api/treeNodes", treeNodeRoutes);
 app.use("/api/tree", treeRoutes);
