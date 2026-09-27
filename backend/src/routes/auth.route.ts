@@ -9,6 +9,7 @@ import {
   resetPassword,
   checkAuth,
   resendVerificationEmail,
+  changePassword,
 } from "../controllers/auth.controller";
 
 import { ResetPasswordParams } from "../types/auth.types";
@@ -30,6 +31,7 @@ router.post<ResetPasswordParams>(
   authLimiter,
   resetPassword,
 );
+router.post("/change-password", authLimiter, protectRoute, changePassword);
 router.post("/resend-verification", resendLimiter, resendVerificationEmail);
 
 export default router;
