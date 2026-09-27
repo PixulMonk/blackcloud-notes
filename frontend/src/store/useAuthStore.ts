@@ -1,15 +1,15 @@
-import { create } from 'zustand';
-import { useShallow } from 'zustand/react/shallow';
-import axios from 'axios';
-import { axiosInstance } from '@/lib/axios';
+import { create } from "zustand";
+import { useShallow } from "zustand/react/shallow";
+import axios from "axios";
+import { axiosInstance } from "@/lib/axios";
 
 import type {
   AuthState,
   AuthStateActions,
   AuthStoreState,
-} from '@/types/auth.types';
-import type { LoginMetaDetaResponse } from '@/types/encryption.types';
-import { toBase64 } from '@/lib/crypto/crypto-utils';
+} from "@/types/auth.types";
+import type { LoginMetaDetaResponse } from "@/types/encryption.types";
+import { toBase64 } from "@/lib/crypto/crypto-utils";
 
 const useAuthStore = create<AuthState>((set) => ({
   user: null,
@@ -51,11 +51,11 @@ const useAuthStore = create<AuthState>((set) => ({
       } catch (error: unknown) {
         if (axios.isAxiosError(error)) {
           set({
-            error: error.response?.data?.message || 'Error signing up',
+            error: error.response?.data?.message || "Error signing up",
             isLoading: false,
           });
         } else {
-          set({ error: 'An unexpected error occurred', isLoading: false });
+          set({ error: "An unexpected error occurred", isLoading: false });
         }
         return false;
       }
@@ -77,11 +77,11 @@ const useAuthStore = create<AuthState>((set) => ({
       } catch (error) {
         if (axios.isAxiosError(error)) {
           set({
-            error: error.response?.data?.message || 'Error signing in',
+            error: error.response?.data?.message || "Error signing in",
             isLoading: false,
           });
         } else {
-          set({ error: 'An unexpected error occurred', isLoading: false });
+          set({ error: "An unexpected error occurred", isLoading: false });
         }
         return false;
       }
@@ -107,11 +107,11 @@ const useAuthStore = create<AuthState>((set) => ({
       } catch (error) {
         if (axios.isAxiosError(error)) {
           set({
-            error: error.response?.data?.message || 'Error signing in',
+            error: error.response?.data?.message || "Error signing in",
             isLoading: false,
           });
         } else {
-          set({ error: 'An unexpected error occurred', isLoading: false });
+          set({ error: "An unexpected error occurred", isLoading: false });
         }
         return;
       }
@@ -132,11 +132,11 @@ const useAuthStore = create<AuthState>((set) => ({
       } catch (error: unknown) {
         if (axios.isAxiosError(error)) {
           set({
-            error: error.response?.data?.message || 'Error verifying email',
+            error: error.response?.data?.message || "Error verifying email",
             isLoading: false,
           });
         } else {
-          set({ error: 'An unexpected error occurred', isLoading: false });
+          set({ error: "An unexpected error occurred", isLoading: false });
         }
         return false;
       }
@@ -145,7 +145,7 @@ const useAuthStore = create<AuthState>((set) => ({
       set({ isLoading: true, error: null });
 
       try {
-        const response = await axiosInstance.post('auth/resend-verification', {
+        const response = await axiosInstance.post("auth/resend-verification", {
           email,
         });
 
@@ -165,7 +165,7 @@ const useAuthStore = create<AuthState>((set) => ({
           set({
             error:
               error.response?.data?.message ||
-              'Error sending verification email',
+              "Error sending verification email",
             isLoading: false,
           });
 
@@ -175,7 +175,7 @@ const useAuthStore = create<AuthState>((set) => ({
           };
         } else {
           set({
-            error: 'An unexpected error occurred',
+            error: "An unexpected error occurred",
             isLoading: false,
           });
 
@@ -211,12 +211,12 @@ const useAuthStore = create<AuthState>((set) => ({
       } catch (error) {
         if (axios.isAxiosError(error)) {
           set({
-            error: error.response?.data?.message || 'Error logging out',
+            error: error.response?.data?.message || "Error logging out",
             isLoading: false,
           });
           throw error;
         } else {
-          set({ error: 'An unexpected error occurred', isLoading: false });
+          set({ error: "An unexpected error occurred", isLoading: false });
           throw error;
         }
       }
@@ -225,7 +225,7 @@ const useAuthStore = create<AuthState>((set) => ({
       set({ isLoading: true, error: null, message: null });
 
       try {
-        const response = await axiosInstance.post('auth/forgot-password', {
+        const response = await axiosInstance.post("auth/forgot-password", {
           email,
         });
 
@@ -245,7 +245,7 @@ const useAuthStore = create<AuthState>((set) => ({
           set({
             error:
               error.response?.data?.message ||
-              'Error sending password reset email',
+              "Error sending password reset email",
             isLoading: false,
           });
 
@@ -255,7 +255,7 @@ const useAuthStore = create<AuthState>((set) => ({
           };
         } else {
           set({
-            error: 'An unexpected error occurred',
+            error: "An unexpected error occurred",
             isLoading: false,
           });
 
@@ -286,11 +286,52 @@ const useAuthStore = create<AuthState>((set) => ({
       } catch (error) {
         if (axios.isAxiosError(error)) {
           set({
-            error: error.response?.data?.message || 'Error resetting password',
+            error: error.response?.data?.message || "Error resetting password",
             isLoading: false,
           });
         } else {
-          set({ error: 'An unexpected error occurred', isLoading: false });
+          set({ error: "An unexpected error occurred", isLoading: false });
+        }
+        return false;
+      }
+    },
+    updateUser: async (updates: Partial<{ name: string }>) => {
+      set({ isLoading: true, error: null });
+      try {
+        const response = await axiosInstance.patch(`users/me`, updates);
+        set({
+          user: response.data.user,
+          isLoading: false,
+        });
+        return true;
+      } catch (error) {
+        if (axios.isAxiosError(error)) {
+          set({
+            error: error.response?.data?.message || "Error updating account",
+            isLoading: false,
+          });
+        } else {
+          set({ error: "An unexpected error occurred", isLoading: false });
+        }
+        return false;
+      }
+    },
+    deleteAccount: async (authToken: Uint8Array) => {
+      set({ isLoading: true, error: null });
+      try {
+        await axiosInstance.delete(`users/me`, {
+          data: { authToken: toBase64(authToken) }, // axios needs `data` for DELETE bodies
+        });
+        set({ user: null, isAuthenticated: false, isLoading: false });
+        return true;
+      } catch (error) {
+        if (axios.isAxiosError(error)) {
+          set({
+            error: error.response?.data?.message || "Incorrect password",
+            isLoading: false,
+          });
+        } else {
+          set({ error: "An unexpected error occurred", isLoading: false });
         }
         return false;
       }
