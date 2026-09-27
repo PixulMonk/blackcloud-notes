@@ -5,6 +5,7 @@ import asyncHandler from "../utils/asyncHandler";
 import { User } from "../models/user.model";
 import deleteUserData from "../utils/deleteUserData";
 import { SimpleResponse } from "../types/common.types";
+import { sendAccountDeletionConfirmationEmail } from "../mailer/emails";
 
 export const deleteUser = asyncHandler(
   async (
@@ -40,6 +41,9 @@ export const deleteUser = asyncHandler(
     }
 
     await deleteUserData(userId.toString());
+
+    await sendAccountDeletionConfirmationEmail(user.name, user.email);
+
     await User.findByIdAndDelete(userId);
 
     res.cookie("jwt", "", { maxAge: 0 });
