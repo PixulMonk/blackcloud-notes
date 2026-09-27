@@ -2,6 +2,7 @@ import {
   FORGOT_PASSWORD_TEMPLATE,
   PASSWORD_RESET_SUCCESS_TEMPLATE,
   PASSWORD_CHANGE_SUCCESS_TEMPLATE,
+  ACCOUNT_DELETION_CONFIRMATION_TEMPLATE,
   VERIFY_EMAIL_TEMPLATE,
   WELCOME_EMAIL_TEMPLATE,
 } from "./emailTemplates";
@@ -82,6 +83,17 @@ export const sendPasswordChangeSuccessEmail = async (
     name,
   ).replace("{logoUrl}", logoUrl);
   await sendEmailTemplate(email, "Your Password Was Changed", template);
+};
+
+export const sendAccountDeletionConfirmationEmail = async (
+  name: string,
+  email: string,
+) => {
+  const template = ACCOUNT_DELETION_CONFIRMATION_TEMPLATE.replace(
+    "{name}",
+    name,
+  ).replace("{logoUrl}", logoUrl);
+  await sendEmailTemplate(email, "Your Account Has Been Deleted", template);
 };
 
 export const sendSupportContactEmail = async (

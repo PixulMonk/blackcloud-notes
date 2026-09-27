@@ -19,3 +19,6 @@ export const PASSWORD_CHANGE_SUCCESS_TEMPLATE = loadTemplate(
 export const PASSWORD_RESET_SUCCESS_TEMPLATE = loadTemplate(
   "passwordResetSuccessTemplate.html",
 );
+export const ACCOUNT_DELETION_CONFIRMATION_TEMPLATE = loadTemplate(
+  "accountDeletionConfirmationTemplate.html",
+);
