@@ -1,6 +1,7 @@
 import {
   FORGOT_PASSWORD_TEMPLATE,
   PASSWORD_RESET_SUCCESS_TEMPLATE,
+  PASSWORD_CHANGE_SUCCESS_TEMPLATE,
   VERIFY_EMAIL_TEMPLATE,
   WELCOME_EMAIL_TEMPLATE,
 } from "./emailTemplates";
@@ -70,6 +71,17 @@ export const sendPasswordResetSuccessEmail = async (
     name,
   ).replace("{logoUrl}", logoUrl);
   await sendEmailTemplate(email, "Your Password Has Been Reset", template);
+};
+
+export const sendPasswordChangeSuccessEmail = async (
+  name: string,
+  email: string,
+) => {
+  const template = PASSWORD_CHANGE_SUCCESS_TEMPLATE.replace(
+    "{name}",
+    name,
+  ).replace("{logoUrl}", logoUrl);
+  await sendEmailTemplate(email, "Your Password Was Changed", template);
 };
 
 export const sendSupportContactEmail = async (
