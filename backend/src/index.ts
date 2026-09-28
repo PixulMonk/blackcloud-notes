@@ -29,7 +29,7 @@ const isVercelPreview = (origin: string) =>
   // ! Note: This is a simple heuristic to allow Vercel preview deployments to access the API.
   // ! It assumes that the preview URLs follow the pattern "https://blackcloud-notes-frontend-<random-string>.vercel.app".
   // ! Adjust this logic if your deployment patterns change.
-  origin.startsWith("https://blackcloud-notes-frontend- ") &&
+  origin.startsWith("https://blackcloud-notes-frontend-") &&
   origin.endsWith(".vercel.app");
 
 app.use(
@@ -49,6 +49,7 @@ app.use(
   }),
 );
 
+app.set("trust proxy", 1);
 app.use(cookieParser());
 // Added to support base64-encoded images embedded in note content
 // Note: MongoDB document size limit is 16mb — monitor note sizes if users
