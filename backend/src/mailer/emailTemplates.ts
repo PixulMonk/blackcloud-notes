@@ -22,3 +22,7 @@ export const PASSWORD_RESET_SUCCESS_TEMPLATE = loadTemplate(
 export const ACCOUNT_DELETION_CONFIRMATION_TEMPLATE = loadTemplate(
   "accountDeletionConfirmationTemplate.html",
 );
+
+export const VAULT_WIPE_CONFIRMATION_TEMPLATE = loadTemplate(
+  "vaultWipeConfirmationTemplate.html",
+);

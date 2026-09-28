@@ -5,6 +5,7 @@ import {
   ACCOUNT_DELETION_CONFIRMATION_TEMPLATE,
   VERIFY_EMAIL_TEMPLATE,
   WELCOME_EMAIL_TEMPLATE,
+  VAULT_WIPE_CONFIRMATION_TEMPLATE,
 } from "./emailTemplates";
 
 import { emailClient } from "./emailClient";
@@ -113,4 +114,15 @@ export const sendSupportContactEmail = async (
     html,
     fromEmail, // replyTo
   );
+};
+
+export const sendVaultWipeConfirmationEmail = async (
+  name: string,
+  email: string,
+) => {
+  const template = VAULT_WIPE_CONFIRMATION_TEMPLATE.replace(
+    "{name}",
+    name,
+  ).replace("{logoUrl}", logoUrl);
+  await sendEmailTemplate(email, "Your Vault Was Wiped", template);
 };
