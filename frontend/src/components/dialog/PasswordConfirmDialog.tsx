@@ -11,44 +11,56 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-type DeleteStatus = "idle" | "pending" | "error";
+type ConfirmStatus = "idle" | "pending" | "error";
 
-interface DeleteAccountDialogProps {
+interface PasswordConfirmDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onConfirm: (password: string) => Promise<void>;
+  title: string;
+  description: string;
+  confirmLabel: string;
+  pendingLabel?: string;
 }
 
-export function DeleteAccountDialog({
+export function PasswordConfirmDialog({
   open,
   onOpenChange,
   onConfirm,
-}: DeleteAccountDialogProps) {
+  title,
+  description,
+  confirmLabel,
+  pendingLabel = "Working...",
+}: PasswordConfirmDialogProps) {
   const [password, setPassword] = useState("");
-  const [status, setStatus] = useState<DeleteStatus>("idle");
+  const [status, setStatus] = useState<ConfirmStatus>("idle");
   const [error, setError] = useState<string | null>(null);
 
   const isBusy = status === "pending";
 
+  const reset = () => {
+    setPassword("");
+    setStatus("idle");
+    setError(null);
+  };
+
   const handleConfirm = async () => {
-    if (!password) return;
+    if (!password || isBusy) return;
     setError(null);
     setStatus("pending");
     try {
       await onConfirm(password);
-      // parent closes dialog on success via onOpenChange
+      reset();
+      onOpenChange(false);
     } catch (err) {
       setStatus("error");
-      setError(err instanceof Error ? err.message : "Incorrect password");
+      setError(err instanceof Error ? err.message : "Something went wrong");
     }
   };
 
   const handleOpenChange = (next: boolean) => {
-    if (!next) {
-      setPassword("");
-      setStatus("idle");
-      setError(null);
-    }
+    if (isBusy) return; // don't allow closing mid-request
+    if (!next) reset();
     onOpenChange(next);
   };
 
@@ -56,17 +68,14 @@ export function DeleteAccountDialog({
     <AlertDialog open={open} onOpenChange={handleOpenChange}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Delete account</AlertDialogTitle>
-          <AlertDialogDescription>
-            This permanently deletes your account and vault. This cannot be
-            undone. Enter your password to confirm.
-          </AlertDialogDescription>
+          <AlertDialogTitle>{title}</AlertDialogTitle>
+          <AlertDialogDescription>{description}</AlertDialogDescription>
         </AlertDialogHeader>
 
         <div className="flex flex-col gap-2 py-2">
-          <Label htmlFor="delete-confirm-password">Password</Label>
+          <Label htmlFor="confirm-password">Password</Label>
           <Input
-            id="delete-confirm-password"
+            id="confirm-password"
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
@@ -90,7 +99,7 @@ export function DeleteAccountDialog({
             onClick={handleConfirm}
             disabled={isBusy || !password}
           >
-            {isBusy ? "Deleting..." : "Delete account"}
+            {isBusy ? pendingLabel : confirmLabel}
           </Button>
         </AlertDialogFooter>
       </AlertDialogContent>
