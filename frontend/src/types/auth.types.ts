@@ -50,6 +50,9 @@ export interface AuthStateActions {
   ) => Promise<{ success: boolean; error?: string }>;
   updateUser: (updates: Partial<{ name: string }>) => Promise<boolean>;
   deleteAccount: (authToken: Uint8Array) => Promise<boolean>;
+  wipeVault: (
+    authToken: Uint8Array,
+  ) => Promise<{ success: boolean; error?: string }>;
 }
 
 export interface AuthState {

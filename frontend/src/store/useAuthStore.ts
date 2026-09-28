@@ -362,6 +362,23 @@ const useAuthStore = create<AuthState>((set) => ({
         return false;
       }
     },
+
+    wipeVault: async (authToken: Uint8Array) => {
+      set({ isLoading: true, error: null });
+      try {
+        await axiosInstance.delete(`users/me/vault`, {
+          data: { authToken: toBase64(authToken) },
+        });
+        set({ isLoading: false });
+        return { success: true };
+      } catch (error) {
+        const message = axios.isAxiosError(error)
+          ? error.response?.data?.message || "Error wiping vault"
+          : "An unexpected error occurred";
+        set({ error: message, isLoading: false });
+        return { success: false, error: message };
+      }
+    },
   },
 }));
 
