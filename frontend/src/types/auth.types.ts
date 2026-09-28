@@ -41,6 +41,13 @@ export interface AuthStateActions {
     newArgon2Salt: string,
     Argon2Params: Argon2Params,
   ) => Promise<boolean>;
+  changePassword: (
+    currentAuthToken: string,
+    newAuthToken: string,
+    newProtectedDEK: string,
+    newArgon2Salt: string,
+    argon2Params: Argon2Params,
+  ) => Promise<{ success: boolean; error?: string }>;
   updateUser: (updates: Partial<{ name: string }>) => Promise<boolean>;
   deleteAccount: (authToken: Uint8Array) => Promise<boolean>;
 }

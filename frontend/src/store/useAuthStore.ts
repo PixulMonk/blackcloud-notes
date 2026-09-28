@@ -295,6 +295,32 @@ const useAuthStore = create<AuthState>((set) => ({
         return false;
       }
     },
+    changePassword: async (
+      currentAuthToken,
+      newAuthToken,
+      newProtectedDEK,
+      newArgon2Salt,
+      argon2Params,
+    ) => {
+      set({ isLoading: true, error: null });
+      try {
+        await axiosInstance.post("auth/change-password", {
+          currentAuthToken,
+          newAuthToken,
+          newProtectedDEK,
+          newArgon2Salt,
+          argon2Params,
+        });
+        set({ isLoading: false });
+        return { success: true };
+      } catch (error) {
+        const message = axios.isAxiosError(error)
+          ? error.response?.data?.message || "Error changing password"
+          : "An unexpected error occurred";
+        set({ error: message, isLoading: false });
+        return { success: false, error: message };
+      }
+    },
     updateUser: async (updates: Partial<{ name: string }>) => {
       set({ isLoading: true, error: null });
       try {
