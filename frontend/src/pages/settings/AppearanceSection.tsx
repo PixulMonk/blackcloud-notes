@@ -39,30 +39,6 @@ function AppearanceSection() {
             </Button>
           </div>
         </div>
-
-        <div className="flex items-center justify-between py-4">
-          <div>
-            <Label>Editor font</Label>
-            <p className="text-xs text-muted-foreground mt-1">
-              Font used inside your notes.
-            </p>
-          </div>
-          <Button variant="outline" size="sm">
-            Default
-          </Button>
-        </div>
-
-        <div className="flex items-center justify-between py-4">
-          <div>
-            <Label>Line height</Label>
-            <p className="text-xs text-muted-foreground mt-1">
-              Spacing between lines in the editor.
-            </p>
-          </div>
-          <Button variant="outline" size="sm">
-            Comfortable
-          </Button>
-        </div>
       </div>
     </div>
   );
