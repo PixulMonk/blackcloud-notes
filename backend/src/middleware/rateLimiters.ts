@@ -11,6 +11,16 @@ const createAuthLimiter = (max: number, skipSuccessfulRequests = false) =>
     message: { success: false, message: "Too many attempts. Try again later." },
   });
 
+export const sensitiveActionLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 5,
+  skipSuccessfulRequests: true, // only failed attempts count toward the limit
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: (req) => req.user?._id?.toString() ?? req.ip ?? "unknown",
+  message: { success: false, message: "Too many attempts. Try again later." },
+});
+
 export const loginMetadataLimiter = createAuthLimiter(30);
 export const signupLimiter = createAuthLimiter(5);
 export const loginLimiter = createAuthLimiter(10, true);
