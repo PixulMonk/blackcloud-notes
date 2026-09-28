@@ -107,7 +107,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           {/* Logo Container */}
           <div className="flex items-center justify-center h-8 mb-4">
             <img
-              src={logoUrl} // Removed "public"
+              src={logoUrl}
               alt="BlackCloud Logo"
               className="h-6 w-auto transition-all group-data-[collapsible=icon]:hidden"
             />
