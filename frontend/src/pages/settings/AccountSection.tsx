@@ -13,7 +13,7 @@ import { fromBase64 } from "@/lib/crypto/crypto-utils";
 import { encryptAESGCM } from "@/lib/crypto/aes";
 import { toBase64 } from "@/lib/crypto/crypto-utils";
 import { useDataEncryptionKey, useVaultActions } from "@/store/useVaultStore";
-import { DeleteAccountDialog } from "@/components/dialog/DeleteAccountDialog";
+import { PasswordConfirmDialog } from "@/components/dialog/PasswordConfirmDialog";
 import { ChangePasswordDialog } from "@/components/dialog/ChangePasswordDialog";
 
 function AccountSection() {
@@ -214,10 +214,14 @@ function AccountSection() {
       </div>
 
       {/* DIALOGS */}
-      <DeleteAccountDialog
+      <PasswordConfirmDialog
         open={deleteDialogOpen}
         onOpenChange={setDeleteDialogOpen}
         onConfirm={handleDeleteAccount}
+        title="Delete account"
+        description="This permanently deletes your account and vault. This cannot be undone. Enter your password to confirm."
+        confirmLabel="Delete account"
+        pendingLabel="Deleting..."
       />
       <ChangePasswordDialog
         open={changePasswordDialogOpen}
