@@ -52,11 +52,26 @@ const useDataStore = create<DataState>((set) => ({
         );
         set({ tree: decryptedTree, isInitialLoading: false });
       } catch (err: any) {
-        set({ error: err.message || "Failed to fetch tree", isLoading: false });
+        set({
+          error: err.message || "Failed to fetch tree",
+          isInitialLoading: false,
+        });
       }
     },
 
     setSyncing: (value) => set({ isSyncing: value }),
+
+    resetData: () =>
+      set({
+        tree: [],
+        archivedNodes: [],
+        deletedNodes: [],
+        isInitialLoading: false,
+        isLoading: false,
+        isFetchingContent: false,
+        isSyncing: false,
+        error: null,
+      }),
 
     addNode: async ({
       type,

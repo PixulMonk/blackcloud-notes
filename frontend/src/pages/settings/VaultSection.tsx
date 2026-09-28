@@ -1,8 +1,33 @@
+import { useState } from "react";
+
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Progress } from "@/components/ui/progress";
+import { PasswordConfirmDialog } from "@/components/dialog/PasswordConfirmDialog";
+import { useAuthActions } from "@/store/useAuthStore";
+import { useDeriveAuthToken } from "@/hooks/useDeriveAuthToken";
+import { useDataActions } from "@/store/useDataStore";
+import { useTreeUIActions } from "@/store/useTreeUIStore";
 
 function VaultSection() {
+  const { wipeVault } = useAuthActions();
+  const deriveAuthToken = useDeriveAuthToken();
+  const [wipeDialogOpen, setWipeDialogOpen] = useState(false);
+
+  const { resetData } = useDataActions();
+  const { clearSelection } = useTreeUIActions();
+
+  const handleWipeVault = async (password: string) => {
+    const authToken = await deriveAuthToken(password);
+
+    const result = await wipeVault(authToken);
+    if (!result.success) {
+      throw new Error(result.error ?? "Failed to wipe vault");
+    }
+
+    // Deselect first so the editor unmounts before the data disappears
+    clearSelection();
+    resetData();
+  };
   return (
     <div className="flex flex-col h-full">
       <h2 className="mb-6 text-sm font-semibold">Vault</h2>
@@ -51,14 +76,29 @@ function VaultSection() {
           <div>
             <Label>Wipe vault</Label>
             <p className="text-xs text-muted-foreground mt-1">
-              Permanently deletes all notes. Your account stays active.
+              Permanently deletes all your notes and folders. Your account
+              stays. This cannot be undone.
             </p>
           </div>
-          <Button variant="destructive" size="sm">
+          <Button
+            variant="destructive"
+            size="sm"
+            onClick={() => setWipeDialogOpen(true)}
+          >
             Wipe
           </Button>
         </div>
       </div>
+
+      <PasswordConfirmDialog
+        open={wipeDialogOpen}
+        onOpenChange={setWipeDialogOpen}
+        onConfirm={handleWipeVault}
+        title="Wipe vault"
+        description="This permanently deletes all your notes and folders. Your account will remain. This cannot be undone. Enter your password to confirm."
+        confirmLabel="Wipe vault"
+        pendingLabel="Wiping..."
+      />
     </div>
   );
 }

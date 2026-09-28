@@ -1,3 +1,5 @@
+// ? Is this a duplicate?? Delete this
+
 export interface NoteDTO {
   _id: string;
   userId: string;
