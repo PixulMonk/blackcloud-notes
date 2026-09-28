@@ -1,15 +1,26 @@
 import { Request, Response } from "express";
 import bcrypt from "bcrypt";
 
-import asyncHandler from "../utils/asyncHandler";
-import { User } from "../models/user.model";
-import deleteUserData from "../utils/deleteUserData";
+import { User, IUser } from "../models/user.model";
+
 import { SimpleResponse } from "../types/common.types";
-import { sendAccountDeletionConfirmationEmail } from "../mailer/emails";
+import {
+  AuthTokenConfirmRequest,
+  AuthResponse,
+  UpdateUserRequest,
+} from "../types";
+
+import asyncHandler from "../utils/asyncHandler";
+import { sanitizeUser } from "../utils/sanitizeUser";
+import deleteUserData from "../utils/deleteUserData";
+import {
+  sendAccountDeletionConfirmationEmail,
+  sendVaultWipeConfirmationEmail,
+} from "../mailer/emails";
 
 export const deleteUser = asyncHandler(
   async (
-    req: Request<{}, SimpleResponse, { authToken: string }>,
+    req: Request<{}, SimpleResponse, AuthTokenConfirmRequest>,
     res: Response<SimpleResponse>,
   ) => {
     const userId = req.user?._id;
@@ -23,8 +34,6 @@ export const deleteUser = asyncHandler(
       throw new Error("Password confirmation is required");
     }
 
-    // req.user from protectRoute likely omits hashedAuthToken (like the sanitized login response) —
-    // fetch it explicitly if so
     const user = await User.findById(userId).select("+hashedAuthToken");
 
     if (!user) {
@@ -53,27 +62,94 @@ export const deleteUser = asyncHandler(
   },
 );
 
-export const updateUser = asyncHandler(async (req: Request, res: Response) => {
-  const userId = req.user?._id;
+export const updateUser = asyncHandler(
+  async (
+    req: Request<{}, AuthResponse, UpdateUserRequest>,
+    res: Response<AuthResponse>,
+  ): Promise<void> => {
+    const userId = req.user?._id;
 
-  if (!userId) {
-    throw new Error("User ID is required");
-  }
+    if (!userId) {
+      throw new Error("User ID is required");
+    }
 
-  // Allow name updates for now, but we can add more fields later if needed
-  const { name } = req.body;
+    const updates: Partial<Pick<IUser, "name">> = {};
 
-  const updatedUser = await User.findByIdAndUpdate(
-    userId,
-    { name },
-    { new: true },
-  );
+    if (req.body.name !== undefined) {
+      if (typeof req.body.name !== "string" || !req.body.name.trim()) {
+        throw new Error("Name must be a non-empty string");
+      }
+      if (req.body.name.trim().length > 50) {
+        throw new Error("Name must be 50 characters or fewer");
+      }
+      updates.name = req.body.name.trim();
+    }
 
-  if (!updatedUser) {
-    throw new Error("User not found");
-  }
+    if (Object.keys(updates).length === 0) {
+      throw new Error("No valid fields to update");
+    }
 
-  res
-    .status(200)
-    .json({ message: "User updated successfully", user: updatedUser });
-});
+    const updatedUser = await User.findByIdAndUpdate(userId, updates, {
+      new: true,
+      runValidators: true,
+    });
+
+    if (!updatedUser) {
+      throw new Error("User not found");
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "User updated successfully",
+      user: sanitizeUser(updatedUser),
+    });
+  },
+);
+
+export const wipeVault = asyncHandler(
+  async (
+    req: Request<{}, SimpleResponse, AuthTokenConfirmRequest>,
+    res: Response<SimpleResponse>,
+  ): Promise<void> => {
+    const userId = req.user?._id;
+    const { authToken } = req.body;
+
+    if (!userId) {
+      throw new Error("User ID is required");
+    }
+
+    if (!authToken) {
+      throw new Error("Password confirmation is required");
+    }
+
+    const user = await User.findById(userId);
+
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    const isAuthVerified = await bcrypt.compare(
+      authToken,
+      user.hashedAuthToken,
+    );
+
+    if (!isAuthVerified) {
+      throw new Error("Incorrect password");
+    }
+
+    await deleteUserData(userId.toString());
+
+    // The wipe is irreversible, so a mail failure must not turn a
+    // successful wipe into a 500. Log it and carry on.
+    try {
+      await sendVaultWipeConfirmationEmail(user.name, user.email);
+    } catch (error) {
+      console.error("Failed to send vault wipe confirmation email:", error);
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Vault wiped successfully",
+    });
+  },
+);

@@ -19,6 +19,10 @@ export interface AuthResponse extends SimpleResponse {
   user?: SanitizedUser;
 }
 
+export interface AuthTokenConfirmRequest {
+  authToken: string; // base64
+}
+
 export interface SignupRequest {
   name: string;
   email: string;
@@ -76,4 +80,8 @@ export interface ChangePasswordRequest {
 
 export interface ResendVerificationEmailRequest {
   email: string;
+}
+
+export interface UpdateUserRequest {
+  name?: string; // add more editable fields here later
 }
