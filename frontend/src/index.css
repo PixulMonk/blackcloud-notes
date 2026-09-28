@@ -1,6 +1,6 @@
-@import 'tailwindcss';
+@import "tailwindcss";
 @plugin "@tailwindcss/typography";
-@import 'tw-animate-css';
+@import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -173,43 +173,43 @@
 }
 
 /* Checkbox styling */
-.ProseMirror input[type='checkbox'] {
+.ProseMirror input[type="checkbox"] {
   @apply appearance-none h-4 w-4 rounded border border-primary/50 bg-background checked:bg-primary checked:border-primary cursor-pointer flex items-center justify-center;
 }
 
-.ProseMirror input[type='checkbox']:checked::before {
-  content: '✓';
+.ProseMirror input[type="checkbox"]:checked::before {
+  content: "✓";
   @apply text-primary-foreground text-xs;
 }
 
 /* Strike-through completed tasks */
-.ProseMirror li[data-checked='true'] > div {
+.ProseMirror li[data-checked="true"] > div {
   @apply text-muted-foreground line-through;
 }
 
 /* Task list styles */
-.ProseMirror ul[data-type='taskList'] {
+.ProseMirror ul[data-type="taskList"] {
   list-style: none !important;
   padding-left: 0;
 }
 
-.ProseMirror ul[data-type='taskList'] p {
+.ProseMirror ul[data-type="taskList"] p {
   margin: 0;
 }
 
-.ProseMirror ul[data-type='taskList'] li {
+.ProseMirror ul[data-type="taskList"] li {
   display: flex;
   align-items: center;
   gap: 0.5rem;
 }
 
-.ProseMirror ul[data-type='taskList'] li > label {
+.ProseMirror ul[data-type="taskList"] li > label {
   display: flex;
   align-items: center;
   user-select: none;
 }
 
-.ProseMirror ul[data-type='taskList'] li > div {
+.ProseMirror ul[data-type="taskList"] li > div {
   flex: 1;
 }
 
@@ -234,4 +234,32 @@
 
 .ProseMirror table .selectedCell {
   background-color: var(--color-accent);
+}
+
+@utility no-scrollbar {
+  @apply [scrollbar-width:none] [&::-webkit-scrollbar]:hidden;
+}
+
+/* Thin, theme-matching scrollbars for sidebar containers */
+div[data-slot="sidebar-container"] {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border) transparent;
+}
+
+div[data-slot="sidebar-container"]::-webkit-scrollbar {
+  width: 6px;
+}
+
+div[data-slot="sidebar-container"]::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+div[data-slot="sidebar-container"]::-webkit-scrollbar-thumb {
+  background-color: var(--color-border);
+  border-radius: 3px;
+  opacity: 0.5;
+}
+
+div[data-slot="sidebar-container"]::-webkit-scrollbar-thumb:hover {
+  background-color: var(--color-muted-foreground);
 }
