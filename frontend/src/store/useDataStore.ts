@@ -23,6 +23,8 @@ import {
   updateRecursive,
   insertNode,
   moveNode,
+  findNodeRecursive,
+  flattenNode,
 } from "@/lib/tree/treeHelpers";
 import handleStoreError from "@/utils/handleStoreError";
 
@@ -227,13 +229,31 @@ const useDataStore = create<DataState>((set) => ({
         const response = await axiosInstance.patch<TreeNodeResponse>(
           `treeNodes/${nodeIdToDelete}/soft-delete`,
         );
-
         const updatedNodeDTO = response.data.data;
 
-        set((state) => ({
-          tree: removeRecursive(state.tree, nodeIdToDelete),
-          isLoading: false,
-        }));
+        set((state) => {
+          const target = findNodeRecursive(state.tree, nodeIdToDelete);
+          const trashed: TreeNode[] = (target ? flattenNode(target) : []).map(
+            (node) => ({
+              ...node,
+              ...(node._id === nodeIdToDelete ? updatedNodeDTO : {}),
+              title: node.title, // keep the decrypted title
+              isDeleted: true,
+              deletedAt: updatedNodeDTO.deletedAt,
+              children: [],
+            }),
+          );
+          const trashedIds = new Set(trashed.map((n) => n._id));
+
+          return {
+            tree: removeRecursive(state.tree, nodeIdToDelete),
+            deletedNodes: [
+              ...trashed,
+              ...state.deletedNodes.filter((n) => !trashedIds.has(n._id)),
+            ],
+            isLoading: false,
+          };
+        });
 
         return updatedNodeDTO;
       } catch (error) {
@@ -249,19 +269,31 @@ const useDataStore = create<DataState>((set) => ({
         const response = await axiosInstance.patch<TreeNodeResponse>(
           `treeNodes/${nodeIdToArchive}/archive`,
         );
-
         const updatedNodeDTO = response.data.data;
 
-        set((state) => ({
-          tree: updateRecursive(state.tree, nodeIdToArchive, {
-            ...updatedNodeDTO,
-            title: undefined,
-            children: undefined,
-          }).map((n) => {
-            return n;
-          }),
-          isLoading: false,
-        }));
+        set((state) => {
+          const target = findNodeRecursive(state.tree, nodeIdToArchive);
+          const archived: TreeNode[] = (target ? flattenNode(target) : []).map(
+            (node) => ({
+              ...node,
+              ...(node._id === nodeIdToArchive ? updatedNodeDTO : {}),
+              title: node.title, // keep the decrypted title
+              isArchived: true,
+              archivedAt: updatedNodeDTO.archivedAt,
+              children: [],
+            }),
+          );
+          const archivedIds = new Set(archived.map((n) => n._id));
+
+          return {
+            tree: removeRecursive(state.tree, nodeIdToArchive),
+            archivedNodes: [
+              ...archived,
+              ...state.archivedNodes.filter((n) => !archivedIds.has(n._id)),
+            ],
+            isLoading: false,
+          };
+        });
 
         return updatedNodeDTO;
       } catch (error) {
