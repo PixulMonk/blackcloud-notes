@@ -1,9 +1,8 @@
 import type { Argon2Params } from "@blackcloud/shared";
 import type { LoginMetaDetaResponse } from "@/types/encryption.types";
 
-// TODO: check if matches SanitizedUser returned by backend
 export interface User {
-  id: string;
+  _id: string;
   name: string;
   email: string;
   isVerified: boolean;
