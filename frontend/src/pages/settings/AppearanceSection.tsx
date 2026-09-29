@@ -1,11 +1,19 @@
 // pages/Settings/AppearanceSection.tsx
 import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
-import { Sun, Moon, Monitor } from "lucide-react";
-import { useIsDark } from "@/store/useThemeStore";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useTheme, useSetTheme } from "@/store/useThemeStore";
+import { THEMES } from "@/config/theme";
+import type { ThemeMode } from "@/types/theme.types";
 
-function AppearanceSection() {
-  const isDark = useIsDark();
+export default function AppearanceSection() {
+  const currentTheme = useTheme();
+  const setTheme = useSetTheme();
 
   return (
     <div className="flex flex-col h-full">
@@ -19,53 +27,23 @@ function AppearanceSection() {
               Choose how BlackCloud looks on this device.
             </p>
           </div>
-          <div className="flex items-center gap-1 rounded-md border border-border p-1">
-            <Button
-              variant={!isDark ? "secondary" : "ghost"}
-              size="icon"
-              className="size-8"
-            >
-              <Sun className="size-4" />
-            </Button>
-            <Button variant="ghost" size="icon" className="size-8">
-              <Monitor className="size-4" />
-            </Button>
-            <Button
-              variant={isDark ? "secondary" : "ghost"}
-              size="icon"
-              className="size-8"
-            >
-              <Moon className="size-4" />
-            </Button>
-          </div>
-        </div>
-
-        <div className="flex items-center justify-between py-4">
-          <div>
-            <Label>Editor font</Label>
-            <p className="text-xs text-muted-foreground mt-1">
-              Font used inside your notes.
-            </p>
-          </div>
-          <Button variant="outline" size="sm">
-            Default
-          </Button>
-        </div>
-
-        <div className="flex items-center justify-between py-4">
-          <div>
-            <Label>Line height</Label>
-            <p className="text-xs text-muted-foreground mt-1">
-              Spacing between lines in the editor.
-            </p>
-          </div>
-          <Button variant="outline" size="sm">
-            Comfortable
-          </Button>
+          <Select
+            value={currentTheme}
+            onValueChange={(value) => setTheme(value as ThemeMode)}
+          >
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Select a theme" />
+            </SelectTrigger>
+            <SelectContent>
+              {THEMES.map((t) => (
+                <SelectItem key={t.id} value={t.id}>
+                  {t.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       </div>
     </div>
   );
 }
-
-export default AppearanceSection;

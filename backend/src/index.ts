@@ -13,6 +13,7 @@ import treeNodeRoutes from "./routes/treeNode.route";
 import treeRoutes from "./routes/tree.route";
 import healthRoutes from "./routes/health.route";
 import supportRoutes from "./routes/support.route";
+import usersRoutes from "./routes/users.route";
 import { apiLimiter } from "./middleware/rateLimiters";
 
 const app: Express = express();
@@ -28,7 +29,7 @@ const isVercelPreview = (origin: string) =>
   // ! Note: This is a simple heuristic to allow Vercel preview deployments to access the API.
   // ! It assumes that the preview URLs follow the pattern "https://blackcloud-notes-frontend-<random-string>.vercel.app".
   // ! Adjust this logic if your deployment patterns change.
-  origin.startsWith("https://blackcloud-notes-frontend- ") &&
+  origin.startsWith("https://blackcloud-notes-frontend-") &&
   origin.endsWith(".vercel.app");
 
 app.use(
@@ -48,6 +49,7 @@ app.use(
   }),
 );
 
+app.set("trust proxy", 1);
 app.use(cookieParser());
 // Added to support base64-encoded images embedded in note content
 // Note: MongoDB document size limit is 16mb — monitor note sizes if users
@@ -56,6 +58,7 @@ app.use(express.json({ limit: "10mb" }));
 app.use("/api/health", healthRoutes);
 app.use("/api", apiLimiter);
 app.use("/api/auth", authRoutes);
+app.use("/api/users", usersRoutes);
 app.use("/api/notes", notesRoutes);
 app.use("/api/treeNodes", treeNodeRoutes);
 app.use("/api/tree", treeRoutes);

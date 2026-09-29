@@ -1,31 +1,58 @@
-import { create } from 'zustand';
-import { updateFavicon } from '@/lib/utils';
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
 
-import type { ThemeActions, ThemeState } from '@/types/theme.types';
+import { updateFavicon } from "@/lib/utils";
+import { THEMES, isThemeDark } from "@/config/theme";
+import type { ThemeMode } from "@/types/theme.types";
 
-const useThemeStore = create<ThemeState>((set) => ({
-  isDark:
-    localStorage.getItem('theme') === 'dark' ||
-    localStorage.getItem('theme') === null,
-  actions: {
-    toggleTheme: () =>
-      set((state) => {
-        const newTheme: boolean = !state.isDark;
-        document.documentElement.classList.toggle('dark', newTheme);
-        localStorage.setItem('theme', newTheme ? 'dark' : 'light');
-        updateFavicon(newTheme);
-        return { isDark: newTheme };
-      }),
+const ALL_THEME_CLASSES = THEMES.map((t) => t.id).filter(
+  (id) => id !== "light",
+);
 
-    setTheme: (dark) => {
-      document.documentElement.classList.toggle('dark', dark);
-      localStorage.setItem('theme', dark ? 'dark' : 'light');
-      updateFavicon(dark);
-      set({ isDark: dark });
+interface ThemeState {
+  theme: ThemeMode;
+  setTheme: (theme: ThemeMode) => void;
+}
+
+export const useThemeStore = create<ThemeState>()(
+  persist(
+    (set) => ({
+      theme: "dark", // default fallback
+      setTheme: (theme: ThemeMode) => {
+        const root = document.documentElement;
+
+        // Remove all previous theme classes dynamically
+        root.classList.remove(...ALL_THEME_CLASSES);
+
+        // Apply the new theme class (light default has no special class)
+        if (theme !== "light") {
+          root.classList.add(theme);
+        }
+
+        // Update favicon dynamically using the config helper
+        const isDarkVariant = isThemeDark(theme);
+        updateFavicon(isDarkVariant);
+
+        set({ theme });
+      },
+    }),
+    {
+      name: "blackcloud-theme",
+      onRehydrateStorage: () => (state) => {
+        if (state) {
+          const root = document.documentElement;
+          root.classList.remove(...ALL_THEME_CLASSES);
+          if (state.theme !== "light") {
+            root.classList.add(state.theme);
+          }
+        }
+      },
     },
-  },
-}));
+  ),
+);
 
-export const useIsDark = () => useThemeStore((s) => s.isDark);
-export const useThemeStoreActions = (): ThemeActions =>
-  useThemeStore((s) => s.actions);
+// Clean, direct selectors
+export const useTheme = () => useThemeStore((s) => s.theme);
+export const useIsDarkVariant = () =>
+  useThemeStore((s) => isThemeDark(s.theme));
+export const useSetTheme = () => useThemeStore((s) => s.setTheme);

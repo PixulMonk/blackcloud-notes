@@ -1,8 +1,11 @@
 import {
   FORGOT_PASSWORD_TEMPLATE,
   PASSWORD_RESET_SUCCESS_TEMPLATE,
+  PASSWORD_CHANGE_SUCCESS_TEMPLATE,
+  ACCOUNT_DELETION_CONFIRMATION_TEMPLATE,
   VERIFY_EMAIL_TEMPLATE,
   WELCOME_EMAIL_TEMPLATE,
+  VAULT_WIPE_CONFIRMATION_TEMPLATE,
 } from "./emailTemplates";
 
 import { emailClient } from "./emailClient";
@@ -72,6 +75,28 @@ export const sendPasswordResetSuccessEmail = async (
   await sendEmailTemplate(email, "Your Password Has Been Reset", template);
 };
 
+export const sendPasswordChangeSuccessEmail = async (
+  name: string,
+  email: string,
+) => {
+  const template = PASSWORD_CHANGE_SUCCESS_TEMPLATE.replace(
+    "{name}",
+    name,
+  ).replace("{logoUrl}", logoUrl);
+  await sendEmailTemplate(email, "Your Password Was Changed", template);
+};
+
+export const sendAccountDeletionConfirmationEmail = async (
+  name: string,
+  email: string,
+) => {
+  const template = ACCOUNT_DELETION_CONFIRMATION_TEMPLATE.replace(
+    "{name}",
+    name,
+  ).replace("{logoUrl}", logoUrl);
+  await sendEmailTemplate(email, "Your Account Has Been Deleted", template);
+};
+
 export const sendSupportContactEmail = async (
   fromEmail: string,
   subject: string,
@@ -89,4 +114,15 @@ export const sendSupportContactEmail = async (
     html,
     fromEmail, // replyTo
   );
+};
+
+export const sendVaultWipeConfirmationEmail = async (
+  name: string,
+  email: string,
+) => {
+  const template = VAULT_WIPE_CONFIRMATION_TEMPLATE.replace(
+    "{name}",
+    name,
+  ).replace("{logoUrl}", logoUrl);
+  await sendEmailTemplate(email, "Your Vault Was Wiped", template);
 };

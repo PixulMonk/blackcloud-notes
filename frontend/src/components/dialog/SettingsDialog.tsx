@@ -33,10 +33,10 @@ function SettingsDialog() {
               <CircleUser className="mr-2 size-4" />
               Account
             </TabsTrigger>
-            <TabsTrigger value="security" className="justify-start">
+            {/* <TabsTrigger value="security" className="justify-start">
               <ShieldUser className="mr-2 size-4" />
               Security
-            </TabsTrigger>
+            </TabsTrigger> */}
             <TabsTrigger value="vault" className="justify-start">
               <LockKeyhole className="mr-2 size-4" />
               Vault

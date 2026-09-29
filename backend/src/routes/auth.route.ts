@@ -9,27 +9,47 @@ import {
   resetPassword,
   checkAuth,
   resendVerificationEmail,
+  changePassword,
 } from "../controllers/auth.controller";
 
 import { ResetPasswordParams } from "../types/auth.types";
 
 import { protectRoute } from "../middleware/auth.middleware";
-import { authLimiter, resendLimiter } from "../middleware/rateLimiters";
+import {
+  changePasswordLimiter,
+  forgotPasswordLimiter,
+  loginLimiter,
+  loginMetadataLimiter,
+  resetPasswordLimiter,
+  resendVerificationLimiter,
+  signupLimiter,
+  verifyEmailLimiter,
+} from "../middleware/rateLimiters";
 
 const router = express.Router();
 
 router.get("/check-auth", protectRoute, checkAuth);
-router.post("/getLoginMetadata", authLimiter, getLoginMetadata);
-router.post("/signup", authLimiter, signup);
-router.post("/login", authLimiter, login);
+router.post("/getLoginMetadata", loginMetadataLimiter, getLoginMetadata);
+router.post("/signup", signupLimiter, signup);
+router.post("/login", loginLimiter, login);
 router.post("/logout", logout);
-router.post("/verify-email", authLimiter, verifyEmail);
-router.post("/forgot-password", resendLimiter, forgotPassword);
+router.post("/verify-email", verifyEmailLimiter, verifyEmail);
+router.post("/forgot-password", forgotPasswordLimiter, forgotPassword);
 router.post<ResetPasswordParams>(
   "/reset-password/:token",
-  authLimiter,
+  resetPasswordLimiter,
   resetPassword,
 );
-router.post("/resend-verification", resendLimiter, resendVerificationEmail);
+router.post(
+  "/change-password",
+  changePasswordLimiter,
+  protectRoute,
+  changePassword,
+);
+router.post(
+  "/resend-verification",
+  resendVerificationLimiter,
+  resendVerificationEmail,
+);
 
 export default router;

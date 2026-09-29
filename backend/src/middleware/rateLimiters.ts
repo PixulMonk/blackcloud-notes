@@ -1,19 +1,42 @@
 import rateLimit from "express-rate-limit";
 
-// authLimiter    → login, signup, getLoginMetadata, verify-email, reset-password
-// resendLimiter  → forgot-password, resend-verification (DB cooldown is primary gate)
-// contactLimiter → support/submit
-// apiLimiter     → global default, applied once in app.ts as a catch-all floor
+// Each auth endpoint has its own bucket so one action does not consume another's allowance.
+// apiLimiter remains a broad per-IP floor across API routes.
 
-export const authLimiter = rateLimit({
+const createAuthLimiter = (max: number, skipSuccessfulRequests = false) =>
+  rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max,
+    skipSuccessfulRequests,
+    message: { success: false, message: "Too many attempts. Try again later." },
+  });
+
+export const sensitiveActionLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 5,
+  limit: 5,
+  skipSuccessfulRequests: true, // only failed attempts count toward the limit
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: (req) => req.user?._id?.toString() ?? req.ip ?? "unknown",
   message: { success: false, message: "Too many attempts. Try again later." },
 });
 
-export const resendLimiter = rateLimit({
+export const loginMetadataLimiter = createAuthLimiter(30);
+export const signupLimiter = createAuthLimiter(5);
+export const loginLimiter = createAuthLimiter(10, true);
+export const verifyEmailLimiter = createAuthLimiter(10);
+export const resetPasswordLimiter = createAuthLimiter(10);
+export const changePasswordLimiter = createAuthLimiter(10);
+
+export const forgotPasswordLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 15, // loose — the cooldown logic is the real gate here
+  message: { success: false, message: "Too many requests. Try again later." },
+});
+
+export const resendVerificationLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 15,
   message: { success: false, message: "Too many requests. Try again later." },
 });
 
@@ -25,7 +48,5 @@ export const contactLimiter = rateLimit({
 
 export const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 100,
+  max: process.env.NODE_ENV === "production" ? 300 : 10000,
 });
-
-// TODO: consider adding a more strict limiter for note creation, editing, and deletion endpoints. This would help prevent abuse of the note management features and ensure fair usage among users.

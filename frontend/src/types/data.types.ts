@@ -6,6 +6,7 @@ export type NoteStatus = "trash" | "archived";
 export interface DataActions {
   fetchTree: (dataEncryptionKey: Uint8Array) => Promise<void>;
   setSyncing: (value: boolean) => void;
+  resetData: () => void;
   addNode: (options: AddNodeOptions) => Promise<TreeNodeDTO | null>;
   deleteNode: (nodeId: string) => Promise<TreeNodeDTO | null>;
   updateNode: (options: UpdateNodeOptions) => Promise<TreeNodeDTO | null>;

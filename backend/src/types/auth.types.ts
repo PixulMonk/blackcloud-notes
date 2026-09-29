@@ -19,6 +19,10 @@ export interface AuthResponse extends SimpleResponse {
   user?: SanitizedUser;
 }
 
+export interface AuthTokenConfirmRequest {
+  authToken: string; // base64
+}
+
 export interface SignupRequest {
   name: string;
   email: string;
@@ -66,6 +70,18 @@ export interface ResendEmailResponse extends SimpleResponse {
   retryAfter?: number;
 }
 
+export interface ChangePasswordRequest {
+  currentAuthToken: string; // base64 — for verification, NOT re-derived on backend
+  newAuthToken: string; // base64
+  newProtectedDEK: string; // base64 — IV ‖ ciphertext ‖ tag
+  newArgon2Salt: string; // base64
+  argon2Params: Argon2Params;
+}
+
 export interface ResendVerificationEmailRequest {
   email: string;
+}
+
+export interface UpdateUserRequest {
+  name?: string; // add more editable fields here later
 }

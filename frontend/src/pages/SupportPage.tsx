@@ -57,7 +57,13 @@ function SupportPage() {
 
   return (
     <div className="flex flex-col w-full max-w-2xl mx-auto py-8">
-      <h1 className="text-lg font-semibold mb-1">Help & Support</h1>
+      <div className="flex items-baseline justify-between mb-1">
+        <h1 className="text-lg font-semibold">Help & Support</h1>
+        {/* Dynamic version pulled from package.json via Vite define */}
+        <span className="text-xs text-muted-foreground font-mono">
+          v{__APP_VERSION__}
+        </span>
+      </div>
       <p className="text-sm text-muted-foreground mb-8">
         Answers to common questions, or reach out below.
       </p>
