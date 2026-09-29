@@ -134,3 +134,8 @@ export const moveNode = (
 
   return insertNode(treeWithoutNode, newParentId, nodeToMove);
 };
+
+export const flattenNode = (node: TreeNode): TreeNode[] => [
+  node,
+  ...(node.children ?? []).flatMap(flattenNode),
+];
