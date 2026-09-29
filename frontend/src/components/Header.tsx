@@ -3,8 +3,6 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { useAuth, useAuthActions } from "@/store/useAuthStore";
-import { Sun, Moon, Bell } from "lucide-react";
-import { useIsDark, useThemeStoreActions } from "@/store/useThemeStore";
 import { useActiveView } from "@/store/useAppStore";
 
 import { DocumentTitle } from "./Editor/DocumentTitle";
