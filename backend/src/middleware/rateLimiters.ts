@@ -1,4 +1,4 @@
-import rateLimit from "express-rate-limit";
+import rateLimit, { ipKeyGenerator } from "express-rate-limit";
 
 // Each auth endpoint has its own bucket so one action does not consume another's allowance.
 // apiLimiter remains a broad per-IP floor across API routes.
@@ -17,7 +17,8 @@ export const sensitiveActionLimiter = rateLimit({
   skipSuccessfulRequests: true, // only failed attempts count toward the limit
   standardHeaders: true,
   legacyHeaders: false,
-  keyGenerator: (req) => req.user?._id?.toString() ?? req.ip ?? "unknown",
+  keyGenerator: (req) =>
+    req.user?._id?.toString() ?? ipKeyGenerator(req.ip ?? "unknown"),
   message: { success: false, message: "Too many attempts. Try again later." },
 });
 
