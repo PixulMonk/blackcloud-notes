@@ -396,3 +396,15 @@ export const useAuth = (): AuthStoreState =>
 
 export const useAuthActions = (): AuthStateActions =>
   useAuthStore((s) => s.actions);
+
+export const subscribeToUserId = (
+  callback: (userId: string | null) => void,
+): (() => void) => {
+  return useAuthStore.subscribe((state, prevState) => {
+    const userId = state.user?._id ?? null;
+    const prevUserId = prevState.user?._id ?? null;
+    if (userId !== prevUserId) {
+      callback(userId);
+    }
+  });
+};
