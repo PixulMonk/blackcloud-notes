@@ -1,17 +1,17 @@
 import mongoose from 'mongoose';
 
 export const connectDB = async () => {
-  const { DB_USERNAME, DB_PASSWORD, DB_HOST, DB_NAME } = process.env;
+  const { MONGO_USERNAME, MONGO_PASSWORD, MONGO_HOST, MONGO_DB_NAME } = process.env;
 
-  if (!DB_USERNAME || !DB_PASSWORD || !DB_HOST || !DB_NAME) {
+  if (!MONGO_USERNAME || !MONGO_PASSWORD || !MONGO_HOST || !MONGO_DB_NAME) {
     throw new Error('Missing DB credentials');
   }
 
   const uri = `mongodb+srv://${encodeURIComponent(
-    DB_USERNAME
+    MONGO_USERNAME
   )}:${encodeURIComponent(
-    DB_PASSWORD
-  )}@${DB_HOST}/${DB_NAME}?retryWrites=true&w=majority`;
+    MONGO_PASSWORD
+  )}@${MONGO_HOST}/${MONGO_DB_NAME}?retryWrites=true&w=majority`;
 
   try {
     const conn = await mongoose.connect(uri);

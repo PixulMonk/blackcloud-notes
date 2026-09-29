@@ -1,22 +1,23 @@
 // TODO: typing and checking if sensitive data is being leaked in the responses
-import { Request, Response } from 'express';
-import bcrypt from 'bcrypt';
-import crypto from 'crypto';
-import mongoose from 'mongoose';
-import dotenv from 'dotenv';
+import { Request, Response } from "express";
+import bcrypt from "bcrypt";
+import crypto from "crypto";
+import mongoose from "mongoose";
+import dotenv from "dotenv";
 
-import { ENCRYPTION_CONFIG } from '@blackcloud/shared';
-import asyncHandler from '../utils/asyncHandler';
-import { generateSixDigitCode } from '../utils/generateVerificationCode';
-import deleteUserData from '../utils/deleteUserData';
-import { User } from '../models/user.model';
-import { generateTokenAndSetCookie } from '../utils/generateTokenAndSetCookie';
+import { ENCRYPTION_CONFIG } from "@blackcloud/shared";
+import asyncHandler from "../utils/asyncHandler";
+import { generateSixDigitCode } from "../utils/generateVerificationCode";
+import deleteUserData from "../utils/deleteUserData";
+import { User } from "../models/user.model";
+import { generateTokenAndSetCookie } from "../utils/generateTokenAndSetCookie";
 import {
   sendPasswordResetEmail,
   sendVerificationEmail,
   sendWelcomeEmail,
   sendPasswordResetSuccessEmail,
-} from '../mailer/emails';
+  sendPasswordChangeSuccessEmail,
+} from "../mailer/emails";
 import {
   AuthResponse,
   ForgotPasswordRequest,
@@ -27,16 +28,17 @@ import {
   ResendEmailResponse,
   ResetPasswordParams,
   ResetPasswordRequest,
+  ChangePasswordRequest,
   SignupRequest,
   VerifyEmailRequest,
-} from '../types';
-import { SimpleResponse } from '../types/common.types';
+} from "../types";
+import { SimpleResponse } from "../types/common.types";
 import {
   checkCooldown,
   getProgressiveCooldown,
   shouldResetAttempts,
   getFakeAttempts,
-} from '../utils/cooldownHelpers';
+} from "../utils/cooldownHelpers";
 
 dotenv.config();
 
@@ -48,7 +50,7 @@ export const checkAuth = asyncHandler(
     const user = await User.findById(req.user);
 
     if (!user) {
-      throw new Error('User not found');
+      throw new Error("User not found");
     }
 
     // TODO: extract this process to helper
@@ -91,13 +93,13 @@ export const signup = asyncHandler(
       !argon2Salt ||
       !argon2Params
     ) {
-      throw new Error('All fields are required');
+      throw new Error("All fields are required");
     }
 
     const userAlreadyExists = await User.findOne({ email });
     if (userAlreadyExists) {
       throw new Error(
-        'Unable to create account. Please check your details or try logging in',
+        "Unable to create account. Please check your details or try logging in",
       );
     }
 
@@ -141,7 +143,7 @@ export const signup = asyncHandler(
 
     res.status(201).json({
       success: true,
-      message: 'User created successfully',
+      message: "User created successfully",
       user: sanitizedUser,
     });
   },
@@ -155,19 +157,19 @@ export const getLoginMetadata = asyncHandler(
     const { email } = req.body;
 
     if (!email) {
-      throw new Error('All fields are required');
+      throw new Error("All fields are required");
     }
 
     const user = await User.findOne({ email });
 
     if (!user) {
       const fakeSalt = crypto
-        .createHmac('sha256', process.env.SALT_HMAC_SECRET!)
+        .createHmac("sha256", process.env.SALT_HMAC_SECRET!)
         .update(email)
-        .digest('base64');
+        .digest("base64");
 
       const fakeBinaryBlob = crypto.randomBytes(12 + 32 + 16);
-      const fakeBlobBase64 = fakeBinaryBlob.toString('base64');
+      const fakeBlobBase64 = fakeBinaryBlob.toString("base64");
 
       res.status(200).json({
         success: true,
@@ -196,13 +198,13 @@ export const login = asyncHandler(
     const { email, authToken } = req.body;
 
     if (!email || !authToken) {
-      throw new Error('All fields are required');
+      throw new Error("All fields are required");
     }
 
     const user = await User.findOne({ email });
 
     if (!user) {
-      throw new Error('Invalid credentials');
+      throw new Error("Invalid credentials");
     }
 
     const isAuthVerified = await bcrypt.compare(
@@ -211,7 +213,7 @@ export const login = asyncHandler(
     );
 
     if (!isAuthVerified) {
-      throw new Error('Invalid credentials');
+      throw new Error("Invalid credentials");
     }
 
     const userId = user._id as mongoose.Types.ObjectId;
@@ -235,7 +237,7 @@ export const login = asyncHandler(
 
     res.status(200).json({
       success: true,
-      message: 'Logged in successfully',
+      message: "Logged in successfully",
       user: sanitizedUser,
     });
   },
@@ -245,8 +247,8 @@ export const logout = async (
   req: Request<{}, SimpleResponse, {}>,
   res: Response<SimpleResponse>,
 ): Promise<void> => {
-  res.cookie('jwt', '', { maxAge: 0 });
-  res.status(200).json({ success: true, message: 'Logged out successfully' });
+  res.cookie("jwt", "", { maxAge: 0 });
+  res.status(200).json({ success: true, message: "Logged out successfully" });
 };
 
 export const verifyEmail = asyncHandler(
@@ -262,7 +264,7 @@ export const verifyEmail = asyncHandler(
     });
 
     if (!user) {
-      throw new Error('Invalid or expired verification code');
+      throw new Error("Invalid or expired verification code");
     }
 
     user!.isVerified = true;
@@ -287,7 +289,7 @@ export const verifyEmail = asyncHandler(
 
     res.status(200).json({
       success: true,
-      message: 'User verified successfully',
+      message: "User verified successfully",
       user: sanitizedUser,
     });
   },
@@ -305,7 +307,7 @@ export const forgotPassword = asyncHandler(
     const genericResponse = {
       success: true,
       message:
-        'If an account with that email exists, you will receive further instructions shortly.',
+        "If an account with that email exists, you will receive further instructions shortly.",
     };
 
     if (!user) {
@@ -344,7 +346,7 @@ export const forgotPassword = asyncHandler(
       }
     }
 
-    const resetToken = crypto.randomBytes(20).toString('hex');
+    const resetToken = crypto.randomBytes(20).toString("hex");
 
     user.resetPasswordToken = resetToken;
     user.resetPasswordExpiresAt = new Date(Date.now() + 60 * 60 * 1000);
@@ -353,7 +355,7 @@ export const forgotPassword = asyncHandler(
 
     await user.save();
 
-    const BASE_URL = process.env.CLIENT_URL || 'http://localhost:5173';
+    const BASE_URL = process.env.CLIENT_URL || "http://localhost:5173";
 
     await sendPasswordResetEmail(
       user.name,
@@ -384,7 +386,7 @@ export const resetPassword = asyncHandler(
     } = req.body;
 
     if (!newAuthToken || !newProtectedDEK || !newArgon2Salt || !argon2Params) {
-      throw new Error('All fields are required');
+      throw new Error("All fields are required");
     }
 
     const user = await User.findOne({
@@ -393,7 +395,7 @@ export const resetPassword = asyncHandler(
     });
 
     if (!user) {
-      throw new Error('Invalid or expired reset link');
+      throw new Error("Invalid or expired reset link");
     }
 
     const hashedAuthToken = await bcrypt.hash(newAuthToken, 12);
@@ -414,12 +416,67 @@ export const resetPassword = asyncHandler(
 
     res.status(200).json({
       success: true,
-      message: 'Your password has been reset successfully',
+      message: "Your password has been reset successfully",
     });
   },
 );
 
-// TODO: Change password controller and route (non-destructive password change; DEK is present)
+export const changePassword = asyncHandler(
+  async (
+    req: Request<{}, SimpleResponse, ChangePasswordRequest>,
+    res: Response<SimpleResponse>,
+  ): Promise<void> => {
+    const userId = req.user?._id;
+    const {
+      currentAuthToken,
+      newAuthToken,
+      newProtectedDEK,
+      newArgon2Salt,
+      argon2Params,
+    } = req.body;
+
+    if (
+      !currentAuthToken ||
+      !newAuthToken ||
+      !newProtectedDEK ||
+      !newArgon2Salt ||
+      !argon2Params
+    ) {
+      throw new Error("All fields are required");
+    }
+
+    const user = await User.findById(userId);
+
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    const isCurrentPasswordVerified = await bcrypt.compare(
+      currentAuthToken,
+      user.hashedAuthToken,
+    );
+
+    if (!isCurrentPasswordVerified) {
+      throw new Error("Current password is incorrect");
+    }
+
+    const newHashedAuthToken = await bcrypt.hash(newAuthToken, 12);
+
+    // No deleteUserData call — DEK is unchanged, notes remain valid under it
+    user.hashedAuthToken = newHashedAuthToken;
+    user.protectedDEK = newProtectedDEK;
+    user.argon2Salt = newArgon2Salt;
+    user.argon2Params = argon2Params;
+    await user.save();
+
+    await sendPasswordChangeSuccessEmail(user.name, user.email);
+
+    res.status(200).json({
+      success: true,
+      message: "Password changed successfully",
+    });
+  },
+);
 
 export const resendVerificationEmail = asyncHandler(
   async (
@@ -429,17 +486,17 @@ export const resendVerificationEmail = asyncHandler(
     const { email } = req.body;
 
     if (!email) {
-      throw new Error('Email is required');
+      throw new Error("Email is required");
     }
 
     const user = await User.findOne({ email });
 
     if (!user) {
-      throw new Error('User not found');
+      throw new Error("User not found");
     }
 
     if (user.isVerified) {
-      throw new Error('User already verified');
+      throw new Error("User already verified");
     }
 
     const lastSent = user.resendCooldowns.verification;
@@ -475,7 +532,7 @@ export const resendVerificationEmail = asyncHandler(
 
     res.status(200).json({
       success: true,
-      message: 'Verification email resent successfully',
+      message: "Verification email resent successfully",
       retryAfter: cooldown / 1000,
     });
   },

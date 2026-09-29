@@ -1,18 +1,28 @@
-import fs from 'fs';
-import path from 'path';
+import fs from "fs";
+import path from "path";
 
 function loadTemplate(templateName: string): string {
   return fs.readFileSync(
-    path.join(__dirname, 'templates', templateName),
-    'utf-8'
+    path.join(__dirname, "templates", templateName),
+    "utf-8",
   );
 }
 
-export const VERIFY_EMAIL_TEMPLATE = loadTemplate('verifyEmailTemplate.html');
-export const WELCOME_EMAIL_TEMPLATE = loadTemplate('welcomeEmailTemplate.html');
+export const VERIFY_EMAIL_TEMPLATE = loadTemplate("verifyEmailTemplate.html");
+export const WELCOME_EMAIL_TEMPLATE = loadTemplate("welcomeEmailTemplate.html");
 export const FORGOT_PASSWORD_TEMPLATE = loadTemplate(
-  'passwordResetRequestTemplate.html'
+  "passwordResetRequestTemplate.html",
+);
+export const PASSWORD_CHANGE_SUCCESS_TEMPLATE = loadTemplate(
+  "passwordChangeSuccessTemplate.html",
 );
 export const PASSWORD_RESET_SUCCESS_TEMPLATE = loadTemplate(
-  'passwordResetSuccessTemplate.html'
+  "passwordResetSuccessTemplate.html",
+);
+export const ACCOUNT_DELETION_CONFIRMATION_TEMPLATE = loadTemplate(
+  "accountDeletionConfirmationTemplate.html",
+);
+
+export const VAULT_WIPE_CONFIRMATION_TEMPLATE = loadTemplate(
+  "vaultWipeConfirmationTemplate.html",
 );

@@ -1,16 +1,16 @@
-import { Button } from '@/components/ui/button';
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { Ellipsis, Plus } from 'lucide-react';
-import { confirm } from '../../ConfirmDialogue';
-import { useTreeUIActions, useTreeUI } from '@/store/useTreeUIStore';
-import { useDataActions } from '@/store/useDataStore';
-import type { TreeNode } from '@/types/treeStore.types';
-import useCreateNode from '@/hooks/useCreateNode';
+} from "@/components/ui/dropdown-menu";
+import { Ellipsis, Plus } from "lucide-react";
+import { confirm } from "../../dialog/ConfirmDialog";
+import { useTreeUIActions, useTreeUI } from "@/store/useTreeUIStore";
+import { useDataActions } from "@/store/useDataStore";
+import type { TreeNode } from "@/types/treeStore.types";
+import useCreateNode from "@/hooks/useCreateNode";
 
 function NodeActions({
   node,
@@ -28,32 +28,37 @@ function NodeActions({
   const { softDeleteNode, archiveNode } = useDataActions();
   const { createNode } = useCreateNode();
 
-  const handleSoftDelete = async (id: string) => {
+  const handleSoftDelete = async (node: TreeNode) => {
+    const message =
+      node.type === "folder"
+        ? `Are you sure you want to delete the folder "${node.title}" and all its contents?`
+        : `Are you sure you want to delete "${node.title}"?`;
+
     const ok = await confirm({
-      title: 'Delete',
-      message: 'Are you sure you want to delete this item?',
-      yesText: 'Delete',
-      noText: 'Cancel',
+      title: "Delete",
+      message: message,
+      yesText: "Delete",
+      noText: "Cancel",
     });
     if (ok) {
-      softDeleteNode(id);
-      if (selectedNode?._id === id) clearSelection();
+      softDeleteNode(node._id);
+      if (selectedNode?._id === node._id) clearSelection();
     }
   };
 
-  const handleArchive = async (id: string) => {
+  const handleArchive = async (node: TreeNode) => {
     const ok = await confirm({
-      title: 'Archive',
-      message: 'Are you sure you want to archive this item?',
-      yesText: 'Archive',
-      noText: 'Cancel',
+      title: "Archive",
+      message: `Are you sure you want to archive "${node.title}"?`,
+      yesText: "Archive",
+      noText: "Cancel",
     });
-    if (ok) archiveNode(id);
+    if (ok) archiveNode(node._id);
   };
 
   return (
     <div className="flex items-center ">
-      {node.type == 'folder' && (
+      {node.type == "folder" && (
         <Button
           variant="ghost"
           size="icon"
@@ -61,7 +66,7 @@ function NodeActions({
           onClick={(e) => {
             e.stopPropagation();
             onExpand();
-            createNode('file', node._id);
+            createNode("file", node._id);
           }}
         >
           <Plus className="h-4 w-4" />
@@ -86,7 +91,7 @@ function NodeActions({
           </DropdownMenuItem>
           <DropdownMenuItem
             className="py-1 px-2"
-            onClick={() => handleSoftDelete(node._id)}
+            onClick={() => handleSoftDelete(node)}
           >
             Delete
           </DropdownMenuItem>

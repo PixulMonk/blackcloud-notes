@@ -1,7 +1,7 @@
-import React from 'react';
+import NodeListView from "@/components/NodeListView";
 
 function TrashPage() {
-  return <div>TrashPage</div>;
+  return <NodeListView status="trash" />;
 }
 
 export default TrashPage;

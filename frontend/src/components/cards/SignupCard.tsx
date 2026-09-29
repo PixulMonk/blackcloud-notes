@@ -1,10 +1,10 @@
-import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 
-import { Eye, EyeOff, AlertCircleIcon, Loader } from 'lucide-react';
+import { Eye, EyeOff, AlertCircleIcon, Loader } from "lucide-react";
 
-import { initializeUserVault } from '@/lib/crypto/vault';
-import { deriveKeysForNewUser } from '@/lib/crypto/kdf';
+import { initializeUserVault } from "@/lib/crypto/vault";
+import { deriveKeysForNewUser } from "@/lib/crypto/kdf";
 
 import {
   Card,
@@ -13,22 +13,22 @@ import {
   CardDescription,
   CardContent,
   CardFooter,
-} from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import PasswordStrengthBar from './PasswordStrengthBar';
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import PasswordStrengthBar from "../PasswordStrengthBar";
 
-import { useAuth, useAuthActions } from '@/store/useAuthStore';
-import PasswordRequirements from './PasswordRequirements';
-import { arePasswordRequirementsMet } from '@/utils/passwordRules';
+import { useAuth, useAuthActions } from "@/store/useAuthStore";
+import PasswordRequirements from "../PasswordRequirements";
+import { arePasswordRequirementsMet } from "@/utils/passwordRules";
 
 export default function SignupCard() {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [hasAgreedToTerms, setHasAgreedToTerms] = useState(false);
 
@@ -41,12 +41,12 @@ export default function SignupCard() {
     e.preventDefault();
 
     if (!arePasswordRequirementsMet(password)) {
-      setError('Password does not meet requirements.');
+      setError("Password does not meet requirements.");
       return;
     }
     if (!hasAgreedToTerms) {
       setError(
-        'Please agree to the Terms of Service and Conditions before signing up.',
+        "Please agree to the Terms of Service and Conditions before signing up.",
       );
       return;
     }
@@ -57,13 +57,13 @@ export default function SignupCard() {
         await deriveKeysForNewUser(password);
 
       if (!argon2Salt || !keyEncryptionKey || !authToken || !argon2Params) {
-        throw new Error('Key derivation failed: missing required values.');
+        throw new Error("Key derivation failed: missing required values.");
       }
 
       const { protectedDEK } = await initializeUserVault(keyEncryptionKey);
 
       if (!protectedDEK) {
-        throw new Error('Vault initialization failed.');
+        throw new Error("Vault initialization failed.");
       }
 
       const success = await signup(
@@ -75,15 +75,15 @@ export default function SignupCard() {
         argon2Params,
       );
       if (success) {
-        navigate('/verify-email');
+        navigate("/verify-email");
       }
     } catch (error: unknown) {
       if (error instanceof Error) {
-        console.error('Error:', error.message);
+        console.error("Error:", error.message);
         setError(error.message);
       } else {
-        console.error('Unknown error:', error);
-        setError('Something went wrong. Please try again.');
+        console.error("Unknown error:", error);
+        setError("Something went wrong. Please try again.");
       }
     }
   };
@@ -132,7 +132,7 @@ export default function SignupCard() {
                 <div className="relative">
                   <div className="flex items-center">
                     <Input
-                      type={showPassword ? 'text' : 'password'}
+                      type={showPassword ? "text" : "password"}
                       id="password"
                       value={password}
                       placeholder="Password"
@@ -178,14 +178,14 @@ export default function SignupCard() {
                     }
                   />
                   <p className="text-muted-foreground text-xs text-center">
-                    I agree to the{' '}
+                    I agree to the{" "}
                     <Link
                       to="#"
                       className="underline underline-offset-4 hover:text-primary"
                     >
                       Terms of Service
-                    </Link>{' '}
-                    and{' '}
+                    </Link>{" "}
+                    and{" "}
                     <Link
                       to="#"
                       className="underline underline-offset-4 hover:text-primary"
@@ -199,7 +199,7 @@ export default function SignupCard() {
                 {isLoading ? (
                   <Loader className="animate-spin mx-auto" size={24} />
                 ) : (
-                  'Sign up'
+                  "Sign up"
                 )}
               </Button>
             </div>

@@ -1,14 +1,14 @@
-import { Resend } from 'resend';
-import dotenv from 'dotenv';
-import { transporter } from './nodemailer.config';
+import { Resend } from "resend";
+import dotenv from "dotenv";
+import { transporter } from "./nodemailer.config";
 
 dotenv.config();
 
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
-const isResend = process.env.EMAIL_PROVIDER === 'resend';
+const isResend = process.env.EMAIL_PROVIDER === "resend";
 
 const sender = {
-  name: 'BlackCloud',
+  name: "BlackCloud",
   address: process.env.RESEND_SENDER!,
 };
 
@@ -18,21 +18,22 @@ type EmailOptions = {
   to: string;
   subject: string;
   html: string;
+  replyTo?: string;
 };
 
 export const emailClient = {
-  send: async ({ to, subject, html }: EmailOptions) => {
+  send: async ({ to, subject, html, replyTo }: EmailOptions) => {
     if (isResend) {
       if (!RESEND_API_KEY) {
-        throw new Error('Resend API key not provided.');
+        throw new Error("Resend API key not provided.");
       }
 
       if (!sender) {
-        throw new Error('Resend sender not provided.');
+        throw new Error("Resend sender not provided.");
       }
 
-      if (!to || !to.includes('@')) {
-        throw new Error('Invalid recipient email');
+      if (!to || !to.includes("@")) {
+        throw new Error("Invalid recipient email");
       }
 
       return await resend.emails.send({
@@ -40,6 +41,7 @@ export const emailClient = {
         to: [to],
         subject,
         html,
+        ...(replyTo && { replyTo }),
       });
     }
 
@@ -48,6 +50,7 @@ export const emailClient = {
       to,
       subject,
       html,
+      ...(replyTo && { replyTo }),
     });
   },
 };

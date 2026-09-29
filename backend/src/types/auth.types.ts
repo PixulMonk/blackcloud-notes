@@ -1,25 +1,26 @@
-import { Request } from 'express';
-import { ParamsDictionary, Query } from 'express-serve-static-core';
-import { Argon2Params } from '@blackcloud/shared';
-import { IUser } from '../models/user.model';
-import { SimpleResponse } from './common.types';
-import { Resend } from 'resend';
-import { resendVerificationEmail } from './../controllers/auth.controller';
+import { ParamsDictionary } from "express-serve-static-core";
+import { Argon2Params } from "@blackcloud/shared";
+import { IUser } from "../models/user.model";
+import { SimpleResponse } from "./common.types";
 
 export type SanitizedUser = Omit<
   IUser,
-  | 'hashedAuthToken'
-  | 'protectedDEK'
-  | 'argon2Salt'
-  | 'argon2Params'
-  | 'resetPasswordToken'
-  | 'resetPasswordExpiresAt'
-  | 'verificationToken'
-  | 'verificationTokenExpiresAt'
+  | "hashedAuthToken"
+  | "protectedDEK"
+  | "argon2Salt"
+  | "argon2Params"
+  | "resetPasswordToken"
+  | "resetPasswordExpiresAt"
+  | "verificationToken"
+  | "verificationTokenExpiresAt"
 >;
 
 export interface AuthResponse extends SimpleResponse {
   user?: SanitizedUser;
+}
+
+export interface AuthTokenConfirmRequest {
+  authToken: string; // base64
 }
 
 export interface SignupRequest {
@@ -54,7 +55,7 @@ export interface ForgotPasswordRequest {
   email: string;
 }
 
-export interface ResetPasswordParams {
+export interface ResetPasswordParams extends ParamsDictionary {
   token: string;
 }
 
@@ -69,6 +70,18 @@ export interface ResendEmailResponse extends SimpleResponse {
   retryAfter?: number;
 }
 
+export interface ChangePasswordRequest {
+  currentAuthToken: string; // base64 — for verification, NOT re-derived on backend
+  newAuthToken: string; // base64
+  newProtectedDEK: string; // base64 — IV ‖ ciphertext ‖ tag
+  newArgon2Salt: string; // base64
+  argon2Params: Argon2Params;
+}
+
 export interface ResendVerificationEmailRequest {
   email: string;
+}
+
+export interface UpdateUserRequest {
+  name?: string; // add more editable fields here later
 }
