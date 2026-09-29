@@ -111,6 +111,190 @@
   --sidebar-ring: oklch(0.556 0 0);
 }
 
+/* --- Theme: Midnight Violet --- */
+.theme-violet {
+  --background: oklch(0.16 0.04 290);
+  --foreground: oklch(0.95 0.01 290);
+  --card: oklch(0.2 0.05 290);
+  --card-foreground: oklch(0.95 0.01 290);
+  --popover: oklch(0.2 0.05 290);
+  --popover-foreground: oklch(0.95 0.01 290);
+  --primary: oklch(0.65 0.22 300);
+  --primary-foreground: oklch(0.98 0 0);
+  --secondary: oklch(0.26 0.06 290);
+  --secondary-foreground: oklch(0.95 0.01 290);
+  --muted: oklch(0.26 0.06 290);
+  --muted-foreground: oklch(0.7 0.04 290);
+  --accent: oklch(0.3 0.08 300);
+  --accent-foreground: oklch(0.98 0 0);
+  --destructive: oklch(0.6 0.22 25);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.65 0.22 300);
+  --sidebar: oklch(0.14 0.04 290);
+  --sidebar-foreground: oklch(0.95 0.01 290);
+  --sidebar-primary: oklch(0.65 0.22 300);
+  --sidebar-primary-foreground: oklch(0.98 0 0);
+  --sidebar-accent: oklch(0.26 0.06 290);
+  --sidebar-accent-foreground: oklch(0.95 0.01 290);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.65 0.22 300);
+}
+
+/* --- Theme: Nordic Frost --- */
+.theme-nord {
+  --background: oklch(0.25 0.02 240);
+  --foreground: oklch(0.9 0.02 220);
+  --card: oklch(0.29 0.025 240);
+  --card-foreground: oklch(0.9 0.02 220);
+  --popover: oklch(0.29 0.025 240);
+  --popover-foreground: oklch(0.9 0.02 220);
+  --primary: oklch(0.7 0.12 210);
+  --primary-foreground: oklch(0.2 0.02 240);
+  --secondary: oklch(0.35 0.03 240);
+  --secondary-foreground: oklch(0.9 0.02 220);
+  --muted: oklch(0.35 0.03 240);
+  --muted-foreground: oklch(0.65 0.04 230);
+  --accent: oklch(0.4 0.05 230);
+  --accent-foreground: oklch(0.95 0.01 220);
+  --destructive: oklch(0.65 0.18 25);
+  --border: oklch(1 0 0 / 8%);
+  --input: oklch(1 0 0 / 12%);
+  --ring: oklch(0.7 0.12 210);
+  --sidebar: oklch(0.22 0.02 240);
+  --sidebar-foreground: oklch(0.9 0.02 220);
+  --sidebar-primary: oklch(0.7 0.12 210);
+  --sidebar-primary-foreground: oklch(0.2 0.02 240);
+  --sidebar-accent: oklch(0.35 0.03 240);
+  --sidebar-accent-foreground: oklch(0.9 0.02 220);
+  --sidebar-border: oklch(1 0 0 / 8%);
+  --sidebar-ring: oklch(0.7 0.12 210);
+}
+
+/* --- Theme: Nordic Day --- */
+.theme-nord-light {
+  --background: oklch(0.96 0.012 245);
+  --foreground: oklch(0.24 0.04 250);
+  --card: oklch(0.99 0.003 245);
+  --card-foreground: oklch(0.24 0.04 250);
+  --popover: oklch(0.99 0.003 245);
+  --popover-foreground: oklch(0.24 0.04 250);
+  --primary: oklch(0.48 0.16 245); /* Richer Nordic blue */
+  --primary-foreground: oklch(0.98 0 0);
+  --secondary: oklch(0.92 0.02 245);
+  --secondary-foreground: oklch(0.3 0.05 250);
+  --muted: oklch(0.92 0.02 245);
+  --muted-foreground: oklch(0.52 0.04 245);
+  --accent: oklch(0.88 0.03 245);
+  --accent-foreground: oklch(0.3 0.05 250);
+  --destructive: oklch(0.58 0.22 25);
+  --border: oklch(0.85 0.025 245);
+  --input: oklch(0.85 0.025 245);
+  --ring: oklch(0.48 0.16 245);
+  --sidebar: oklch(0.93 0.015 245);
+  --sidebar-foreground: oklch(0.24 0.04 250);
+  --sidebar-primary: oklch(0.48 0.16 245);
+  --sidebar-primary-foreground: oklch(0.98 0 0);
+  --sidebar-accent: oklch(0.88 0.03 245);
+  --sidebar-accent-foreground: oklch(0.3 0.05 250);
+  --sidebar-border: oklch(0.85 0.025 245);
+  --sidebar-ring: oklch(0.48 0.16 245);
+}
+
+/* --- Theme: Amethyst Frost --- */
+.theme-violet-light {
+  --background: oklch(
+    0.965 0.012 300
+  ); /* Soft, frosted lavender-white background */
+  --foreground: oklch(0.22 0.05 300); /* Deep amethyst ink */
+  --card: oklch(0.99 0.005 300); /* Crisp frosted glass card */
+  --card-foreground: oklch(0.22 0.05 300);
+  --popover: oklch(0.99 0.005 300);
+  --popover-foreground: oklch(0.22 0.05 300);
+  --primary: oklch(0.52 0.22 300); /* Vibrant royal amethyst primary */
+  --primary-foreground: oklch(0.98 0 0);
+  --secondary: oklch(0.92 0.025 300); /* Subtle iced lavender tint */
+  --secondary-foreground: oklch(0.3 0.06 300);
+  --muted: oklch(0.92 0.025 300);
+  --muted-foreground: oklch(0.52 0.06 300);
+  --accent: oklch(0.88 0.04 300); /* Frosted quartz highlight */
+  --accent-foreground: oklch(0.3 0.06 300);
+  --destructive: oklch(0.58 0.22 25);
+  --border: oklch(0.84 0.035 300 / 60%); /* Soft amethyst-tinted border */
+  --input: oklch(0.84 0.035 300 / 60%);
+  --ring: oklch(0.52 0.22 300);
+  --sidebar: oklch(0.945 0.018 300); /* Slightly deeper frosted sidebar */
+  --sidebar-foreground: oklch(0.22 0.05 300);
+  --sidebar-primary: oklch(0.52 0.22 300);
+  --sidebar-primary-foreground: oklch(0.98 0 0);
+  --sidebar-accent: oklch(0.88 0.04 300);
+  --sidebar-accent-foreground: oklch(0.3 0.06 300);
+  --sidebar-border: oklch(0.84 0.035 300 / 60%);
+  --sidebar-ring: oklch(0.52 0.22 300);
+}
+
+/* --- Theme: Cosy Rose (High Contrast) --- */
+.theme-rose {
+  --background: oklch(0.96 0.025 12);
+  --foreground: oklch(0.2 0.05 12);
+  --card: oklch(0.99 0.01 12);
+  --card-foreground: oklch(0.2 0.05 12);
+  --popover: oklch(0.99 0.01 12);
+  --popover-foreground: oklch(0.2 0.05 12);
+  --primary: oklch(0.55 0.24 12);
+  --primary-foreground: oklch(0.98 0 0);
+  --secondary: oklch(0.9 0.04 12);
+  --secondary-foreground: oklch(0.25 0.05 12);
+  --muted: oklch(0.9 0.04 12);
+  --muted-foreground: oklch(0.45 0.06 12);
+  --accent: oklch(0.86 0.06 12);
+  --accent-foreground: oklch(0.2 0.05 12);
+  --destructive: oklch(0.55 0.24 25);
+  --border: oklch(0.8 0.06 12);
+  --input: oklch(0.8 0.06 12);
+  --ring: oklch(0.55 0.24 12);
+  --sidebar: oklch(0.93 0.035 12);
+  --sidebar-foreground: oklch(0.2 0.05 12);
+  --sidebar-primary: oklch(0.55 0.24 12);
+  --sidebar-primary-foreground: oklch(0.98 0 0);
+  --sidebar-accent: oklch(0.86 0.06 12);
+  --sidebar-accent-foreground: oklch(0.2 0.05 12);
+  --sidebar-border: oklch(0.8 0.06 12);
+  --sidebar-ring: oklch(0.55 0.24 12);
+}
+
+/* --- Theme: Cyberpunk Terminal --- */
+.theme-cyberpunk {
+  --background: oklch(0.12 0.02 260); /* Deep industrial dark void */
+  --foreground: oklch(0.95 0.02 95); /* High contrast pale white-yellow */
+  --card: oklch(0.16 0.03 260); /* Elevated terminal panels */
+  --card-foreground: oklch(0.95 0.02 95);
+  --popover: oklch(0.16 0.03 260);
+  --popover-foreground: oklch(0.95 0.02 95);
+  --primary: oklch(0.88 0.22 95); /* Iconic Cyberpunk 2077 Yellow */
+  --primary-foreground: oklch(
+    0.12 0.02 260
+  ); /* Dark text on bright yellow buttons */
+  --secondary: oklch(0.22 0.04 260);
+  --secondary-foreground: oklch(0.95 0.02 95);
+  --muted: oklch(0.22 0.04 260);
+  --muted-foreground: oklch(0.65 0.05 240);
+  --accent: oklch(0.78 0.18 195); /* Netrunner holographic cyan/teal accent */
+  --accent-foreground: oklch(0.12 0.02 260);
+  --destructive: oklch(0.6 0.24 25); /* Alert red */
+  --border: oklch(0.88 0.22 95 / 35%); /* Yellow-tinted technical HUD border */
+  --input: oklch(1 0 0 / 10%);
+  --ring: oklch(0.88 0.22 95); /* Focus rings match the yellow */
+  --sidebar: oklch(0.09 0.02 260); /* Darker deck terminal sidebar */
+  --sidebar-foreground: oklch(0.9 0.02 95);
+  --sidebar-primary: oklch(0.88 0.22 95); /* Sidebar active items in yellow */
+  --sidebar-primary-foreground: oklch(0.12 0.02 260);
+  --sidebar-accent: oklch(0.78 0.18 195 / 15%);
+  --sidebar-accent-foreground: oklch(0.78 0.18 195);
+  --sidebar-border: oklch(0.88 0.22 95 / 20%);
+  --sidebar-ring: oklch(0.88 0.22 95);
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
@@ -120,6 +304,20 @@
     /* Line below was added to fix ShadCN UI's alert dialog box freezing the app after making a selection.*/
     /* Feels like a hack, but too bad (for now)! I haven't had dinner and coffee yet */
     pointer-events: auto !important;
+  }
+
+  /* --- TipTap Editor Neutral Text & Heading Enforcement --- */
+  .ProseMirror {
+    color: var(--foreground);
+    caret-color: var(--primary);
+  }
+
+  /* Ensure empty editor placeholder text stays muted */
+  .ProseMirror p.is-editor-empty:first-child::before {
+    color: var(--muted-foreground);
+    pointer-events: none;
+    height: 0;
+    float: left;
   }
 
   /* Tiptap / ProseMirror block styles */
@@ -161,6 +359,17 @@
     overflow-y: auto;
     padding: 1rem; /* or whatever padding you want */
   }
+}
+
+/* Typography's prose defaults tint headings; use the active theme text color. */
+.prose .ProseMirror h1,
+.prose .ProseMirror h2,
+.prose .ProseMirror h3,
+.prose .ProseMirror h4,
+.prose .ProseMirror h5,
+.prose .ProseMirror h6 {
+  color: var(--foreground);
+  font-weight: 700;
 }
 
 /* Added to prevent open on click, requiring ctrl/cmd + click*/
