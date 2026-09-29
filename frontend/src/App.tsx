@@ -2,7 +2,7 @@ import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "./components/AppSidebar";
 import { useEffect, lazy, Suspense } from "react";
-import { useIsDark } from "./store/useThemeStore";
+import { useIsDarkVariant } from "./store/useThemeStore";
 import { updateFavicon } from "./lib/utils";
 import { useAuth, useAuthActions } from "./store/useAuthStore";
 import { Loader } from "lucide-react";
@@ -23,7 +23,12 @@ function App() {
   const { user, isCheckingAuth, isAuthenticated } = useAuth();
   const { checkAuth } = useAuthActions();
   const dataEncryptionKey = useDataEncryptionKey();
-  const isDark = useIsDark();
+
+  const isDarkVariant = useIsDarkVariant();
+  useEffect(() => {
+    updateFavicon(isDarkVariant);
+  }, [isDarkVariant]);
+
   const location = useLocation();
 
   const authRoutes = [
@@ -38,18 +43,14 @@ function App() {
     authRoutes.includes(location.pathname) ||
     location.pathname.startsWith("/reset-password/");
 
+  // Favicon sync based on active theme variant
   useEffect(() => {
-    document.documentElement.classList.toggle("dark", isDark);
-    localStorage.setItem("theme", isDark ? "dark" : "light");
-  }, [isDark]);
+    updateFavicon(isDarkVariant);
+  }, [isDarkVariant]);
 
   useEffect(() => {
     checkAuth();
   }, []);
-
-  useEffect(() => {
-    updateFavicon(isDark);
-  }, [isDark]);
 
   if (isCheckingAuth) {
     return (
