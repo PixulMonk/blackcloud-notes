@@ -29,7 +29,7 @@ import {
 import { useData, useDataActions } from "@/store/useDataStore";
 import { useAppStoreActions } from "@/store/useAppStore";
 import { useDataEncryptionKey, useVaultActions } from "@/store/useVaultStore";
-import { useIsDark } from "@/store/useThemeStore";
+import { useIsDarkVariant } from "@/store/useThemeStore";
 import { Separator } from "@/components/ui/separator";
 import { confirm } from "@/components/dialog/ConfirmDialog";
 import RootDropZone from "./RootDropZone";
@@ -56,11 +56,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { setActiveView } = useAppStoreActions();
   const { createNode } = useCreateNode();
 
-  const isDark = useIsDark();
-  const logoUrl = isDark
-    ? " /logo/logo-horiz-dark.svg"
+  // Determine logo based on whether the active theme is a dark variant
+  const isDarkVariant = useIsDarkVariant();
+  const logoUrl = isDarkVariant
+    ? "/logo/logo-horiz-dark.svg"
     : "/logo/logo-horiz.svg";
-
   useEffect(() => {
     fetchTree(dataEncryptionKey!);
   }, []);
