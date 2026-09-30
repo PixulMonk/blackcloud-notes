@@ -2,20 +2,21 @@ import { type MouseEvent } from "react";
 
 import type { Editor } from "@tiptap/core";
 
-import { Divider } from "./toolbar/ToolBarPrimitives";
-import { TextStyleGroup } from "./toolbar/TextStyleGroup";
-import ColourGroup from "./toolbar/ColourGroup";
-import UndoRedoGroup from "./toolbar/UndoRedoGroup";
-import FormattingGroup from "./toolbar/FormattingGroup";
-import AlignmentGroup from "./toolbar/AlignmentGroup";
-import ListGroup from "./toolbar/ListGroup";
-import SpacerGroup from "./toolbar/SpacerGroup";
+import { Divider, ToolbarButton } from "./toolbar/ToolBarPrimitives";
+import { TextStyleGroup } from "./toolbar/Groups/TextStyleGroup";
+import ColourGroup from "./toolbar/Groups/ColourGroup";
+import UndoRedoGroup from "./toolbar/Groups/UndoRedoGroup";
+import FormattingGroup from "./toolbar/Groups/FormattingGroup";
+import AlignmentGroup from "./toolbar/Groups/AlignmentGroup";
+import ListGroup from "./toolbar/Groups/ListGroup";
+import SpacerGroup from "./toolbar/Groups/SpacerGroup";
 import ResetFormattingButton from "./toolbar/Buttons/ResetFormattingButton";
 import InsertLinkButton from "./toolbar/Buttons/InsertLinkButton";
 import InsertImageButton from "./toolbar/Buttons/InsertImageButton";
 import InsertTableButton from "./toolbar/Buttons/InsertTableButton";
 import ExportDropdown from "./toolbar/Buttons/ExportDrowndown";
 import useNoteExport from "@/hooks/useNoteExport";
+import { PrintToolbarButton } from "./toolbar/PrintToolbarButton";
 
 interface MenuBarProps {
   editor: Editor | null;
@@ -85,6 +86,8 @@ const MenuBar = ({ editor }: MenuBarProps) => {
           },
         ]}
       />
+
+      <PrintToolbarButton editor={editor} />
     </div>
   );
 };

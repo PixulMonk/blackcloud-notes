@@ -46,7 +46,7 @@ function ExportDropdown({ options }: ExportDropdownProps) {
           {pending ? (
             <Loader2 className="h-3.5 w-3.5 animate-spin" />
           ) : (
-            <Download className="h-3.5 w-3.5" />
+            <Download size={15} />
           )}
         </button>
       </DropdownMenuTrigger>

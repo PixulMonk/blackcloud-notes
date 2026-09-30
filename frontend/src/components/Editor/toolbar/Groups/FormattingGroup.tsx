@@ -1,5 +1,5 @@
-import type { Editor } from '@tiptap/core';
-import { useEditorState } from '@tiptap/react';
+import type { Editor } from "@tiptap/core";
+import { useEditorState } from "@tiptap/react";
 
 import {
   Bold,
@@ -8,10 +8,10 @@ import {
   Strikethrough,
   Superscript,
   Subscript,
-} from 'lucide-react';
+} from "lucide-react";
 
-import { ToolbarButton } from './ToolBarPrimitives';
-import { run } from './toolbarUtils';
+import { ToolbarButton } from "../ToolBarPrimitives";
+import { run } from "../toolbarUtils";
 
 interface FormattingGroupProps {
   editor: Editor;
@@ -23,12 +23,12 @@ function FormattingGroup({ editor }: FormattingGroupProps) {
     selector: (ctx) => {
       const e = ctx.editor!;
       return {
-        isBold: e.isActive('bold'),
-        isItalic: e.isActive('italic'),
-        isUnderline: e.isActive('underline'),
-        isStrike: e.isActive('strike'),
-        isSuperscript: e.isActive('superscript'),
-        isSubscript: e.isActive('subscript'),
+        isBold: e.isActive("bold"),
+        isItalic: e.isActive("italic"),
+        isUnderline: e.isActive("underline"),
+        isStrike: e.isActive("strike"),
+        isSuperscript: e.isActive("superscript"),
+        isSubscript: e.isActive("subscript"),
       };
     },
   });
