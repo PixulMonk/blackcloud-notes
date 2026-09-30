@@ -1,6 +1,6 @@
 import { Printer } from "lucide-react";
 import type { Editor } from "@tiptap/core";
-import { ToolbarButton } from "./ToolBarPrimitives";
+import { ToolbarButton } from "../ToolBarPrimitives";
 import { useNotePrint } from "@/hooks/useNotePrint";
 import { useTreeUI } from "@/store/useTreeUIStore";
 

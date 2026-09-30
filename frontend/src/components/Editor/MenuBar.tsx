@@ -16,7 +16,7 @@ import InsertImageButton from "./toolbar/Buttons/InsertImageButton";
 import InsertTableButton from "./toolbar/Buttons/InsertTableButton";
 import ExportDropdown from "./toolbar/Buttons/ExportDrowndown";
 import useNoteExport from "@/hooks/useNoteExport";
-import { PrintToolbarButton } from "./toolbar/PrintToolbarButton";
+import { PrintToolbarButton } from "./toolbar/Buttons/PrintToolbarButton";
 
 interface MenuBarProps {
   editor: Editor | null;

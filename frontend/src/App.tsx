@@ -1,5 +1,6 @@
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { Toaster } from "@/components/ui/sonner";
 import { AppSidebar } from "./components/AppSidebar";
 import { useEffect, lazy, Suspense } from "react";
 import { useIsDarkVariant } from "./store/useThemeStore";
@@ -139,6 +140,7 @@ function App() {
         </main>
         {!hideSidebar && <SettingsDialog />}
       </SidebarProvider>
+      <Toaster position="bottom-right" richColors />
     </Suspense>
   );
 }
