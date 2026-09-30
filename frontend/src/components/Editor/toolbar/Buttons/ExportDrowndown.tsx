@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
 
 interface ExportOption {
   label: string;
-  format: "md" | "pdf" | "docx";
+  format: "md" | "pdf" | "json";
   onSelect: () => void | Promise<void>;
   disabled?: boolean;
 }

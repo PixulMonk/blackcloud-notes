@@ -85,10 +85,20 @@ const useNoteExport = () => {
       .download(`${sanitizeFilename(noteTitle ?? "")}.pdf`);
   };
 
+  const exportAsJSON = (editor: Editor, noteTitle: string | null) => {
+    const json = editor.getJSON();
+    downloadFile(
+      JSON.stringify(json, null, 2),
+      `${sanitizeFilename(noteTitle ?? "note")}.json`,
+      "application/json",
+    );
+  };
+
   return {
     selectedFileTitle,
     exportAsMarkdown,
     exportAsPDF,
+    exportAsJSON,
   };
 };
 

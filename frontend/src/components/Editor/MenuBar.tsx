@@ -29,7 +29,8 @@ const MenuBar = ({ editor }: MenuBarProps) => {
     command();
   };
 
-  const { selectedFileTitle, exportAsMarkdown, exportAsPDF } = useNoteExport();
+  const { selectedFileTitle, exportAsMarkdown, exportAsPDF, exportAsJSON } =
+    useNoteExport();
 
   return (
     <div className="flex items-center flex-wrap gap-0.5 px-4 py-1.5  border-border/50 bg-background">
@@ -76,6 +77,11 @@ const MenuBar = ({ editor }: MenuBarProps) => {
             label: "PDF",
             format: "pdf",
             onSelect: () => exportAsPDF(editor, selectedFileTitle),
+          },
+          {
+            label: "JSON Backup",
+            format: "json",
+            onSelect: () => exportAsJSON(editor, selectedFileTitle),
           },
         ]}
       />
