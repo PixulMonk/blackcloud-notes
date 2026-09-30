@@ -1,19 +1,21 @@
-import { type MouseEvent } from 'react';
+import { type MouseEvent } from "react";
 
-import type { Editor } from '@tiptap/core';
+import type { Editor } from "@tiptap/core";
 
-import { Divider } from './toolbar/ToolBarPrimitives';
-import { TextStyleGroup } from './toolbar/TextStyleGroup';
-import ColourGroup from './toolbar/ColourGroup';
-import UndoRedoGroup from './toolbar/UndoRedoGroup';
-import FormattingGroup from './toolbar/FormattingGroup';
-import AlignmentGroup from './toolbar/AlignmentGroup';
-import ListGroup from './toolbar/ListGroup';
-import SpacerGroup from './toolbar/SpacerGroup';
-import ResetFormattingButton from './toolbar/Buttons/ResetFormattingButton';
-import InsertLinkButton from './toolbar/Buttons/InsertLinkButton';
-import InsertImageButton from './toolbar/Buttons/InsertImageButton';
-import InsertTableButton from './toolbar/Buttons/InsertTableButton';
+import { Divider } from "./toolbar/ToolBarPrimitives";
+import { TextStyleGroup } from "./toolbar/TextStyleGroup";
+import ColourGroup from "./toolbar/ColourGroup";
+import UndoRedoGroup from "./toolbar/UndoRedoGroup";
+import FormattingGroup from "./toolbar/FormattingGroup";
+import AlignmentGroup from "./toolbar/AlignmentGroup";
+import ListGroup from "./toolbar/ListGroup";
+import SpacerGroup from "./toolbar/SpacerGroup";
+import ResetFormattingButton from "./toolbar/Buttons/ResetFormattingButton";
+import InsertLinkButton from "./toolbar/Buttons/InsertLinkButton";
+import InsertImageButton from "./toolbar/Buttons/InsertImageButton";
+import InsertTableButton from "./toolbar/Buttons/InsertTableButton";
+import ExportDropdown from "./toolbar/Buttons/ExportDrowndown";
+import useNoteExport from "@/hooks/useNoteExport";
 
 interface MenuBarProps {
   editor: Editor | null;
@@ -26,6 +28,8 @@ const MenuBar = ({ editor }: MenuBarProps) => {
     e.preventDefault();
     command();
   };
+
+  const { selectedFileTitle, exportAsMarkdown, exportAsPDF } = useNoteExport();
 
   return (
     <div className="flex items-center flex-wrap gap-0.5 px-4 py-1.5  border-border/50 bg-background">
@@ -58,6 +62,23 @@ const MenuBar = ({ editor }: MenuBarProps) => {
       <Divider />
 
       <SpacerGroup editor={editor} />
+
+      <Divider />
+
+      <ExportDropdown
+        options={[
+          {
+            label: "Markdown (.md)",
+            format: "md",
+            onSelect: () => exportAsMarkdown(editor, selectedFileTitle),
+          },
+          {
+            label: "PDF",
+            format: "pdf",
+            onSelect: () => exportAsPDF(editor, selectedFileTitle),
+          },
+        ]}
+      />
     </div>
   );
 };
