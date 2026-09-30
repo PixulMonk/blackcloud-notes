@@ -1,9 +1,15 @@
 import { useCallback } from "react";
 
+import pdfMake from "pdfmake/build/pdfmake";
+import pdfFonts from "pdfmake/build/vfs_fonts";
+import htmlToPdfmake from "html-to-pdfmake";
+
 import type { Editor } from "@tiptap/core";
 import { useTreeUI } from "@/store/useTreeUIStore";
+
 import { downloadFile } from "@/utils/download";
 import { sanitizeFilename } from "@/utils/sanitizeFileName";
+import { constrainImages } from "@/utils/htmlToPdfmakeHelpers";
 
 const useNoteExport = () => {
   const { selectedFileTitle } = useTreeUI();
@@ -19,56 +25,71 @@ const useNoteExport = () => {
     );
   };
 
-  const exportAsPDF = useCallback(
-    (editor: Editor, noteTitle: string | null) => {
-      const title = sanitizeFilename(noteTitle ?? "");
-      const html = editor.getHTML();
-
-      const iframe = document.createElement("iframe");
-      iframe.style.position = "fixed";
-      iframe.style.right = "-9999px";
-      document.body.appendChild(iframe);
-
-      const doc = iframe.contentDocument!;
-      doc.open();
-      doc.write(`
-    <!DOCTYPE html>
-    <html>
-      <head>
-        <title>${title}</title>
-        <style>${PRINT_STYLES}</style>
-      </head>
-      <body>${html}</body>
-    </html>
-  `);
-      doc.close();
-
-      iframe.contentWindow!.addEventListener("afterprint", () =>
-        iframe.remove(),
-      );
-      iframe.contentWindow!.focus();
-      iframe.contentWindow!.print();
-    },
-    [],
-  );
+  pdfMake.addVirtualFileSystem(pdfFonts);
 
   const PRINT_STYLES = `
-  @page { margin: 2cm; }
-  body {
-    font-family: Georgia, serif;
-    font-size: 11pt;
-    line-height: 1.5;
-    color: #000;
+  @page { 
+    margin: 20mm; 
   }
-  table, pre, blockquote, figure { break-inside: avoid; }
-  h1, h2, h3 { break-after: avoid; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 11pt;
+    line-height: 1.6;
+    color: #111;
+    word-break: break-word;
+  }
+  /* Keep images contained within page width and prevent awkward cuts */
+  img {
+    max-width: 100% !important;
+    height: auto !important;
+    page-break-inside: avoid;
+  }
+  table, pre, blockquote, figure { 
+    break-inside: avoid; 
+  }
+  h1, h2, h3 { 
+    break-after: avoid; 
+  }
   pre, code, mark {
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
 `;
 
-  return { selectedFileTitle, exportAsMarkdown, exportAsPDF };
+  const exportAsPDF = (editor: Editor, noteTitle: string | null) => {
+    const rawHtml = editor.getHTML();
+
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(rawHtml, "text/html");
+
+    doc.querySelectorAll("img").forEach((img) => {
+      img.style.maxWidth = "100%";
+      img.style.height = "auto";
+    });
+
+    const processedHtml = doc.body.innerHTML;
+
+    const content = htmlToPdfmake(processedHtml, {
+      ignoreStyles: ["font-family"],
+    });
+
+    constrainImages(content);
+
+    pdfMake
+      .createPdf({
+        pageSize: "LETTER",
+        pageMargins: [40, 40, 40, 40],
+        content,
+        defaultStyle: { font: "Roboto" },
+      })
+      .download(`${sanitizeFilename(noteTitle ?? "")}.pdf`);
+  };
+
+  return {
+    selectedFileTitle,
+    exportAsMarkdown,
+    exportAsPDF,
+  };
 };
 
 export default useNoteExport;
