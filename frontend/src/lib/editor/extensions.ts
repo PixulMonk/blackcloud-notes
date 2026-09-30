@@ -1,52 +1,55 @@
-import StarterKit from '@tiptap/starter-kit';
-import Paragraph from '@tiptap/extension-paragraph';
-import Heading from '@tiptap/extension-heading';
-import Image from '@tiptap/extension-image';
-import { Dropcursor } from '@tiptap/extensions';
+import StarterKit from "@tiptap/starter-kit";
+import Paragraph from "@tiptap/extension-paragraph";
+import Heading from "@tiptap/extension-heading";
+import Image from "@tiptap/extension-image";
+import { Dropcursor } from "@tiptap/extensions";
 
-import { BubbleMenu } from '@tiptap/react/menus';
+import { BubbleMenu } from "@tiptap/react/menus";
 
-import Highlight from '@tiptap/extension-highlight';
-import TextAlign from '@tiptap/extension-text-align';
-import Placeholder from '@tiptap/extension-placeholder';
-import FileHandler from '@tiptap/extension-file-handler';
-import Link from '@tiptap/extension-link';
-import { TableKit } from '@tiptap/extension-table';
-import { Color } from '@tiptap/extension-color';
-import { TaskItem, TaskList } from '@tiptap/extension-list';
-import { Superscript } from '@tiptap/extension-superscript';
-import { Subscript } from '@tiptap/extension-subscript';
+import Highlight from "@tiptap/extension-highlight";
+import TextAlign from "@tiptap/extension-text-align";
+import Placeholder from "@tiptap/extension-placeholder";
+import FileHandler from "@tiptap/extension-file-handler";
+import Link from "@tiptap/extension-link";
+import { TableKit } from "@tiptap/extension-table";
+import { Color } from "@tiptap/extension-color";
+import { TaskItem, TaskList } from "@tiptap/extension-list";
+import { Superscript } from "@tiptap/extension-superscript";
+import { Subscript } from "@tiptap/extension-subscript";
 import {
   FontSize,
   TextStyle,
   FontFamily,
   LineHeight,
-} from '@tiptap/extension-text-style';
-import Youtube from '@tiptap/extension-youtube';
+} from "@tiptap/extension-text-style";
+import Youtube from "@tiptap/extension-youtube";
 
-import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight';
-import { createLowlight, common } from 'lowlight';
+import CodeBlockLowlight from "@tiptap/extension-code-block-lowlight";
+import { createLowlight, common } from "lowlight";
 
-import compressImage from '@/utils/compressImage';
-import { withLineHeight } from '@/lib/editor/withLineHeight';
+import compressImage from "@/utils/compressImage";
+import { withLineHeight } from "@/lib/editor/withLineHeight";
+
+import { Markdown } from "@tiptap/markdown";
 
 const lowlight = createLowlight(common);
 
 export const editorExtensions = [
+  Markdown,
   StarterKit.configure({
     paragraph: false, // disable built-in paragraph
     heading: false, // disable built-in heading
   }),
   withLineHeight(Paragraph).configure({
-    HTMLAttributes: { class: 'line-height-target' },
+    HTMLAttributes: { class: "line-height-target" },
   }),
   withLineHeight(Heading).configure({
     levels: [1, 2, 3, 4, 5, 6],
   }),
-  TextAlign.configure({ types: ['heading', 'paragraph'] }),
+  TextAlign.configure({ types: ["heading", "paragraph"] }),
   // TipTap V3's LineHeight extension applies via the Textstyle mark
   LineHeight.configure({
-    types: ['textStyle'],
+    types: ["textStyle"],
   }),
   Highlight.configure({ multicolor: true }),
   TextStyle,
@@ -61,7 +64,7 @@ export const editorExtensions = [
   TaskItem.configure({
     nested: true,
     HTMLAttributes: {
-      class: 'flex items-center not-prose gap-2', // Tailwind classes for alignment
+      class: "flex items-center not-prose gap-2", // Tailwind classes for alignment
     },
   }),
   Color,
@@ -69,12 +72,12 @@ export const editorExtensions = [
     lowlight,
   }),
   Placeholder.configure({
-    placeholder: 'Start writing…',
+    placeholder: "Start writing…",
   }),
   Image,
   Dropcursor,
   FileHandler.configure({
-    allowedMimeTypes: ['image/png', 'image/jpeg', 'image/gif', 'image/webp'],
+    allowedMimeTypes: ["image/png", "image/jpeg", "image/gif", "image/webp"],
     onPaste: (editor, files) => {
       files.forEach(async (file) => {
         const compressed = await compressImage(file);
@@ -88,7 +91,7 @@ export const editorExtensions = [
           editor
             .chain()
             .insertContentAt(pos, {
-              type: 'image',
+              type: "image",
               attrs: { src: reader.result as string },
             })
             .run();
@@ -100,39 +103,39 @@ export const editorExtensions = [
   Link.configure({
     openOnClick: false,
     autolink: true,
-    defaultProtocol: 'https',
-    protocols: ['http', 'https'],
+    defaultProtocol: "https",
+    protocols: ["http", "https"],
     isAllowedUri: (url, ctx) => {
       try {
-        const parsedUrl = url.includes(':')
+        const parsedUrl = url.includes(":")
           ? new URL(url)
           : new URL(`${ctx.defaultProtocol}://${url}`);
 
         if (!ctx.defaultValidate(parsedUrl.href)) return false;
 
         const allowedProtocols = ctx.protocols.map((p) =>
-          typeof p === 'string' ? p : p.scheme,
+          typeof p === "string" ? p : p.scheme,
         );
 
-        return allowedProtocols.includes(parsedUrl.protocol.replace(':', ''));
+        return allowedProtocols.includes(parsedUrl.protocol.replace(":", ""));
       } catch {
         return false;
       }
     },
     shouldAutoLink: (url) => {
       try {
-        const parsedUrl = url.includes(':')
+        const parsedUrl = url.includes(":")
           ? new URL(url)
           : new URL(`https://${url}`);
         return (
-          parsedUrl.protocol === 'https:' || parsedUrl.protocol === 'http:'
+          parsedUrl.protocol === "https:" || parsedUrl.protocol === "http:"
         );
       } catch {
         return false;
       }
     },
     HTMLAttributes: {
-      rel: 'noopener noreferrer',
+      rel: "noopener noreferrer",
     },
   }),
   Youtube.configure({
