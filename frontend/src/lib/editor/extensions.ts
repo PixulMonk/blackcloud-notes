@@ -37,8 +37,11 @@ const lowlight = createLowlight(common);
 export const editorExtensions = [
   Markdown,
   StarterKit.configure({
-    paragraph: false, // disable built-in paragraph
-    heading: false, // disable built-in heading
+    paragraph: false,
+    heading: false,
+    link: false, // disable duplicated
+    codeBlock: false, // disable duplicated
+    dropcursor: false, // disable duplicated
   }),
   withLineHeight(Paragraph).configure({
     HTMLAttributes: { class: "line-height-target" },
