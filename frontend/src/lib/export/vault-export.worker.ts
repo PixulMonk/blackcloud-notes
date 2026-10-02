@@ -1,16 +1,18 @@
 /// <reference lib="webworker" />
 import JSZip from "jszip";
 
-import type {
-  DoneMessage,
-  ExportNoteDTO,
-  ExportTreeNode,
-  StartExportMessage,
-  WorkerOutMessage,
-} from "@/types/export.types";
 import { decryptAESGCM } from "@/lib/crypto/aes";
 import { jsonToMarkdown } from "@/lib/renderer/jsonToMarkdown";
 import { sanitizeFilename } from "@/utils/sanitizeFileName";
+
+import type {
+  WorkerOutMessage,
+  ExportNoteDTO,
+  ExportTreeNode,
+  StartExportMessage,
+  ExportFormat,
+  DoneMessage,
+} from "@/types/export.types";
 
 function post(msg: WorkerOutMessage) {
   (self as DedicatedWorkerGlobalScope).postMessage(msg);
@@ -21,8 +23,9 @@ function dedupeFilename(usedNames: Set<string>, filename: string): string {
     usedNames.add(filename);
     return filename;
   }
-  const ext = filename.endsWith(".md") ? ".md" : "";
-  const base = ext ? filename.slice(0, -ext.length) : filename;
+  const dotIndex = filename.lastIndexOf(".");
+  const ext = dotIndex !== -1 ? filename.slice(dotIndex) : "";
+  const base = dotIndex !== -1 ? filename.slice(0, dotIndex) : filename;
   let i = 1;
   let candidate = `${base} (${i})${ext}`;
   while (usedNames.has(candidate)) {
@@ -33,14 +36,62 @@ function dedupeFilename(usedNames: Set<string>, filename: string): string {
   return candidate;
 }
 
-async function decryptNoteMarkdown(
+// Decrypts a note and serializes it per the requested format.
+// Returns both the content string and the file extension to use.
+async function decryptNoteContent(
   note: ExportNoteDTO,
   dek: Uint8Array,
-): Promise<string> {
-  if (!note.encryptedContent) return "";
+  format: ExportFormat,
+): Promise<{ content: string; ext: string }> {
+  if (!note.encryptedContent) {
+    return {
+      content: format === "markdown" ? "" : "{}",
+      ext: format === "markdown" ? "md" : "json",
+    };
+  }
   const plaintext = await decryptAESGCM(note.encryptedContent, dek);
   const json = JSON.parse(plaintext);
-  return jsonToMarkdown(json);
+
+  if (format === "markdown") {
+    return { content: jsonToMarkdown(json), ext: "md" };
+  }
+  return { content: JSON.stringify(json, null, 2), ext: "json" };
+}
+
+async function processFileNode(
+  node: ExportTreeNode,
+  noteMap: Map<string, ExportNoteDTO>,
+  zipFolder: JSZip,
+  dek: Uint8Array,
+  format: ExportFormat,
+  usedNames: Set<string>,
+  errors: DoneMessage["errors"],
+) {
+  if (!node.fileId) return; // malformed node — skip rather than crash the export
+  const note = noteMap.get(node.fileId);
+  if (!note) {
+    errors.push({
+      noteId: node.fileId,
+      title: node.title,
+      reason: "Note content missing from bulk fetch",
+    });
+    return;
+  }
+
+  try {
+    const { content, ext } = await decryptNoteContent(note, dek, format);
+    const filename = dedupeFilename(
+      usedNames,
+      `${sanitizeFilename(node.title)}.${ext}`,
+    );
+    zipFolder.file(filename, content);
+  } catch (err) {
+    errors.push({
+      noteId: node.fileId,
+      title: node.title,
+      reason: err instanceof Error ? err.message : "Unknown error",
+    });
+  }
 }
 
 async function walkTree(
@@ -48,6 +99,7 @@ async function walkTree(
   noteMap: Map<string, ExportNoteDTO>,
   zipFolder: JSZip,
   dek: Uint8Array,
+  format: ExportFormat,
   usedNames: Set<string>,
   errors: DoneMessage["errors"],
   progress: { completed: number; total: number },
@@ -62,6 +114,7 @@ async function walkTree(
           noteMap,
           folder,
           dek,
+          format,
           childUsedNames,
           errors,
           progress,
@@ -70,44 +123,35 @@ async function walkTree(
       continue;
     }
 
-    // type === 'file'
+    await processFileNode(
+      node,
+      noteMap,
+      zipFolder,
+      dek,
+      format,
+      usedNames,
+      errors,
+    );
     progress.completed += 1;
     post({
       type: "progress",
       completed: progress.completed,
       total: progress.total,
     });
-
-    if (!node.fileId) continue; // malformed node — skip rather than crash the export
-    const note = noteMap.get(node.fileId);
-    if (!note) {
-      errors.push({
-        noteId: node.fileId,
-        title: node.title,
-        reason: "Note content missing from bulk fetch",
-      });
-      continue;
-    }
-
-    try {
-      const markdown = await decryptNoteMarkdown(note, dek);
-      const filename = dedupeFilename(
-        usedNames,
-        `${sanitizeFilename(node.title)}.md`,
-      );
-      zipFolder.file(filename, markdown);
-    } catch (err) {
-      errors.push({
-        noteId: node.fileId,
-        title: node.title,
-        reason: err instanceof Error ? err.message : "Unknown error",
-      });
-    }
   }
 }
 
+function countFiles(nodes: ExportTreeNode[]): number {
+  let count = 0;
+  for (const node of nodes) {
+    if (node.type === "file") count += 1;
+    if (node.children?.length) count += countFiles(node.children);
+  }
+  return count;
+}
+
 self.onmessage = async (event: MessageEvent<StartExportMessage>) => {
-  const { type, dek, tree, archivedNodes, notes } = event.data;
+  const { type, format, dek, tree, archivedNodes, notes } = event.data;
   if (type !== "start") return;
 
   try {
@@ -119,46 +163,37 @@ self.onmessage = async (event: MessageEvent<StartExportMessage>) => {
       countFiles(tree) + archivedNodes.filter((n) => n.type === "file").length;
     const progress = { completed: 0, total: totalFiles };
 
-    // main tree
-    await walkTree(tree, noteMap, zip, dek, new Set(), errors, progress);
+    await walkTree(
+      tree,
+      noteMap,
+      zip,
+      dek,
+      format,
+      new Set(),
+      errors,
+      progress,
+    );
 
-    // archived notes — flat, own top-level folder
     if (archivedNodes.length) {
       const archivedFolder = zip.folder("Archived")!;
       const archivedUsedNames = new Set<string>();
       for (const node of archivedNodes) {
-        if (node.type !== "file") continue; // skip stray archived folders — no children to export from them anyway
+        if (node.type !== "file") continue;
+        await processFileNode(
+          node,
+          noteMap,
+          archivedFolder,
+          dek,
+          format,
+          archivedUsedNames,
+          errors,
+        );
         progress.completed += 1;
         post({
           type: "progress",
           completed: progress.completed,
           total: progress.total,
         });
-
-        if (!node.fileId) continue;
-        const note = noteMap.get(node.fileId);
-        if (!note) {
-          errors.push({
-            noteId: node.fileId,
-            title: node.title,
-            reason: "Note content missing from bulk fetch",
-          });
-          continue;
-        }
-        try {
-          const markdown = await decryptNoteMarkdown(note, dek);
-          const filename = dedupeFilename(
-            archivedUsedNames,
-            `${sanitizeFilename(node.title)}.md`,
-          );
-          archivedFolder.file(filename, markdown);
-        } catch (err) {
-          errors.push({
-            noteId: node.fileId,
-            title: node.title,
-            reason: err instanceof Error ? err.message : "Unknown error",
-          });
-        }
       }
     }
 
@@ -181,12 +216,3 @@ self.onmessage = async (event: MessageEvent<StartExportMessage>) => {
     });
   }
 };
-
-function countFiles(nodes: ExportTreeNode[]): number {
-  let count = 0;
-  for (const node of nodes) {
-    if (node.type === "file") count += 1;
-    if (node.children?.length) count += countFiles(node.children);
-  }
-  return count;
-}
