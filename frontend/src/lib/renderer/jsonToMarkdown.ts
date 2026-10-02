@@ -4,7 +4,6 @@ import type { JSONContent } from "@tiptap/core";
 import { editorExtensions } from "@/lib/editor/extensions";
 
 export function jsonToMarkdown(json: JSONContent): string {
-  // TODO: Make sure that the MarkdownManager API does not send decrypted content to their servers!
   const manager = new MarkdownManager({ extensions: editorExtensions });
   const markdown = manager.serialize(json);
 
