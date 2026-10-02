@@ -1,5 +1,5 @@
 export function downloadFile(
-  content: string,
+  content: string | Blob,
   filename: string,
   mimeType: string,
 ) {
