@@ -1,9 +1,9 @@
-import { Request, Response } from 'express';
-import { ParamsDictionary } from 'express-serve-static-core';
+import { Request, Response } from "express";
+import { ParamsDictionary } from "express-serve-static-core";
 
-import { ENCRYPTION_CONFIG } from '@blackcloud/shared';
-import asyncHandler from '../utils/asyncHandler';
-import { Note } from '../models/note.model';
+import { ENCRYPTION_CONFIG } from "@blackcloud/shared";
+import asyncHandler from "../utils/asyncHandler";
+import { Note } from "../models/note.model";
 import {
   CreateNoteRequest,
   DeleteNoteParams,
@@ -12,7 +12,9 @@ import {
   NoteResponse,
   UpdateNoteParams,
   UpdateNoteRequest,
-} from '../types/notes.types';
+  GetNotesForExportRequest,
+  GetNotesForExportResponse,
+} from "../types/notes.types";
 
 export const getAllNotes = asyncHandler(
   async (
@@ -22,14 +24,14 @@ export const getAllNotes = asyncHandler(
     const userId = req.user?._id;
 
     if (!userId) {
-      throw new Error('Unauthorized');
+      throw new Error("Unauthorized");
     }
 
     const userNotes = await Note.find({ userId });
 
     res.status(200).json({
       success: true,
-      message: 'Notes retrieved successfully',
+      message: "Notes retrieved successfully",
       note: userNotes,
     });
   },
@@ -43,18 +45,18 @@ export const getNote = asyncHandler(
     const noteId = req.params.id;
 
     if (!noteId) {
-      throw new Error('Note ID is required');
+      throw new Error("Note ID is required");
     }
 
     const note = await Note.findOne({ _id: noteId, userId: req.user?._id });
 
     if (!note) {
-      throw new Error('Note not found');
+      throw new Error("Note not found");
     }
 
     res.status(200).json({
       success: true,
-      message: 'Note retrieved successfully',
+      message: "Note retrieved successfully",
       note: note,
     });
   },
@@ -68,12 +70,12 @@ export const createNote = asyncHandler(
     const { encryptedContent } = req.body ?? {};
 
     if (!req.user?._id) {
-      throw new Error('User not authenticated');
+      throw new Error("User not authenticated");
     }
 
     const newNote = new Note({
       userId: req.user?._id,
-      encryptedContent: encryptedContent ?? '',
+      encryptedContent: encryptedContent ?? "",
       schemaVersion: ENCRYPTION_CONFIG.schemaVersion,
     });
 
@@ -81,7 +83,7 @@ export const createNote = asyncHandler(
 
     res.status(201).json({
       success: true,
-      message: 'Note created successfully',
+      message: "Note created successfully",
       note: newNote,
     });
   },
@@ -100,7 +102,7 @@ export const updateNote = asyncHandler(
     const noteId = req.params.id;
 
     if (!req.user?._id) {
-      throw new Error('User not authenticated');
+      throw new Error("User not authenticated");
     }
 
     const updatedFields: any = {};
@@ -114,18 +116,17 @@ export const updateNote = asyncHandler(
     );
 
     if (!noteToUpdate) {
-      throw new Error('Note does not exist or unauthorized');
+      throw new Error("Note does not exist or unauthorized");
     }
 
     res.status(200).json({
       success: true,
-      message: 'Note successfully updated',
+      message: "Note successfully updated",
       note: noteToUpdate,
     });
   },
 );
 
-// TODO: just to be sure, try signing in with another user and send a del req. Should get an error
 export const deleteNote = asyncHandler(
   async (
     req: Request<ParamsDictionary & DeleteNoteParams, NoteResponse, {}>,
@@ -134,7 +135,7 @@ export const deleteNote = asyncHandler(
     const noteId = req.params.id;
 
     if (!req.user?._id) {
-      throw new Error('User not authenticated');
+      throw new Error("User not authenticated");
     }
 
     const noteToDelete = await Note.findOneAndDelete({
@@ -143,13 +144,43 @@ export const deleteNote = asyncHandler(
     });
 
     if (!noteToDelete) {
-      throw new Error('Note not found or unauthorized');
+      throw new Error("Note not found or unauthorized");
     }
 
     res.status(200).json({
       success: true,
-      message: 'Note deleted successfully',
+      message: "Note deleted successfully",
       note: noteToDelete,
+    });
+  },
+);
+
+export const getNotesForExport = asyncHandler(
+  async (
+    req: GetNotesForExportRequest,
+    res: Response<GetNotesForExportResponse>,
+  ): Promise<void> => {
+    const userId = req.user?._id;
+
+    if (!userId) {
+      throw new Error("Unauthorized");
+    }
+
+    const userNotes = await Note.find({ userId })
+      .select("_id encryptedContent")
+      .lean();
+
+    const exportNotes = userNotes.map((note) => ({
+      _id: note._id.toString(),
+      // Exporting encryptedContent as an empty string if it's undefined to ensure consistent data structure
+      // This is important for the frontend to handle the data correctly without running into undefined values.
+      encryptedContent: note.encryptedContent ?? "",
+    }));
+
+    res.status(200).json({
+      success: true,
+      message: "Notes retrieved successfully for export",
+      notes: exportNotes,
     });
   },
 );
