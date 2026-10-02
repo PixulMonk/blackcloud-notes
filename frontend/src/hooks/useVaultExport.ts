@@ -5,34 +5,12 @@ import { axiosInstance } from "@/lib/axios";
 import { useDataEncryptionKey } from "@/store/useVaultStore";
 import { downloadFile } from "@/utils/download";
 
-interface ExportNoteDTO {
-  _id: string;
-  encryptedContent: string;
-}
-
-interface GetNotesForExportResponse {
-  success: boolean;
-  message: string;
-  notes: ExportNoteDTO[];
-}
-
-interface ProgressMessage {
-  type: "progress";
-  completed: number;
-  total: number;
-}
-interface DoneMessage {
-  type: "done";
-  blob: Blob;
-  errors: { noteId: string; title: string; reason: string }[];
-}
-interface ErrorMessage {
-  type: "error";
-  message: string;
-}
-type WorkerMessage = ProgressMessage | DoneMessage | ErrorMessage;
-
-type ExportFormat = "markdown" | "json";
+import type {
+  ExportFormat,
+  GetNotesForExportResponse,
+  WorkerOutMessage,
+  DoneMessage,
+} from "@/types/export.types";
 
 export function useVaultExport() {
   const dek = useDataEncryptionKey();
@@ -66,7 +44,7 @@ export function useVaultExport() {
         workerRef.current = worker;
 
         const result = await new Promise<DoneMessage>((resolve, reject) => {
-          worker.onmessage = (event: MessageEvent<WorkerMessage>) => {
+          worker.onmessage = (event: MessageEvent<WorkerOutMessage>) => {
             const msg = event.data;
             if (msg.type === "progress")
               setProgress({ completed: msg.completed, total: msg.total });

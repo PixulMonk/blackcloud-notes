@@ -1,5 +1,11 @@
 export type ExportFormat = "markdown" | "json";
 
+export interface GetNotesForExportResponse {
+  success: boolean;
+  message: string;
+  notes: ExportNoteDTO[];
+}
+
 export interface ExportNoteDTO {
   _id: string;
   encryptedContent: string;
