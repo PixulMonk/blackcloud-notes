@@ -2,11 +2,14 @@ import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { Progress } from "@/components/ui/progress"; // reusing the pattern already present for storage
 import { PasswordConfirmDialog } from "@/components/dialog/PasswordConfirmDialog";
+import { confirm } from "@/components/dialog/ConfirmDialog";
 import { useAuthActions } from "@/store/useAuthStore";
 import { useDeriveAuthToken } from "@/hooks/useDeriveAuthToken";
-import { useDataActions } from "@/store/useDataStore";
+import { useDataActions, useData } from "@/store/useDataStore"; // adjust to however `tree`/`archivedNodes` are actually selected
 import { useTreeUIActions } from "@/store/useTreeUIStore";
+import { useVaultExport } from "@/hooks/useVaultExport";
 
 function VaultSection() {
   const { wipeVault } = useAuthActions();
@@ -15,6 +18,19 @@ function VaultSection() {
 
   const { resetData } = useDataActions();
   const { clearSelection } = useTreeUIActions();
+
+  const { tree, archivedNodes } = useData();
+  const { exportVault, isExporting, progress } = useVaultExport();
+
+  const handleExportVault = async () => {
+    const ok = await confirm({
+      title: "Export vault",
+      message:
+        "Your notes will be exported as a ZIP file containing Markdown files. During this process, some formatting that is not supported by Markdown format may be lost. Do you want to continue?",
+    });
+    if (!ok) return;
+    await exportVault(tree, archivedNodes);
+  };
 
   const handleWipeVault = async (password: string) => {
     const authToken = await deriveAuthToken(password);
@@ -43,20 +59,19 @@ function VaultSection() {
           <Progress value={0.6} />
         </div> */}
 
-        {/* TODO: Include export functionality here when export update comes */}
-        {/* <div className="flex items-center justify-between py-4">
+        <div className="flex items-center justify-between py-4">
           <div>
             <Label>Export vault</Label>
             <p className="text-xs text-muted-foreground mt-1">
-              Download all your notes as Markdown or PDF.
+              Download all your notes as Markdown files.
             </p>
           </div>
-          <Button variant="outline" size="sm">
+          <Button variant="outline" size="sm" onClick={handleExportVault}>
             Export
           </Button>
         </div>
 
-        <div className="flex items-center justify-between py-4">
+        {/* <div className="flex items-center justify-between py-4">
           <div>
             <Label>Import notes</Label>
             <p className="text-xs text-muted-foreground mt-1">
