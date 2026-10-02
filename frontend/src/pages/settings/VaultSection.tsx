@@ -27,9 +27,23 @@ function VaultSection() {
       title: "Export vault",
       message:
         "Your notes will be exported as a ZIP file containing Markdown files. During this process, some formatting that is not supported by Markdown format may be lost. Do you want to continue?",
+      yesText: "Export",
+      noText: "Cancel",
     });
     if (!ok) return;
-    await exportVault(tree, archivedNodes);
+    await exportVault("markdown", tree, archivedNodes);
+  };
+
+  const handleDownloadBackup = async () => {
+    const ok = await confirm({
+      title: "Download backup",
+      message:
+        "This downloads a full backup of your vault that can be restored later in BlackCloud. It is not meant to be opened in other apps.",
+      yesText: "Download",
+      noText: "Cancel",
+    });
+    if (!ok) return;
+    await exportVault("json", tree, archivedNodes);
   };
 
   const handleWipeVault = async (password: string) => {
@@ -47,27 +61,45 @@ function VaultSection() {
   return (
     <div className="flex flex-col h-full">
       <h2 className="mb-6 text-sm font-semibold">Vault</h2>
-      {/* TODO: Storage count */}
       <div className="flex flex-col divide-y divide-border">
-        {/* <div className="py-4">
-          <div className="flex items-center justify-between mb-2">
-            <Label>Storage used</Label>
-            <span className="text-xs text-muted-foreground">
-              3.2 MB of 500 MB
-            </span>
+        {/* Export Vault Row */}
+        <div className="py-4 space-y-3">
+          <div className="flex items-center justify-between">
+            <div>
+              <Label>Export vault</Label>
+              <p className="text-xs text-muted-foreground mt-1.5">
+                Download all your notes as Markdown.
+              </p>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleExportVault}
+              disabled={isExporting}
+            >
+              {isExporting ? "Exporting…" : "Export"}
+            </Button>
           </div>
-          <Progress value={0.6} />
-        </div> */}
+          {isExporting && progress && progress.total > 0 && (
+            <Progress value={(progress.completed / progress.total) * 100} />
+          )}
+        </div>
 
+        {/* Download Backup Row */}
         <div className="flex items-center justify-between py-4">
           <div>
-            <Label>Export vault</Label>
-            <p className="text-xs text-muted-foreground mt-1">
-              Download all your notes as Markdown files.
+            <Label>Download backup</Label>
+            <p className="text-xs text-muted-foreground mt-1.5">
+              Full backup for restoring in BlackCloud later.
             </p>
           </div>
-          <Button variant="outline" size="sm" onClick={handleExportVault}>
-            Export
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleDownloadBackup}
+            disabled={isExporting}
+          >
+            {isExporting ? "Downloading…" : "Download"}
           </Button>
         </div>
 

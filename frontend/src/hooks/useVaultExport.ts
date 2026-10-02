@@ -32,6 +32,8 @@ interface ErrorMessage {
 }
 type WorkerMessage = ProgressMessage | DoneMessage | ErrorMessage;
 
+type ExportFormat = "markdown" | "json";
+
 export function useVaultExport() {
   const dek = useDataEncryptionKey();
   const [isExporting, setIsExporting] = useState(false);
@@ -42,8 +44,8 @@ export function useVaultExport() {
   const workerRef = useRef<Worker | null>(null);
 
   const exportVault = useCallback(
-    async (tree: unknown[], archivedNodes: unknown[]) => {
-      if (isExporting) return; // guard against double-trigger
+    async (format: ExportFormat, tree: unknown[], archivedNodes: unknown[]) => {
+      if (isExporting) return;
       if (!dek) {
         toast.error("Vault is locked — cannot export.");
         return;
@@ -66,19 +68,16 @@ export function useVaultExport() {
         const result = await new Promise<DoneMessage>((resolve, reject) => {
           worker.onmessage = (event: MessageEvent<WorkerMessage>) => {
             const msg = event.data;
-            if (msg.type === "progress") {
+            if (msg.type === "progress")
               setProgress({ completed: msg.completed, total: msg.total });
-            } else if (msg.type === "done") {
-              resolve(msg);
-            } else if (msg.type === "error") {
-              reject(new Error(msg.message));
-            }
+            else if (msg.type === "done") resolve(msg);
+            else if (msg.type === "error") reject(new Error(msg.message));
           };
           worker.onerror = (err) => reject(err);
 
-          // clone, not transfer — dek must remain usable on the main thread
           worker.postMessage({
             type: "start",
+            format,
             dek,
             tree,
             archivedNodes,
@@ -86,18 +85,23 @@ export function useVaultExport() {
           });
         });
 
+        const label = format === "markdown" ? "export" : "backup";
         downloadFile(
           result.blob,
-          `vault-export-${new Date().toISOString().slice(0, 10)}.zip`,
+          `vault-${label}-${new Date().toISOString().slice(0, 10)}.zip`,
           "application/zip",
         );
 
         if (result.errors.length) {
           toast.warning(
-            `Export finished with ${result.errors.length} note(s) skipped — see errors.txt in the zip.`,
+            `Finished with ${result.errors.length} note(s) skipped — see errors.txt.`,
           );
         } else {
-          toast.success("Vault exported successfully!");
+          toast.success(
+            format === "markdown"
+              ? "Vault exported successfully!"
+              : "Backup downloaded successfully!",
+          );
         }
       } catch (error) {
         console.error("Vault export failed:", error);

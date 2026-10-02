@@ -1,3 +1,5 @@
+export type ExportFormat = "markdown" | "json";
+
 export interface ExportNoteDTO {
   _id: string;
   encryptedContent: string;
@@ -13,10 +15,11 @@ export interface ExportTreeNode {
 
 export interface StartExportMessage {
   type: "start";
+  format: ExportFormat;
   dek: Uint8Array;
-  tree: ExportTreeNode[]; // main tree, from buildTree
-  archivedNodes: ExportTreeNode[]; // flat list, per the above
-  notes: ExportNoteDTO[]; // bulk payload from getNotesForExport
+  tree: ExportTreeNode[];
+  archivedNodes: ExportTreeNode[];
+  notes: ExportNoteDTO[];
 }
 
 export interface ProgressMessage {
@@ -24,16 +27,13 @@ export interface ProgressMessage {
   completed: number;
   total: number;
 }
-
 export interface DoneMessage {
   type: "done";
   blob: Blob;
   errors: { noteId: string; title: string; reason: string }[];
 }
-
 export interface ErrorMessage {
   type: "error";
   message: string;
 }
-
 export type WorkerOutMessage = ProgressMessage | DoneMessage | ErrorMessage;
