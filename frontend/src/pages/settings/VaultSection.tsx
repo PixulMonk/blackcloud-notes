@@ -21,6 +21,9 @@ function VaultSection() {
 
   const { tree, archivedNodes } = useData();
   const { exportVault, isExporting, progress } = useVaultExport();
+  const [activeAction, setActiveAction] = useState<"markdown" | "json" | null>(
+    null,
+  );
 
   const handleExportVault = async () => {
     const ok = await confirm({
@@ -31,7 +34,9 @@ function VaultSection() {
       noText: "Cancel",
     });
     if (!ok) return;
+    setActiveAction("markdown");
     await exportVault("markdown", tree, archivedNodes);
+    setActiveAction(null);
   };
 
   const handleDownloadBackup = async () => {
@@ -43,7 +48,9 @@ function VaultSection() {
       noText: "Cancel",
     });
     if (!ok) return;
+    setActiveAction("json");
     await exportVault("json", tree, archivedNodes);
+    setActiveAction(null);
   };
 
   const handleWipeVault = async (password: string) => {
@@ -77,12 +84,17 @@ function VaultSection() {
               onClick={handleExportVault}
               disabled={isExporting}
             >
-              {isExporting ? "Exporting…" : "Export"}
+              {isExporting && activeAction === "markdown"
+                ? "Exporting…"
+                : "Export"}
             </Button>
           </div>
-          {isExporting && progress && progress.total > 0 && (
-            <Progress value={(progress.completed / progress.total) * 100} />
-          )}
+          {isExporting &&
+            activeAction === "markdown" &&
+            progress &&
+            progress.total > 0 && (
+              <Progress value={(progress.completed / progress.total) * 100} />
+            )}
         </div>
 
         {/* Download Backup Row */}
@@ -99,7 +111,9 @@ function VaultSection() {
             onClick={handleDownloadBackup}
             disabled={isExporting}
           >
-            {isExporting ? "Downloading…" : "Download"}
+            {isExporting && activeAction === "json"
+              ? "Downloading…"
+              : "Download"}
           </Button>
         </div>
 
