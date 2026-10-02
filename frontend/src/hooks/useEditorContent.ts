@@ -1,9 +1,9 @@
-import { useState, useEffect } from 'react';
-import { type Editor } from '@tiptap/react';
+import { useState, useEffect } from "react";
+import { type Editor } from "@tiptap/react";
 
-import { useData, useDataActions } from '@/store/useDataStore';
-import { useDataEncryptionKey } from '@/store/useVaultStore';
-import { decryptAESGCM } from '@/lib/crypto/aes';
+import { useData, useDataActions } from "@/store/useDataStore";
+import { useDataEncryptionKey } from "@/store/useVaultStore";
+import { decryptAESGCM } from "@/lib/crypto/aes";
 
 const useEditorContent = (
   editor: Editor | null,
