@@ -58,8 +58,19 @@ async function decryptNoteContent(
   return { content: JSON.stringify(json, null, 2), ext: "json" };
 }
 
+function safeFolderTitle(title: unknown): string {
+  if (typeof title !== "string" || title.length === 0)
+    return "Corrupted Folder";
+  try {
+    return sanitizeFilename(title);
+  } catch {
+    return "Corrupted Folder";
+  }
+}
+
 async function processFileNode(
   node: ExportTreeNode,
+  path: string[],
   noteMap: Map<string, ExportNoteDTO>,
   zipFolder: JSZip,
   dek: Uint8Array,
@@ -67,13 +78,15 @@ async function processFileNode(
   usedNames: Set<string>,
   errors: DoneMessage["errors"],
 ) {
-  if (!node.fileId) return; // malformed node — skip rather than crash the export
+  if (!node.fileId) return;
   const note = noteMap.get(node.fileId);
+  const fullPath = [...path, node.title].join(" / ");
+
   if (!note) {
     errors.push({
       noteId: node.fileId,
       title: node.title,
-      reason: "Note content missing from bulk fetch",
+      reason: `Note content missing from bulk fetch — location: ${fullPath}`,
     });
     return;
   }
@@ -89,13 +102,14 @@ async function processFileNode(
     errors.push({
       noteId: node.fileId,
       title: node.title,
-      reason: err instanceof Error ? err.message : "Unknown error",
+      reason: `${err instanceof Error ? err.message : "Unknown error"} — location: ${fullPath}`,
     });
   }
 }
 
 async function walkTree(
   nodes: ExportTreeNode[],
+  path: string[],
   noteMap: Map<string, ExportNoteDTO>,
   zipFolder: JSZip,
   dek: Uint8Array,
@@ -106,11 +120,13 @@ async function walkTree(
 ) {
   for (const node of nodes) {
     if (node.type === "folder") {
-      const folder = zipFolder.folder(sanitizeFilename(node.title))!;
+      const safeName = safeFolderTitle(node.title);
+      const folder = zipFolder.folder(safeName)!;
       const childUsedNames = new Set<string>();
       if (node.children?.length) {
         await walkTree(
           node.children,
+          [...path, safeName],
           noteMap,
           folder,
           dek,
@@ -125,6 +141,7 @@ async function walkTree(
 
     await processFileNode(
       node,
+      path,
       noteMap,
       zipFolder,
       dek,
@@ -165,6 +182,7 @@ self.onmessage = async (event: MessageEvent<StartExportMessage>) => {
 
     await walkTree(
       tree,
+      [],
       noteMap,
       zip,
       dek,
@@ -181,6 +199,7 @@ self.onmessage = async (event: MessageEvent<StartExportMessage>) => {
         if (node.type !== "file") continue;
         await processFileNode(
           node,
+          [],
           noteMap,
           archivedFolder,
           dek,
