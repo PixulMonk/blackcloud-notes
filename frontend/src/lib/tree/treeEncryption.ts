@@ -1,6 +1,6 @@
-import type { TreeNode, TreeNodeDTO } from '@/types/treeStore.types';
+import type { TreeNode, TreeNodeDTO } from "@/types/treeStore.types";
 
-import { decryptAESGCM } from '@/lib/crypto/aes';
+import { decryptAESGCM } from "@/lib/crypto/aes";
 
 export const decryptTree = async (
   nodes: TreeNodeDTO[],
@@ -8,7 +8,12 @@ export const decryptTree = async (
 ): Promise<TreeNode[]> => {
   return Promise.all(
     nodes.map(async (node: TreeNodeDTO) => {
-      const decryptedTitle = await decryptAESGCM(node.encryptedTitle, key);
+      let decryptedTitle: string;
+      try {
+        decryptedTitle = await decryptAESGCM(node.encryptedTitle, key);
+      } catch {
+        decryptedTitle = "[Corrupted title]";
+      }
 
       const decryptedChildren = node.children
         ? await decryptTree(node.children, key)
