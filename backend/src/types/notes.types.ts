@@ -35,20 +35,3 @@ export interface UpdateNoteParams {
 export interface DeleteNoteParams {
   id: string;
 }
-
-export interface ExportNoteDTO {
-  _id: string;
-  encryptedContent: string;
-}
-
-export interface GetNotesForExportResponse extends SimpleResponse {
-  notes?: ExportNoteDTO[];
-}
-
-export interface GetNotesForExportRequest extends Request<
-  ParamsDictionary,
-  GetNotesForExportResponse,
-  {}
-> {
-  user?: IUser;
-}

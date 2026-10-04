@@ -12,8 +12,6 @@ import {
   NoteResponse,
   UpdateNoteParams,
   UpdateNoteRequest,
-  GetNotesForExportRequest,
-  GetNotesForExportResponse,
 } from "../types/notes.types";
 
 export const getAllNotes = asyncHandler(
@@ -151,36 +149,6 @@ export const deleteNote = asyncHandler(
       success: true,
       message: "Note deleted successfully",
       note: noteToDelete,
-    });
-  },
-);
-
-export const getNotesForExport = asyncHandler(
-  async (
-    req: GetNotesForExportRequest,
-    res: Response<GetNotesForExportResponse>,
-  ): Promise<void> => {
-    const userId = req.user?._id;
-
-    if (!userId) {
-      throw new Error("Unauthorized");
-    }
-
-    const userNotes = await Note.find({ userId })
-      .select("_id encryptedContent")
-      .lean();
-
-    const exportNotes = userNotes.map((note) => ({
-      _id: note._id.toString(),
-      // Exporting encryptedContent as an empty string if it's undefined to ensure consistent data structure
-      // This is important for the frontend to handle the data correctly without running into undefined values.
-      encryptedContent: note.encryptedContent ?? "",
-    }));
-
-    res.status(200).json({
-      success: true,
-      message: "Notes retrieved successfully for export",
-      notes: exportNotes,
     });
   },
 );
