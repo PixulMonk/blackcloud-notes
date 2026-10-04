@@ -34,7 +34,7 @@ export function useVaultExport() {
 
       try {
         const { data } =
-          await axiosInstance.get<GetNotesForExportResponse>("notes/export");
+          await axiosInstance.get<GetNotesForExportResponse>("vault/export");
         const notes = data.notes;
 
         const worker = new Worker(
