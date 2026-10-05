@@ -10,6 +10,8 @@ import { useDeriveAuthToken } from "@/hooks/useDeriveAuthToken";
 import { useDataActions, useData } from "@/store/useDataStore"; // adjust to however `tree`/`archivedNodes` are actually selected
 import { useTreeUIActions } from "@/store/useTreeUIStore";
 import { useVaultExport } from "@/hooks/useVaultExport";
+import { useVaultImport } from "@/hooks/useVaultImport";
+import { selectZipFile } from "@/utils/selectZipFile";
 
 function VaultSection() {
   const { wipeVault } = useAuthActions();
@@ -20,10 +22,28 @@ function VaultSection() {
   const { clearSelection } = useTreeUIActions();
 
   const { tree, archivedNodes } = useData();
+  const { importVault, isImporting } = useVaultImport();
   const { exportVault, isExporting, progress } = useVaultExport();
   const [activeAction, setActiveAction] = useState<"markdown" | "json" | null>(
     null,
   );
+
+  const handleImportVault = async () => {
+    const ok = await confirm({
+      title: "Import notes",
+      message:
+        "This will import notes from a ZIP file. Existing notes will not be deleted, but imported notes may overwrite existing ones if they have the same title and location. Do you want to continue?",
+      yesText: "Import",
+      noText: "Cancel",
+    });
+
+    if (!ok) return;
+
+    const file = await selectZipFile();
+    if (!file) return;
+
+    await importVault(file);
+  };
 
   const handleExportVault = async () => {
     const ok = await confirm({
@@ -69,6 +89,25 @@ function VaultSection() {
     <div className="flex flex-col h-full">
       <h2 className="mb-6 text-sm font-semibold">Vault</h2>
       <div className="flex flex-col divide-y divide-border">
+        {/* Import Vault Row */}
+
+        <div className="flex items-center justify-between py-4">
+          <div>
+            <Label>Import notes</Label>
+            <p className="text-xs text-muted-foreground mt-1">
+              Bring in notes from Markdown or another notes app.
+            </p>
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleImportVault}
+            disabled={isImporting}
+          >
+            {isImporting ? "Importing…" : "Import"}
+          </Button>
+        </div>
+
         {/* Export Vault Row */}
         <div className="py-4 space-y-3">
           <div className="flex items-center justify-between">
@@ -96,7 +135,6 @@ function VaultSection() {
               <Progress value={(progress.completed / progress.total) * 100} />
             )}
         </div>
-
         {/* Download Backup Row */}
         <div className="flex items-center justify-between py-4">
           <div>
@@ -116,18 +154,6 @@ function VaultSection() {
               : "Download"}
           </Button>
         </div>
-
-        {/* <div className="flex items-center justify-between py-4">
-          <div>
-            <Label>Import notes</Label>
-            <p className="text-xs text-muted-foreground mt-1">
-              Bring in notes from Markdown or another notes app.
-            </p>
-          </div>
-          <Button variant="outline" size="sm">
-            Import
-          </Button>
-        </div> */}
       </div>
       <div className="mt-6">
         <p className="text-sm font-semibold text-destructive mb-4">
