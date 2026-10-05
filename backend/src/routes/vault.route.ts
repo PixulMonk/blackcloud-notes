@@ -2,10 +2,10 @@ import { protectRoute } from "../middleware/auth.middleware";
 import router from "../routes/users.route";
 import {
   getNotesForExport,
-  importNotes,
+  importVault,
 } from "../controllers/vault.controller";
 
 router.get("/export", protectRoute, getNotesForExport);
-router.get("/import", protectRoute, importNotes);
+router.post("/import", protectRoute, importVault);
 
 export default router;
