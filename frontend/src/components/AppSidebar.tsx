@@ -210,10 +210,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           {/* Security - Lock Vault */}
           <Button
             variant="secondary"
-            className="w-full justify-start gap-2 h-9 px-2 text-xs font-semibold mt-2 bg-secondary/30 hover:bg-secondary/50"
+            className="w-full justify-start gap-2 h-9 px-2 text-sm font-semibold mt-2 bg-secondary/30 hover:bg-secondary/50"
             onClick={() => clearKeys()}
           >
-            <Lock className="size-3.5" />
+            <Lock className="size-4" />
             <span>Lock Vault</span>
           </Button>
         </SidebarFooter>
