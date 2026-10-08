@@ -11,7 +11,7 @@ import { useDataActions, useData } from "@/store/useDataStore"; // adjust to how
 import { useTreeUIActions } from "@/store/useTreeUIStore";
 import { useVaultExport } from "@/hooks/useVaultExport";
 import { useVaultImport } from "@/hooks/useVaultImport";
-import { selectZipFile } from "@/utils/selectZipFile";
+import { selectImportFiles } from "@/utils/selectImportFiles";
 
 function VaultSection() {
   const { wipeVault } = useAuthActions();
@@ -39,10 +39,10 @@ function VaultSection() {
 
     if (!ok) return;
 
-    const file = await selectZipFile();
-    if (!file) return;
+    const files = await selectImportFiles();
+    if (!files) return;
 
-    await importVault(file);
+    await importVault(files);
   };
 
   const handleExportVault = async () => {

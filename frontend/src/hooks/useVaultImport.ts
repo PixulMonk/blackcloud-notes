@@ -13,7 +13,7 @@ export function useVaultImport() {
   const [isImporting, setIsImporting] = useState(false);
 
   const importVault = useCallback(
-    async (zipFile: File) => {
+    async (files: FileList) => {
       if (isImporting) return;
       if (!dek) {
         toast.error("Vault is locked — cannot import.");
@@ -22,7 +22,7 @@ export function useVaultImport() {
 
       setIsImporting(true);
       try {
-        const { payload, skipped } = await buildImportPayload(zipFile, dek);
+        const { payload, skipped } = await buildImportPayload(files, dek);
 
         if (payload.notes.length === 0) {
           toast.error("No valid backup files found in this zip.");
