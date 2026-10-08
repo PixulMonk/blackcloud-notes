@@ -14,6 +14,7 @@ import treeRoutes from "./routes/tree.route";
 import healthRoutes from "./routes/health.route";
 import supportRoutes from "./routes/support.route";
 import usersRoutes from "./routes/users.route";
+import vaultRoutes from "./routes/vault.route";
 import { apiLimiter } from "./middleware/rateLimiters";
 
 const app: Express = express();
@@ -63,6 +64,7 @@ app.use("/api/notes", notesRoutes);
 app.use("/api/treeNodes", treeNodeRoutes);
 app.use("/api/tree", treeRoutes);
 app.use("/api/support", supportRoutes);
+app.use("/api/vault", vaultRoutes);
 app.use("/public", express.static("public"));
 
 app.listen(PORT, () => {

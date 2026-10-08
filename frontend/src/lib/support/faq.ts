@@ -88,6 +88,28 @@ export const faqSections: FaqSection[] = [
   },
 
   {
+    category: "Data & Backups",
+    items: [
+      {
+        q: "How do I export my notes?",
+        a: "You can export your entire vault as a ZIP file containing Markdown files directly from your Vault settings. Note that because Markdown has structural limitations, some advanced rich-text formatting may be adjusted or lost during conversion.",
+      },
+      {
+        q: "What is the difference between an Export and a Backup?",
+        a: "Exporting your vault downloads your notes as human-readable Markdown files meant for external use or other apps. A backup downloads a complete structural snapshot of your vault that can be used to restore or transfer your data.",
+      },
+      {
+        q: "Can I import my notes or backups back into BlackCloud?",
+        a: "Yes. You can restore your data using your backup files. Imports are processed securely through client-side validation and efficient bulk operations to safely rebuild your file tree and notes.",
+      },
+      {
+        q: "Are my exported files or backups encrypted?",
+        a: "Currently, both Markdown exports and backups are exported in plaintext to allow you to easily read, inspect, or move your data between accounts. Future updates will introduce encrypted backup options for added security when storing files externally.",
+      },
+    ],
+  },
+
+  {
     category: "Access & Devices",
     items: [
       {

@@ -1,9 +1,9 @@
-import { useState, useEffect } from 'react';
-import { type Editor } from '@tiptap/react';
+import { useState, useEffect } from "react";
+import { type Editor } from "@tiptap/react";
 
-import { useData, useDataActions } from '@/store/useDataStore';
-import { useDataEncryptionKey } from '@/store/useVaultStore';
-import { decryptAESGCM } from '@/lib/crypto/aes';
+import { useData, useDataActions } from "@/store/useDataStore";
+import { useDataEncryptionKey } from "@/store/useVaultStore";
+import { decryptAESGCM } from "@/lib/crypto/aes";
 
 const useEditorContent = (
   editor: Editor | null,
@@ -27,26 +27,46 @@ const useEditorContent = (
   }, [isFetchingContent]);
 
   useEffect(() => {
-    if (!selectedFileId) return;
+    if (!selectedFileId || !editor || editor.isDestroyed) return;
 
-    setIsContentReady(false); // reset on note switch
-    editor?.commands.clearContent();
+    let cancelled = false;
+    setIsContentReady(false);
+    editor.commands.clearContent();
 
-    fetchNodeContent(selectedFileId).then(async (content) => {
-      if (!content || !content.encryptedContent || !dataEncryptionKey) {
-        setIsContentReady(true); // genuinely empty note
-        return;
+    const loadContent = async () => {
+      try {
+        const content = await fetchNodeContent(selectedFileId);
+        if (cancelled || editor.isDestroyed) return;
+
+        if (!content?.encryptedContent) {
+          setIsContentReady(true);
+          return;
+        }
+
+        // Wait for the key; the effect will retry when it becomes available.
+        if (!dataEncryptionKey) return;
+
+        const decrypted = await decryptAESGCM(
+          content.encryptedContent,
+          dataEncryptionKey,
+        );
+        if (cancelled || editor.isDestroyed) return;
+
+        editor.commands.setContent(JSON.parse(decrypted));
+        setIsContentReady(true);
+      } catch (error) {
+        if (!cancelled) {
+          console.error("Failed to load note content:", error);
+          setIsContentReady(true);
+        }
       }
+    };
 
-      const decryptedDataString = await decryptAESGCM(
-        content.encryptedContent,
-        dataEncryptionKey,
-      );
-      const jsonContent = JSON.parse(decryptedDataString);
-      editor?.commands.setContent(jsonContent);
-      setIsContentReady(true);
-    });
-  }, [selectedFileId, editor]);
+    void loadContent();
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedFileId, editor, fetchNodeContent, dataEncryptionKey]);
 
   return { showSkeleton, isFetchingContent, isContentReady };
 };
