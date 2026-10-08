@@ -1,10 +1,13 @@
+import { lazy } from "react";
+
 import { useTreeUI } from "@/store/useTreeUIStore";
-import EmptyPlaceholder from "@/components/Editor/EmptyPlaceholder";
 import { useActiveView } from "@/store/useAppStore";
-import TrashPage from "./TrashPage";
-import EditorPage from "./EditorPage";
-import ArchivedPage from "./ArchivedPage";
-import SupportPage from "./SupportPage";
+import EmptyPlaceholder from "@/components/Editor/EmptyPlaceholder";
+
+const TrashPage = lazy(() => import("./TrashPage"));
+const EditorPage = lazy(() => import("./EditorPage"));
+const ArchivedPage = lazy(() => import("./ArchivedPage"));
+const SupportPage = lazy(() => import("./SupportPage"));
 
 function HomePage() {
   const activeView = useActiveView();

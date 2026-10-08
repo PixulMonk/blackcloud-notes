@@ -18,4 +18,36 @@ export default defineConfig({
   define: {
     __APP_VERSION__: JSON.stringify(packageJson.version),
   },
+
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (!id.includes("node_modules")) {
+            return;
+          }
+
+          if (id.includes("pdfmake") || id.includes("vfs_fonts")) {
+            return "vendor-pdfmake";
+          }
+
+          if (id.includes("lowlight") || id.includes("highlight.js")) {
+            return "vendor-highlight";
+          }
+
+          if (id.includes("@tiptap") || id.includes("prosemirror")) {
+            return "vendor-tiptap";
+          }
+
+          if (
+            id.includes("react/") ||
+            id.includes("react-dom") ||
+            id.includes("react-router")
+          ) {
+            return "vendor-react";
+          }
+        },
+      },
+    },
+  },
 });

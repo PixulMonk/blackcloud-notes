@@ -1,14 +1,15 @@
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { useEffect, lazy, Suspense } from "react";
+import { Loader } from "lucide-react";
+
+import { updateFavicon } from "./lib/utils";
+import { SidebarProvider } from "@/components/ui/sidebar";
 import { Toaster } from "@/components/ui/sonner";
 import { AppSidebar } from "./components/AppSidebar";
-import { useEffect, lazy, Suspense } from "react";
-import { useIsDarkVariant } from "./store/useThemeStore";
-import { updateFavicon } from "./lib/utils";
-import { useAuth, useAuthActions } from "./store/useAuthStore";
-import { Loader } from "lucide-react";
-import { useDataEncryptionKey } from "./store/useVaultStore";
 import Header from "./components/Header";
+import { useIsDarkVariant } from "./store/useThemeStore";
+import { useAuth, useAuthActions } from "./store/useAuthStore";
+import { useDataEncryptionKey } from "./store/useVaultStore";
 
 // Lazy-loaded pages
 const HomePage = lazy(() => import("./pages/HomePage"));
