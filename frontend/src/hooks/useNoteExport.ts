@@ -1,17 +1,9 @@
 import { toast } from "sonner";
 
-import pdfMake from "pdfmake/build/pdfmake";
-import pdfFonts from "pdfmake/build/vfs_fonts";
-import htmlToPdfmake from "html-to-pdfmake";
-
 import type { Editor } from "@tiptap/core";
 import { useTreeUI } from "@/store/useTreeUIStore";
-
 import { downloadFile } from "@/utils/download";
 import { sanitizeFilename } from "@/utils/sanitizeFileName";
-import { constrainImages } from "@/utils/htmlToPdfmakeHelpers";
-
-pdfMake.addVirtualFileSystem(pdfFonts);
 
 const useNoteExport = () => {
   const { selectedFileTitle } = useTreeUI();
@@ -35,6 +27,20 @@ const useNoteExport = () => {
 
   const exportAsPDF = async (editor: Editor, noteTitle: string | null) => {
     try {
+      const [
+        { default: pdfMake },
+        { default: pdfFonts },
+        { default: htmlToPdfmake },
+      ] = await Promise.all([
+        import("pdfmake/build/pdfmake"),
+        import("pdfmake/build/vfs_fonts"),
+        import("html-to-pdfmake"),
+      ]);
+
+      const { constrainImages } = await import("@/utils/htmlToPdfmakeHelpers");
+
+      pdfMake.addVirtualFileSystem(pdfFonts);
+
       const rawHtml = editor.getHTML();
 
       const parser = new DOMParser();
