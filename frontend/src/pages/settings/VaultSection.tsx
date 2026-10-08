@@ -32,8 +32,8 @@ function VaultSection() {
     const ok = await confirm({
       title: "Import notes",
       message:
-        "This will import notes from a ZIP file. Existing notes will not be deleted, but imported notes may overwrite existing ones if they have the same title and location. Do you want to continue?",
-      yesText: "Import",
+        "Select a ZIP file, or one or more Markdown (.md) or BlackCloud backup (.json) files. Your notes will be added to a new \"Imported\" folder, and your existing notes won't be changed or overwritten. Formatting that Markdown doesn't support may be lost, and images stored as separate files (common in exports from other apps) won't be imported. Do you want to continue?",
+      yesText: "Choose files",
       noText: "Cancel",
     });
 
