@@ -1,8 +1,8 @@
-import type { Editor } from '@tiptap/core';
-import { Undo2, Redo2 } from 'lucide-react';
+import type { Editor } from "@tiptap/core";
+import { Undo2, Redo2 } from "lucide-react";
 
-import { ToolbarButton } from './ToolBarPrimitives';
-import { run } from './toolbarUtils';
+import { ToolbarButton } from "../ToolBarPrimitives";
+import { run } from "../toolbarUtils";
 
 interface UndoRedoGroupProps {
   editor: Editor;

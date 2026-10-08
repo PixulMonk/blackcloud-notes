@@ -1,8 +1,8 @@
-import { Request } from 'express';
-import { ParamsDictionary } from 'express-serve-static-core';
-import { SimpleResponse } from './common.types';
-import { Note, type INote } from '../models/note.model';
-import { IUser } from '../models/user.model';
+import { Request } from "express";
+import { ParamsDictionary } from "express-serve-static-core";
+import { SimpleResponse } from "./common.types";
+import { Note, type INote } from "../models/note.model";
+import { IUser } from "../models/user.model";
 
 export interface NoteResponse extends SimpleResponse {
   note?: INote | INote[];

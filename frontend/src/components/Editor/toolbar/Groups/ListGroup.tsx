@@ -1,10 +1,10 @@
-import type { Editor } from '@tiptap/core';
-import { useEditorState } from '@tiptap/react';
+import type { Editor } from "@tiptap/core";
+import { useEditorState } from "@tiptap/react";
 
-import { List, ListOrdered, ListChecks } from 'lucide-react';
+import { List, ListOrdered, ListChecks } from "lucide-react";
 
-import { ToolbarButton } from './ToolBarPrimitives';
-import { run } from './toolbarUtils';
+import { ToolbarButton } from "../ToolBarPrimitives";
+import { run } from "../toolbarUtils";
 
 interface ListGroupProps {
   editor: Editor;
@@ -16,9 +16,9 @@ function ListGroup({ editor }: ListGroupProps) {
     selector: (ctx) => {
       const e = ctx.editor!;
       return {
-        isBulletList: e.isActive('bulletList'),
-        isOrderedList: e.isActive('orderedList'),
-        isTaskList: e.isActive('taskList'),
+        isBulletList: e.isActive("bulletList"),
+        isOrderedList: e.isActive("orderedList"),
+        isTaskList: e.isActive("taskList"),
       };
     },
   });

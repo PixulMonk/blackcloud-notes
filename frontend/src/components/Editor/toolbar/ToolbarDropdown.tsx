@@ -1,12 +1,12 @@
-import type { ReactNode } from 'react';
-import { ChevronDown } from 'lucide-react';
+import type { ReactNode } from "react";
+import { ChevronDown } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
-} from '../ui/dropdown-menu';
-import { cn } from '@/lib/utils';
+} from "../../ui/dropdown-menu";
+import { cn } from "@/lib/utils";
 
 interface ToolbarDropdownItem {
   label: string;
@@ -35,8 +35,8 @@ function ToolbarDropdown({
       <DropdownMenuTrigger asChild>
         <button
           className={cn(
-            'flex items-center gap-0.5 px-2 py-1.5 rounded-md transition-colors',
-            'text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-muted',
+            "flex items-center gap-0.5 px-2 py-1.5 rounded-md transition-colors",
+            "text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-muted",
           )}
         >
           {icon ? (

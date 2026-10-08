@@ -2,11 +2,16 @@ import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { Progress } from "@/components/ui/progress"; // reusing the pattern already present for storage
 import { PasswordConfirmDialog } from "@/components/dialog/PasswordConfirmDialog";
+import { confirm } from "@/components/dialog/ConfirmDialog";
 import { useAuthActions } from "@/store/useAuthStore";
 import { useDeriveAuthToken } from "@/hooks/useDeriveAuthToken";
-import { useDataActions } from "@/store/useDataStore";
+import { useDataActions, useData } from "@/store/useDataStore"; // adjust to however `tree`/`archivedNodes` are actually selected
 import { useTreeUIActions } from "@/store/useTreeUIStore";
+import { useVaultExport } from "@/hooks/useVaultExport";
+import { useVaultImport } from "@/hooks/useVaultImport";
+import { selectImportFiles } from "@/utils/selectImportFiles";
 
 function VaultSection() {
   const { wipeVault } = useAuthActions();
@@ -15,6 +20,58 @@ function VaultSection() {
 
   const { resetData } = useDataActions();
   const { clearSelection } = useTreeUIActions();
+
+  const { tree, archivedNodes } = useData();
+  const { importVault, isImporting } = useVaultImport();
+  const { exportVault, isExporting, progress } = useVaultExport();
+  const [activeAction, setActiveAction] = useState<"markdown" | "json" | null>(
+    null,
+  );
+
+  const handleImportVault = async () => {
+    const ok = await confirm({
+      title: "Import notes",
+      message:
+        "Select a ZIP file, or one or more Markdown (.md) or BlackCloud backup (.json) files. Your notes will be added to a new \"Imported\" folder, and your existing notes won't be changed or overwritten. Formatting that Markdown doesn't support may be lost, and images stored as separate files (common in exports from other apps) won't be imported. Do you want to continue?",
+      yesText: "Choose files",
+      noText: "Cancel",
+    });
+
+    if (!ok) return;
+
+    const files = await selectImportFiles();
+    if (!files) return;
+
+    await importVault(files);
+  };
+
+  const handleExportVault = async () => {
+    const ok = await confirm({
+      title: "Export vault",
+      message:
+        "Your notes will be exported as a ZIP file containing Markdown files. During this process, some formatting that is not supported by Markdown format may be lost. Do you want to continue?",
+      yesText: "Export",
+      noText: "Cancel",
+    });
+    if (!ok) return;
+    setActiveAction("markdown");
+    await exportVault("markdown", tree, archivedNodes);
+    setActiveAction(null);
+  };
+
+  const handleDownloadBackup = async () => {
+    const ok = await confirm({
+      title: "Download backup",
+      message:
+        "This downloads a full backup of your vault that can be restored later in BlackCloud. It is not meant to be opened in other apps.",
+      yesText: "Download",
+      noText: "Cancel",
+    });
+    if (!ok) return;
+    setActiveAction("json");
+    await exportVault("json", tree, archivedNodes);
+    setActiveAction(null);
+  };
 
   const handleWipeVault = async (password: string) => {
     const authToken = await deriveAuthToken(password);
@@ -31,30 +88,8 @@ function VaultSection() {
   return (
     <div className="flex flex-col h-full">
       <h2 className="mb-6 text-sm font-semibold">Vault</h2>
-      {/* TODO: Storage count */}
       <div className="flex flex-col divide-y divide-border">
-        {/* <div className="py-4">
-          <div className="flex items-center justify-between mb-2">
-            <Label>Storage used</Label>
-            <span className="text-xs text-muted-foreground">
-              3.2 MB of 500 MB
-            </span>
-          </div>
-          <Progress value={0.6} />
-        </div> */}
-
-        {/* TODO: Include export functionality here when export update comes */}
-        {/* <div className="flex items-center justify-between py-4">
-          <div>
-            <Label>Export vault</Label>
-            <p className="text-xs text-muted-foreground mt-1">
-              Download all your notes as Markdown or PDF.
-            </p>
-          </div>
-          <Button variant="outline" size="sm">
-            Export
-          </Button>
-        </div>
+        {/* Import Vault Row */}
 
         <div className="flex items-center justify-between py-4">
           <div>
@@ -63,10 +98,62 @@ function VaultSection() {
               Bring in notes from Markdown or another notes app.
             </p>
           </div>
-          <Button variant="outline" size="sm">
-            Import
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleImportVault}
+            disabled={isImporting}
+          >
+            {isImporting ? "Importing…" : "Import"}
           </Button>
-        </div> */}
+        </div>
+
+        {/* Export Vault Row */}
+        <div className="py-4 space-y-3">
+          <div className="flex items-center justify-between">
+            <div>
+              <Label>Export vault</Label>
+              <p className="text-xs text-muted-foreground mt-1.5">
+                Download all your notes as Markdown.
+              </p>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleExportVault}
+              disabled={isExporting}
+            >
+              {isExporting && activeAction === "markdown"
+                ? "Exporting…"
+                : "Export"}
+            </Button>
+          </div>
+          {isExporting &&
+            activeAction === "markdown" &&
+            progress &&
+            progress.total > 0 && (
+              <Progress value={(progress.completed / progress.total) * 100} />
+            )}
+        </div>
+        {/* Download Backup Row */}
+        <div className="flex items-center justify-between py-4">
+          <div>
+            <Label>Download backup</Label>
+            <p className="text-xs text-muted-foreground mt-1.5">
+              Full backup for restoring in BlackCloud later.
+            </p>
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleDownloadBackup}
+            disabled={isExporting}
+          >
+            {isExporting && activeAction === "json"
+              ? "Downloading…"
+              : "Download"}
+          </Button>
+        </div>
       </div>
       <div className="mt-6">
         <p className="text-sm font-semibold text-destructive mb-4">

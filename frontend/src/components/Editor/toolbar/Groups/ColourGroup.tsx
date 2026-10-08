@@ -1,9 +1,9 @@
-import { useEditorState } from '@tiptap/react';
-import type { Editor } from '@tiptap/core';
-import { Type, Highlighter } from 'lucide-react';
+import { useEditorState } from "@tiptap/react";
+import type { Editor } from "@tiptap/core";
+import { Type, Highlighter } from "lucide-react";
 
-import ColourDropdown from '../ColourDropdown';
-import { run } from './toolbarUtils';
+import ColourDropdown from "../../ColourDropdown";
+import { run } from "../toolbarUtils";
 
 interface ColourGroupProps {
   editor: Editor;
@@ -16,8 +16,8 @@ function ColourGroup({ editor }: ColourGroupProps) {
     selector: (ctx) => {
       const e = ctx.editor!;
       return {
-        fontColor: e.getAttributes('textStyle').color ?? null,
-        highlightColor: e.getAttributes('highlight').color ?? null,
+        fontColor: e.getAttributes("textStyle").color ?? null,
+        highlightColor: e.getAttributes("highlight").color ?? null,
       };
     },
   });
