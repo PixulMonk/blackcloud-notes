@@ -3,29 +3,18 @@ import ObjectID from "bson-objectid";
 import type { JSONContent } from "@tiptap/core";
 
 import { encryptAESGCM } from "@/lib/crypto/aes";
+import { parseFileEntry, isParseFailure } from "@/lib/import/parseFileEntry";
 import type {
   ImportTreeNode,
   ImportNote,
   VaultImportRequest,
 } from "@/types/import.types";
 
-import { markdownToJson } from "./markdownToJson";
-import { sanitizeMarkdownInput } from "./sanitizeMarkdownInput";
-
 interface ZipEntryNode {
   type: "folder" | "file";
   name: string;
   children: ZipEntryNode[];
-  fileData?: string; // raw JSON string, files only
-}
-
-function isValidTiptapDoc(value: unknown): value is JSONContent {
-  return (
-    typeof value === "object" &&
-    value !== null &&
-    (value as { type?: unknown }).type === "doc" &&
-    Array.isArray((value as { content?: unknown }).content)
-  );
+  docJson?: JSONContent;
 }
 
 interface SkippedEntry {
@@ -33,20 +22,28 @@ interface SkippedEntry {
   reason: string;
 }
 
-export async function buildImportPayload(
+async function buildRootFromZip(
   zipFile: File,
-  dek: Uint8Array,
-): Promise<{ payload: VaultImportRequest; skipped: SkippedEntry[] }> {
+  skipped: SkippedEntry[],
+): Promise<ZipEntryNode> {
   const zip = await JSZip.loadAsync(zipFile);
-  const skipped: SkippedEntry[] = [];
   const root: ZipEntryNode = { type: "folder", name: "", children: [] };
+
+  const IGNORED_ZIP_ENTRIES = [
+    /^__MACOSX\//,
+    /(^|\/)\.DS_Store$/,
+    /(^|\/)Thumbs\.db$/,
+    /(^|\/)errors\.txt$/,
+  ];
 
   for (const entry of Object.values(zip.files)) {
     if (entry.dir) continue;
+    if (IGNORED_ZIP_ENTRIES.some((re) => re.test(entry.name))) continue;
 
-    const isJson = entry.name.endsWith(".json");
-    const isMd = entry.name.endsWith(".md");
-    if (!isJson && !isMd) continue; // skip errors.txt, images, anything else
+    if (!entry.name.endsWith(".json") && !entry.name.endsWith(".md")) {
+      skipped.push({ path: entry.name, reason: "Unsupported file type" });
+      continue;
+    }
 
     const parts = entry.name.split("/");
     let current = root;
@@ -62,42 +59,74 @@ export async function buildImportPayload(
       current = folder;
     }
 
-    const title = parts[parts.length - 1].replace(/\.(json|md)$/, "");
     const raw = await entry.async("string");
-
-    let docJson: JSONContent;
-    if (isJson) {
-      let parsed: unknown;
-      try {
-        parsed = JSON.parse(raw);
-      } catch {
-        skipped.push({ path: entry.name, reason: "Invalid JSON" });
-        continue;
-      }
-      if (!isValidTiptapDoc(parsed)) {
-        skipped.push({
-          path: entry.name,
-          reason: "Not a recognized note document",
-        });
-        continue;
-      }
-      docJson = parsed;
-    } else {
-      try {
-        docJson = markdownToJson(sanitizeMarkdownInput(raw));
-      } catch {
-        skipped.push({ path: entry.name, reason: "Could not parse Markdown" });
-        continue;
-      }
+    const result = parseFileEntry(entry.name, raw);
+    if (isParseFailure(result)) {
+      skipped.push(result);
+      continue;
     }
-
     current.children.push({
       type: "file",
-      name: title,
+      name: result.title,
       children: [],
-      fileData: JSON.stringify(docJson),
+      docJson: result.docJson,
     });
   }
+
+  return root;
+}
+
+// Loose files have no shared directory — everything lands flat, directly
+// under the import root, with no folder reconstruction.
+async function buildRootFromLooseFiles(
+  files: File[],
+  skipped: SkippedEntry[],
+): Promise<ZipEntryNode> {
+  const root: ZipEntryNode = { type: "folder", name: "", children: [] };
+
+  for (const file of files) {
+    const raw = await file.text();
+    const result = parseFileEntry(file.name, raw);
+    if (isParseFailure(result)) {
+      skipped.push(result);
+      continue;
+    }
+    root.children.push({
+      type: "file",
+      name: result.title,
+      children: [],
+      docJson: result.docJson,
+    });
+  }
+
+  return root;
+}
+
+export async function buildImportPayload(
+  input: FileList,
+  dek: Uint8Array,
+): Promise<{ payload: VaultImportRequest; skipped: SkippedEntry[] }> {
+  const files = Array.from(input);
+  const skipped: SkippedEntry[] = [];
+
+  const isSingleZip = files.length === 1 && files[0].name.endsWith(".zip");
+  const root = isSingleZip
+    ? await buildRootFromZip(files[0], skipped)
+    : await buildRootFromLooseFiles(
+        files.filter((f) => {
+          const ok = f.name.endsWith(".md") || f.name.endsWith(".json");
+          if (!ok) {
+            skipped.push({
+              path: f.name,
+              reason: f.name.endsWith(".zip")
+                ? "Zip files can't be combined with other files — import it on its own"
+                : "Unsupported file type",
+            });
+          }
+          return ok;
+        }),
+        skipped,
+      );
 
   const nodes: ImportTreeNode[] = [];
   const notes: ImportNote[] = [];
@@ -129,7 +158,10 @@ export async function buildImportPayload(
         const noteId = new ObjectID().toHexString();
         notes.push({
           _id: noteId,
-          encryptedContent: await encryptAESGCM(child.fileData!, dek),
+          encryptedContent: await encryptAESGCM(
+            JSON.stringify(child.docJson),
+            dek,
+          ),
         });
         nodes.push({
           _id: nodeId,
