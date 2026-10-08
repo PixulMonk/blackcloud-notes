@@ -1,22 +1,23 @@
-import { useMemo, useState } from 'react';
-import { EditorContent, EditorContext } from '@tiptap/react';
-import { PenLine } from 'lucide-react';
+import { useMemo, useState } from "react";
+import { EditorContent, EditorContext } from "@tiptap/react";
+import { PenLine } from "lucide-react";
 
-import useEditorSetup from '@/hooks/useEditorSetup';
-import useEditorContent from '@/hooks/useEditorContent';
-import useEditorSync from '@/hooks/useEditorSync';
-import { useTreeUI } from '@/store/useTreeUIStore';
+import useEditorSetup from "@/hooks/useEditorSetup";
+import useEditorContent from "@/hooks/useEditorContent";
+import useEditorSync from "@/hooks/useEditorSync";
+import { useTreeUI } from "@/store/useTreeUIStore";
 
-import MenuBar from './MenuBar';
-import { SkeletonText } from './SkeletonText';
-import TableBubbleMenu from './TableBubbleMenu';
+import MenuBar from "./MenuBar";
+import { SkeletonText } from "./SkeletonText";
+import TableBubbleMenu from "./TableBubbleMenu";
+import SyncingIndicator from "./SyncingIndicator";
 
 const formatDate = (iso?: string) => {
   if (!iso) return null;
-  return new Date(iso).toLocaleDateString('en-US', {
-    month: 'long',
-    day: 'numeric',
-    year: 'numeric',
+  return new Date(iso).toLocaleDateString("en-US", {
+    month: "long",
+    day: "numeric",
+    year: "numeric",
   });
 };
 
@@ -49,12 +50,15 @@ const Editor = () => {
 
         {/* Scrollable content area */}
         <div className="flex-1 overflow-y-auto">
-          <div className="max-w-3xl mx-auto px-8 py-10">
+          <div className="max-w-3xl mx-auto px-8 pt-8 pb-10">
+            <div className="pt-2 text-sm">
+              <SyncingIndicator />
+            </div>
             {/* Metadata row */}
             {selectedNode?.createdAt && (
               <div className="flex items-center gap-4 mb-6 text-xs text-muted-foreground">
                 <span>
-                  Created{' '}
+                  Created{" "}
                   <span className="text-foreground/70">
                     {formatDate(selectedNode.createdAt)}
                   </span>
@@ -67,8 +71,15 @@ const Editor = () => {
               <SkeletonText />
             ) : (
               <div
-                className="relative group cursor-text"
-                onClick={() => editor?.commands.focus()}
+                className="relative group cursor-text pb-[40vh]"
+                onClick={(e) => {
+                  // clicking the empty space below the text puts the caret at the end
+                  if (e.target === e.currentTarget) {
+                    editor?.commands.focus("end");
+                  } else {
+                    editor?.commands.focus();
+                  }
+                }}
               >
                 {isContentReady && isEmpty && !isFocused && (
                   <div className="absolute top-0 left-0 flex items-center gap-2 text-muted-foreground/40 pointer-events-none transition-colors group-hover:text-muted-foreground/60">
