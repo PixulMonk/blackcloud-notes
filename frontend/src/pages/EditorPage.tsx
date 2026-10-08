@@ -1,12 +1,9 @@
-import 'highlight.js/styles/github-dark.css';
-
-import Editor from '@/components/Editor/Editor';
-import SyncingIndicator from '@/components/Editor/SyncingIndicator';
+import "highlight.js/styles/github-dark.css";
+import Editor from "@/components/Editor/Editor";
 
 function EditorPage() {
   return (
-    <div className="w-full max-w-5xl">
-      <SyncingIndicator />
+    <div className="w-full h-full">
       <Editor />
     </div>
   );

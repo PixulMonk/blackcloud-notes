@@ -34,7 +34,7 @@ const MenuBar = ({ editor }: MenuBarProps) => {
     useNoteExport();
 
   return (
-    <div className="flex items-center flex-wrap gap-0.5 px-4 py-1.5  border-border/50 bg-background">
+    <div className="flex items-center flex-wrap gap-0.5 px-4 border-border/50 bg-background">
       <UndoRedoGroup editor={editor} />
 
       <Divider />
